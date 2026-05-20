@@ -7,32 +7,44 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-gray-50 text-gray-900 font-sans;
+    @apply bg-bone text-ink font-sans;
     overscroll-behavior-y: contain;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply w-full bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl
-           active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed
+    @apply w-full bg-lime text-ink font-mono font-bold py-3 px-4 rounded-none
+           uppercase tracking-widest text-sm
+           active:bg-lime-dim disabled:opacity-40 disabled:cursor-not-allowed
            transition-colors duration-150;
   }
   .btn-secondary {
-    @apply w-full border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-xl
-           active:bg-gray-100 transition-colors duration-150;
+    @apply w-full bg-ink text-bone font-mono font-bold py-3 px-4 rounded-none
+           uppercase tracking-widest text-sm
+           active:bg-plasma disabled:opacity-40 disabled:cursor-not-allowed
+           transition-colors duration-150;
+  }
+  .btn-ghost {
+    @apply w-full border border-ink text-ink bg-transparent font-mono font-bold py-3 px-4 rounded-none
+           uppercase tracking-widest text-sm
+           active:bg-ink active:text-bone disabled:opacity-40 disabled:cursor-not-allowed
+           transition-colors duration-150;
   }
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
+    @apply bg-receipt border border-line rounded-none p-4;
   }
   .input {
-    @apply w-full border border-gray-300 rounded-xl px-4 py-3 text-sm
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full bg-white border border-ink rounded-none px-4 py-3 text-sm font-sans
+           focus:outline-none focus:border-lime;
   }
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block font-mono text-[11px] uppercase tracking-widest text-mute mb-1;
   }
   .page {
-    @apply min-h-screen pb-24 px-4 pt-4;
+    @apply min-h-screen pb-24 px-4 pt-4 bg-bone;
+  }
+  .qtm-num {
+    @apply font-mono tabular-nums;
   }
 }

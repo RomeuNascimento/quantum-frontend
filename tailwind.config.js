@@ -4,16 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-        },
+        ink:     '#0B0B0F',
+        bone:    '#F4EFE3',
+        lime:    '#D6FF3F',
+        'lime-dim': '#B8E520',
+        plasma:  '#1A1B20',
+        rust:    '#C44A2A',
+        receipt: '#EBE5D6',
+        line:    '#D9D2BF',
+        mute:    '#6B6A60',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
     },
   },

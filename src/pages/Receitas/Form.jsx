@@ -93,9 +93,11 @@ export default function ReceitaForm() {
         {/* Ingredientes */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-700">Ingredientes</h3>
+            <p className="label">Ingredientes</p>
             <button type="button" onClick={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}
-              className="text-sm text-primary-600 font-medium">+ Adicionar</button>
+              className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+              + Adicionar
+            </button>
           </div>
           <div className="space-y-2">
             {ingFields.map((field, idx) => (
@@ -106,7 +108,8 @@ export default function ReceitaForm() {
                 </select>
                 <input className="input w-28" type="number" step="0.1" placeholder="g"
                   {...register(`ingredientes.${idx}.quantidade_g`, { required: true })} />
-                <button type="button" onClick={() => removeIng(idx)} className="p-3 text-red-400">✕</button>
+                <button type="button" onClick={() => removeIng(idx)}
+                  className="p-3 font-mono text-mute active:text-rust">✕</button>
               </div>
             ))}
           </div>
@@ -115,9 +118,11 @@ export default function ReceitaForm() {
         {/* Etapas MO */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-700">Mão de obra</h3>
+            <p className="label">Mão de obra</p>
             <button type="button" onClick={() => appendMo({ descricao: '', tempo_min: '' })}
-              className="text-sm text-primary-600 font-medium">+ Adicionar</button>
+              className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+              + Adicionar
+            </button>
           </div>
           <div className="space-y-2">
             {moFields.map((field, idx) => (
@@ -126,13 +131,14 @@ export default function ReceitaForm() {
                   {...register(`etapas_mo.${idx}.descricao`, { required: true })} />
                 <input className="input w-24" type="number" step="1" placeholder="min"
                   {...register(`etapas_mo.${idx}.tempo_min`, { required: true })} />
-                <button type="button" onClick={() => removeMo(idx)} className="p-3 text-red-400">✕</button>
+                <button type="button" onClick={() => removeMo(idx)}
+                  className="p-3 font-mono text-mute active:text-rust">✕</button>
               </div>
             ))}
           </div>
         </div>
 
-        {erro && <p className="text-sm text-red-600">{erro}</p>}
+        {erro && <p className="font-mono text-sm text-rust">{erro}</p>}
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Salvando...' : 'Salvar receita'}
         </button>

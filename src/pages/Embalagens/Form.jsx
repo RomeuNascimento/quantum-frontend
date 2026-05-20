@@ -80,7 +80,7 @@ export default function EmbalagemForm() {
           </FormField>
           {!isEdit && (
             <>
-              <p className="text-sm font-medium text-gray-700 pt-2">Preço de compra (opcional)</p>
+              <p className="label pt-2">Preço de compra (opcional)</p>
               <FormField label="Preço pago (R$)">
                 <input className="input" type="number" step="0.01" {...register('preco')} />
               </FormField>
@@ -89,7 +89,7 @@ export default function EmbalagemForm() {
               </FormField>
             </>
           )}
-          {erro && <p className="text-sm text-red-600">{erro}</p>}
+          {erro && <p className="font-mono text-sm text-rust">{erro}</p>}
           <div className="pt-2">
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar'}
@@ -100,8 +100,13 @@ export default function EmbalagemForm() {
         {isEdit && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-700">Histórico de preços</h3>
-              <button onClick={() => setShowPreco(!showPreco)} className="text-sm text-primary-600 font-medium">+ Adicionar</button>
+              <p className="label">Histórico de preços</p>
+              <button
+                onClick={() => setShowPreco(!showPreco)}
+                className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+              >
+                + Adicionar
+              </button>
             </div>
             {showPreco && (
               <form onSubmit={submitPreco(onAddPreco)} className="card mb-3 space-y-3">
@@ -114,14 +119,14 @@ export default function EmbalagemForm() {
                 <button type="submit" className="btn-primary">Registrar preço</button>
               </form>
             )}
-            <div className="space-y-2">
+            <div>
               {historico.map((p) => (
-                <div key={p.id} className="card flex justify-between text-sm">
+                <div key={p.id} className="flex justify-between border-b border-line py-3 last:border-b-0">
                   <div>
-                    <p className="font-medium">R$ {p.preco.toFixed(2)} / {p.quantidade_embalagem} un</p>
-                    <p className="text-xs text-gray-500">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
+                    <p className="qtm-num text-sm text-ink">R$ {p.preco.toFixed(2)} / {p.quantidade_embalagem} un</p>
+                    <p className="font-mono text-xs text-mute">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
                   </div>
-                  <p className="font-semibold text-primary-600">R$ {p.custo_unitario?.toFixed(4)}/un</p>
+                  <p className="qtm-num text-sm font-bold text-ink">R$ {p.custo_unitario?.toFixed(4)}/un</p>
                 </div>
               ))}
             </div>

@@ -62,43 +62,48 @@ export default function CustosFixos() {
         {resumo && (
           <div className="grid grid-cols-2 gap-3 mb-5">
             <div className="card">
-              <p className="text-xs text-gray-500 mb-1">Total mensal</p>
-              <p className="text-xl font-bold text-primary-600">{brl(resumo.total_mensal)}</p>
+              <p className="label">Total mensal</p>
+              <p className="qtm-num text-xl font-bold text-ink">{brl(resumo.total_mensal)}</p>
             </div>
             <div className="card">
-              <p className="text-xs text-gray-500 mb-1">Total anual</p>
-              <p className="text-xl font-bold text-gray-700">{brl(resumo.total_anual)}</p>
+              <p className="label">Total anual</p>
+              <p className="qtm-num text-xl font-bold text-mute">{brl(resumo.total_anual)}</p>
             </div>
           </div>
         )}
 
         <div className="flex justify-end mb-4">
-          <button onClick={abrirNovo} className="bg-primary-600 text-white text-sm font-semibold px-4 py-2 rounded-xl">
+          <button
+            onClick={abrirNovo}
+            className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none active:bg-lime-dim"
+          >
             + Novo
           </button>
         </div>
 
         {loading ? <LoadingSpinner /> : (
-          <div className="space-y-2">
+          <div>
             {items.map((cf) => (
-              <div key={cf.id} className="card flex items-center justify-between gap-3">
+              <div key={cf.id} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
                 <button onClick={() => abrirEditar(cf)} className="flex-1 text-left min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{cf.nome}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-medium text-ink truncate">{cf.nome}</p>
+                  <p className="font-mono text-xs text-mute">
                     {brl(cf.valor)} / {cf.periodo === 'mensal' ? 'mês' : 'ano'} →{' '}
-                    <span className="font-medium">{brl(cf.valor_mensal)}/mês</span>
+                    <span className="font-bold text-ink">{brl(cf.valor_mensal)}/mês</span>
                   </p>
                 </button>
-                <button onClick={() => handleDelete(cf.id, cf.nome)} className="p-2 text-gray-400 active:text-red-500 flex-shrink-0">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <button onClick={() => handleDelete(cf.id, cf.nome)} className="p-2 text-mute active:text-rust flex-shrink-0">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
               </div>
             ))}
             {items.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-8">Nenhum custo fixo cadastrado</p>
+              <p className="font-mono text-xs text-mute text-center py-8 uppercase tracking-widest">
+                Nenhum custo fixo cadastrado
+              </p>
             )}
           </div>
         )}

@@ -85,12 +85,12 @@ export default function IngredienteForm() {
           <FormField label="Fator de correção" error={errors.fator_correcao?.message}>
             <input className="input" type="number" step="0.01" placeholder="1.0"
               {...register('fator_correcao', { required: 'Obrigatório', min: 0.01 })} />
-            <p className="text-xs text-gray-400 mt-1">Percentual aproveitável. Ex: 0.85 para 85% de aproveitamento</p>
+            <p className="font-mono text-xs text-mute mt-1">Percentual aproveitável. Ex: 0.85 para 85% de aproveitamento</p>
           </FormField>
 
           {!isEdit && (
             <>
-              <p className="text-sm font-medium text-gray-700 pt-2">Preço de compra (opcional)</p>
+              <p className="label pt-2">Preço de compra (opcional)</p>
               <FormField label="Preço pago (R$)">
                 <input className="input" type="number" step="0.01" placeholder="Ex: 4.50" {...register('preco')} />
               </FormField>
@@ -100,7 +100,7 @@ export default function IngredienteForm() {
             </>
           )}
 
-          {erro && <p className="text-sm text-red-600">{erro}</p>}
+          {erro && <p className="font-mono text-sm text-rust">{erro}</p>}
 
           <div className="pt-2">
             <button type="submit" className="btn-primary" disabled={loading}>
@@ -112,8 +112,11 @@ export default function IngredienteForm() {
         {isEdit && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-700">Histórico de preços</h3>
-              <button onClick={() => setShowPreco(!showPreco)} className="text-sm text-primary-600 font-medium">
+              <p className="label">Histórico de preços</p>
+              <button
+                onClick={() => setShowPreco(!showPreco)}
+                className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+              >
                 + Adicionar
               </button>
             </div>
@@ -130,16 +133,16 @@ export default function IngredienteForm() {
               </form>
             )}
 
-            <div className="space-y-2">
+            <div>
               {historico.map((p) => (
-                <div key={p.id} className="card flex justify-between text-sm">
+                <div key={p.id} className="flex justify-between border-b border-line py-3 last:border-b-0">
                   <div>
-                    <p className="font-medium">R$ {p.preco.toFixed(2)} / {p.quantidade_embalagem}{' '}un</p>
-                    <p className="text-xs text-gray-500">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
+                    <p className="qtm-num text-sm text-ink">R$ {p.preco.toFixed(2)} / {p.quantidade_embalagem} un</p>
+                    <p className="font-mono text-xs text-mute">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-primary-600">R$ {p.custo_unitario?.toFixed(4)}/un</p>
-                    <p className="text-xs text-gray-400">{p.origem}</p>
+                    <p className="qtm-num text-sm font-bold text-ink">R$ {p.custo_unitario?.toFixed(4)}/un</p>
+                    <p className="font-mono text-xs text-mute">{p.origem}</p>
                   </div>
                 </div>
               ))}

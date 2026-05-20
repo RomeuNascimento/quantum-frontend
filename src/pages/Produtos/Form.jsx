@@ -70,11 +70,14 @@ export default function ProdutoForm() {
     }
   }
 
-  const Section = ({ title, fields, onAdd, children }) => (
+  const Section = ({ title, onAdd, children }) => (
     <div className="mt-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
-        <button type="button" onClick={onAdd} className="text-sm text-primary-600 font-medium">+ Adicionar</button>
+        <p className="label">{title}</p>
+        <button type="button" onClick={onAdd}
+          className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+          + Adicionar
+        </button>
       </div>
       <div className="space-y-2">{children}</div>
     </div>
@@ -91,7 +94,7 @@ export default function ProdutoForm() {
             {...register('nome', { required: 'Obrigatório' })} />
         </FormField>
 
-        <Section title="Massas" fields={massaFields} onAdd={() => appendMassa({ receita_id: '', quantidade_g: '' })}>
+        <Section title="Massas" onAdd={() => appendMassa({ receita_id: '', quantidade_g: '' })}>
           {massaFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`massas.${i}.receita_id`)}>
@@ -100,12 +103,13 @@ export default function ProdutoForm() {
               </select>
               <input className="input w-24" type="number" step="0.1" placeholder="g"
                 {...register(`massas.${i}.quantidade_g`)} />
-              <button type="button" onClick={() => removeMassa(i)} className="p-3 text-red-400">✕</button>
+              <button type="button" onClick={() => removeMassa(i)}
+                className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
           ))}
         </Section>
 
-        <Section title="Recheios" fields={recheioFields} onAdd={() => appendRecheio({ receita_id: '', quantidade_g: '' })}>
+        <Section title="Recheios" onAdd={() => appendRecheio({ receita_id: '', quantidade_g: '' })}>
           {recheioFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`recheios.${i}.receita_id`)}>
@@ -114,12 +118,13 @@ export default function ProdutoForm() {
               </select>
               <input className="input w-24" type="number" step="0.1" placeholder="g"
                 {...register(`recheios.${i}.quantidade_g`)} />
-              <button type="button" onClick={() => removeRecheio(i)} className="p-3 text-red-400">✕</button>
+              <button type="button" onClick={() => removeRecheio(i)}
+                className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
           ))}
         </Section>
 
-        <Section title="Ingredientes avulsos" fields={ingFields} onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
+        <Section title="Ingredientes avulsos" onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
           {ingFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`ingredientes.${i}.ingrediente_id`)}>
@@ -128,12 +133,13 @@ export default function ProdutoForm() {
               </select>
               <input className="input w-24" type="number" step="0.1" placeholder="g"
                 {...register(`ingredientes.${i}.quantidade_g`)} />
-              <button type="button" onClick={() => removeIng(i)} className="p-3 text-red-400">✕</button>
+              <button type="button" onClick={() => removeIng(i)}
+                className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
           ))}
         </Section>
 
-        <Section title="Embalagens" fields={embFields} onAdd={() => appendEmb({ embalagem_id: '', quantidade: '' })}>
+        <Section title="Embalagens" onAdd={() => appendEmb({ embalagem_id: '', quantidade: '' })}>
           {embFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`embalagens.${i}.embalagem_id`)}>
@@ -142,23 +148,25 @@ export default function ProdutoForm() {
               </select>
               <input className="input w-24" type="number" step="0.001" placeholder="qtd"
                 {...register(`embalagens.${i}.quantidade`)} />
-              <button type="button" onClick={() => removeEmb(i)} className="p-3 text-red-400">✕</button>
+              <button type="button" onClick={() => removeEmb(i)}
+                className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
           ))}
         </Section>
 
-        <Section title="Mão de obra (montagem)" fields={moFields} onAdd={() => appendMo({ descricao: '', tempo_min: '' })}>
+        <Section title="Mão de obra (montagem)" onAdd={() => appendMo({ descricao: '', tempo_min: '' })}>
           {moFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <input className="input flex-1" placeholder="Etapa" {...register(`mo_montagem.${i}.descricao`)} />
               <input className="input w-24" type="number" step="1" placeholder="min"
                 {...register(`mo_montagem.${i}.tempo_min`)} />
-              <button type="button" onClick={() => removeMo(i)} className="p-3 text-red-400">✕</button>
+              <button type="button" onClick={() => removeMo(i)}
+                className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
           ))}
         </Section>
 
-        {erro && <p className="text-sm text-red-600 mt-4">{erro}</p>}
+        {erro && <p className="font-mono text-sm text-rust mt-4">{erro}</p>}
         <button type="submit" className="btn-primary mt-6" disabled={loading}>
           {loading ? 'Salvando...' : 'Salvar produto'}
         </button>

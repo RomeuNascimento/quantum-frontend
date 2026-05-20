@@ -3,7 +3,7 @@ export default function FormField({ label, error, children }) {
     <div className="mb-4">
       {label && <label className="label">{label}</label>}
       {children}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs font-mono text-rust">{error}</p>}
     </div>
   )
 }

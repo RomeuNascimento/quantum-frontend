@@ -29,20 +29,20 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-600 to-primary-700 flex items-end sm:items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Quantum</h1>
-          <p className="text-sm text-gray-500 mt-1">Gestão para confeiteiros</p>
+    <div className="min-h-screen bg-ink flex items-end sm:items-center justify-center">
+      <div className="bg-bone w-full max-w-sm p-6 rounded-none">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-ink font-sans">Quantum</h1>
+          <p className="font-mono text-xs uppercase tracking-widest text-mute mt-1">Gestão para confeiteiros</p>
         </div>
 
-        <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+        <div className="flex border border-ink mb-6">
           {['login', 'registro'].map((m) => (
             <button
               key={m}
               onClick={() => { setModo(m); setErro('') }}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all
-                ${modo === m ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500'}`}
+              className={`flex-1 py-2 font-mono text-xs uppercase tracking-widest transition-colors
+                ${modo === m ? 'bg-ink text-bone' : 'text-mute'}`}
             >
               {m === 'login' ? 'Entrar' : 'Criar conta'}
             </button>
@@ -58,7 +58,7 @@ export default function Login() {
                 placeholder="Sua confeitaria"
                 {...register('nome', { required: 'Nome obrigatório' })}
               />
-              {errors.nome && <p className="text-xs text-red-600 mt-1">{errors.nome.message}</p>}
+              {errors.nome && <p className="text-xs font-mono text-rust mt-1">{errors.nome.message}</p>}
             </div>
           )}
 
@@ -70,7 +70,7 @@ export default function Login() {
               placeholder="seu@email.com"
               {...register('email', { required: 'E-mail obrigatório' })}
             />
-            {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email.message}</p>}
+            {errors.email && <p className="text-xs font-mono text-rust mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -81,12 +81,12 @@ export default function Login() {
               placeholder="••••••••"
               {...register('senha', { required: 'Senha obrigatória', minLength: { value: 6, message: 'Mínimo 6 caracteres' } })}
             />
-            {errors.senha && <p className="text-xs text-red-600 mt-1">{errors.senha.message}</p>}
+            {errors.senha && <p className="text-xs font-mono text-rust mt-1">{errors.senha.message}</p>}
           </div>
 
           {erro && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-              <p className="text-sm text-red-700">{erro}</p>
+            <div className="bg-rust/10 border border-rust px-4 py-3">
+              <p className="text-sm font-mono text-rust">{erro}</p>
             </div>
           )}
 

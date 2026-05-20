@@ -28,7 +28,10 @@ export default function Ingredientes() {
     <Layout title="Ingredientes">
       <div className="px-4 pt-4">
         <div className="flex justify-end mb-4">
-          <Link to="/ingredientes/novo" className="bg-primary-600 text-white text-sm font-semibold px-4 py-2 rounded-xl">
+          <Link
+            to="/ingredientes/novo"
+            className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none active:bg-lime-dim"
+          >
             + Novo
           </Link>
         </div>
@@ -42,22 +45,22 @@ export default function Ingredientes() {
             action={<Link to="/ingredientes/novo" className="btn-primary w-auto px-6">Cadastrar</Link>}
           />
         ) : (
-          <div className="space-y-2">
+          <div>
             {items.map((ing) => (
-              <div key={ing.id} className="card flex items-center justify-between gap-3">
+              <div key={ing.id} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
                 <Link to={`/ingredientes/${ing.id}`} className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{ing.nome}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="font-medium text-ink truncate">{ing.nome}</p>
+                  <p className="font-mono text-xs text-mute mt-0.5">
                     {ing.unidade} · fator {ing.fator_correcao} · {formatCusto(ing.custo_unitario_atual)}/un
                   </p>
                 </Link>
                 <button
                   onClick={() => handleDelete(ing.id, ing.nome)}
-                  className="p-2 text-gray-400 active:text-red-500 flex-shrink-0"
+                  className="p-2 text-mute active:text-rust flex-shrink-0"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
               </div>

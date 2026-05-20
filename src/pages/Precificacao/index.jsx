@@ -10,6 +10,28 @@ import { useForm } from 'react-hook-form'
 
 const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
 
+function MargemBadge({ margem }) {
+  if (margem >= 30) {
+    return (
+      <span className="font-mono text-[10px] uppercase tracking-widest bg-lime text-ink px-2 py-0.5">
+        + Saudável {margem}%
+      </span>
+    )
+  }
+  if (margem >= 10) {
+    return (
+      <span className="font-mono text-[10px] uppercase tracking-widest bg-bone border border-ink text-ink px-2 py-0.5">
+        ± Atenção {margem}%
+      </span>
+    )
+  }
+  return (
+    <span className="font-mono text-[10px] uppercase tracking-widest bg-rust text-bone px-2 py-0.5">
+      − Revisar {margem}%
+    </span>
+  )
+}
+
 export default function Precificacao() {
   const [produtos, setProdutos] = useState([])
   const [canais, setCanais] = useState([])
@@ -85,18 +107,21 @@ export default function Precificacao() {
           <>
             {/* Canais */}
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-700">Canais de venda</h3>
-              <button onClick={() => setShowModalCanal(true)} className="text-sm text-primary-600 font-medium">
+              <p className="label">Canais de venda</p>
+              <button
+                onClick={() => setShowModalCanal(true)}
+                className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+              >
                 + Canal
               </button>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
               {canais.map((c) => (
                 <div key={c.id} className="flex-shrink-0 card px-3 py-2 min-w-[140px]">
-                  <p className="text-sm font-semibold text-gray-900">{c.nome}</p>
-                  <p className="text-xs text-gray-500">Plataforma: {c.taxa_plataforma_pct}%</p>
-                  <p className="text-xs text-gray-500">Cartão: {c.taxa_cartao_pct}%</p>
-                  <p className="text-xs text-gray-500">Imposto: {c.imposto_pct}%</p>
+                  <p className="font-sans font-semibold text-ink text-sm">{c.nome}</p>
+                  <p className="font-mono text-xs text-mute">Plataforma: {c.taxa_plataforma_pct}%</p>
+                  <p className="font-mono text-xs text-mute">Cartão: {c.taxa_cartao_pct}%</p>
+                  <p className="font-mono text-xs text-mute">Imposto: {c.imposto_pct}%</p>
                 </div>
               ))}
             </div>
@@ -110,33 +135,40 @@ export default function Precificacao() {
 
             {/* Preços do produto */}
             <div className="flex items-center justify-between mb-3 mt-4">
-              <h3 className="text-sm font-semibold text-gray-700">Preços por canal</h3>
-              <button onClick={() => { setEditPreco(null); resetPreco(); setShowModalPreco(true) }}
-                className="text-sm text-primary-600 font-medium">+ Precificar</button>
+              <p className="label">Preços por canal</p>
+              <button
+                onClick={() => { setEditPreco(null); resetPreco(); setShowModalPreco(true) }}
+                className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+              >
+                + Precificar
+              </button>
             </div>
 
-            <div className="space-y-2">
+            <div>
               {precos.length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-4">Nenhum canal precificado ainda</p>
+                <p className="font-mono text-xs text-mute text-center py-4 uppercase tracking-widest">
+                  Nenhum canal precificado ainda
+                </p>
               )}
               {precos.map((pp) => (
-                <button key={pp.id} onClick={() => abrirEditar(pp)} className="card w-full text-left">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-gray-900">{pp.canal_nome}</span>
-                    <span className="text-xs text-gray-500">margem {pp.margem_pct}%</span>
+                <button key={pp.id} onClick={() => abrirEditar(pp)}
+                  className="card w-full text-left mb-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-sans font-semibold text-ink text-sm">{pp.canal_nome}</span>
+                    <MargemBadge margem={pp.margem_pct} />
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between">
                     <div>
-                      <p className="text-xs text-gray-500">Custo total</p>
-                      <p className="font-medium">{brl(pp.custo_total)}</p>
+                      <p className="label">Custo total</p>
+                      <p className="qtm-num text-sm text-ink">{brl(pp.custo_total)}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-500">Sugerido</p>
-                      <p className="font-bold text-primary-600">{brl(pp.preco_sugerido)}</p>
+                      <p className="label">Sugerido</p>
+                      <p className="qtm-num text-sm font-bold text-ink bg-lime px-2">{brl(pp.preco_sugerido)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-500">Manual</p>
-                      <p className="font-medium">{pp.preco_final ? brl(pp.preco_final) : '—'}</p>
+                      <p className="label">Manual</p>
+                      <p className="qtm-num text-sm text-mute">{pp.preco_final ? brl(pp.preco_final) : '—'}</p>
                     </div>
                   </div>
                 </button>
