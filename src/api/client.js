@@ -1,4 +1,5 @@
 import axios from 'axios'
+import useAuthStore from '../store/authStore'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'https://api.quantumcalc.com.br',
@@ -15,10 +16,12 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      // Limpa TODAS as chaves de auth para evitar loop entre Zustand persist e a redirect
-      localStorage.removeItem('quantum_token')
-      localStorage.removeItem('quantum-auth')
-      window.location.href = '/login'
+      const { token, logout } = useAuthStore.getState()
+      // Só faz logout se havia uma sessão ativa.
+      // Evita interferir com erros de credenciais na tela de login.
+      if (token) logout()
+      // Sem window.location.href — o PrivateRoute detecta token: null
+      // e faz <Navigate to="/login"> via React Router (sem reload de página).
     }
     const msg = error.response?.data?.detail || 'Erro ao conectar com o servidor'
     return Promise.reject(new Error(msg))
