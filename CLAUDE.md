@@ -4,7 +4,7 @@
 
 **Criado em:** 2026-05-20
 **Última sessão:** 2026-05-20
-**Status:** Estrutura inicial criada, aguardando deploy no EasyPanel
+**Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
 
@@ -23,8 +23,11 @@
 - [x] Páginas: Custos Fixos (lista + formulário)
 - [x] Componentes base: Layout, BottomNav, Modal, FormField
 - [x] PWA manifest.json
-- [x] Dockerfile
+- [x] Dockerfile (multi-stage: node build + nginx serve)
+- [x] nginx.conf (SPA routing + gzip + cache estático)
 - [x] Push inicial para GitHub
+- [x] Deploy no EasyPanel via Dockerfile (build.type: dockerfile)
+- [x] SSL via Let's Encrypt (válido até jul/2026)
 
 ---
 
@@ -84,19 +87,23 @@ VITE_API_URL=https://api.quantumcalc.com.br
 
 ## Deploy EasyPanel
 
-1. Criar serviço "Static" ou "App" com Node
-2. Build command: `npm install && npm run build`
-3. Output dir: `dist/`
-4. Configurar variável: `VITE_API_URL=https://api.quantumcalc.com.br`
-5. Domínio: `quantumcalc.com.br`
+- **Build type:** `dockerfile` (usa o `Dockerfile` do repo — multi-stage node+nginx)
+- **Env vars:** `VITE_API_URL=https://api.quantumcalc.com.br` (+ vars NIXPACKS_* residuais, inofensivas)
+- **Domínio:** `quantumcalc.com.br` porta 80, HTTPS true
+- **VITE_API_URL** é injetada como `ARG` no estágio de build do Dockerfile
+
+> **Atenção:** Se recriar o serviço do zero, usar build.type=dockerfile. nixpacks não tem startCommand
+> configurado e serviria os fontes em vez do dist/ buildado.
 
 ---
 
 ## Próximos passos
 
-- [ ] Configurar VITE_API_URL no EasyPanel
-- [ ] Testar fluxo completo login → cadastro → precificação
+- [x] Configurar VITE_API_URL no EasyPanel
+- [x] Testar fluxo completo login → cadastro → precificação (validado em 2026-05-20)
+- [ ] Corrigir bugs encontrados no fluxo (rodar e anotar aqui)
 - [ ] Implementar upload de nota fiscal (OCR via IA)
 - [ ] Adicionar gráficos de evolução de custos
 - [ ] Adicionar relatório de margem por produto/canal
-- [ ] Implementar modo offline (PWA cache)
+- [ ] Implementar modo offline (PWA cache — service worker já configurado no vite.config.js)
+- [ ] Habilitar autoDeploy no EasyPanel (atualmente false)
