@@ -15,7 +15,9 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
+      // Limpa TODAS as chaves de auth para evitar loop entre Zustand persist e a redirect
       localStorage.removeItem('quantum_token')
+      localStorage.removeItem('quantum-auth')
       window.location.href = '/login'
     }
     const msg = error.response?.data?.detail || 'Erro ao conectar com o servidor'
