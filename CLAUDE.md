@@ -34,6 +34,19 @@
   - `src/index.css`: classes `.btn-primary` (lime), `.btn-secondary` (ink), `.btn-ghost`, `.card` (receipt/line, sem shadow), `.input` (border-ink, focus lime), `.label` (mono 11px uppercase), `.qtm-num` (mono tabular-nums), `body` bone
   - Todos os componentes e páginas migrados (21 arquivos, 310 inserções / 210 remoções)
   - Deploy manual via API EasyPanel disparado e concluído (action `cmpeen77m004j07t5fgcm1qe0`, status: done)
+- [x] **Botão "+ Novo" fixo (FAB) nas listas** (2026-05-20)
+  - Ingredientes, Receitas e Produtos: botão lime ancorado `fixed bottom-[88px] right-4 z-30`
+  - Sem precisar rolar para o topo para acessar a ação principal
+- [x] **Erro de deleção visível nas listas** (2026-05-20)
+  - `handleDelete` com `try/catch` — erros do backend (ex: FK constraint) aparecem como banner rust
+  - Ingredientes usados em receitas não podem ser deletados; o erro agora é exibido na tela
+- [x] **Fix loop infinito de autenticação** (2026-05-20)
+  - Causa: interceptor 401 removia `quantum_token` mas não `quantum-auth` (chave do Zustand persist)
+  - Zustand reidratava com token antigo → PrivateRoute redirecionava para /dashboard → 401 → loop
+  - Fix: interceptor agora limpa `quantum_token` + `quantum-auth` antes de redirecionar para /login
+- [x] **PWA registerType `autoUpdate` → `prompt`** (2026-05-20)
+  - Evita que o service worker force reload automático da página a cada novo deploy
+  - `theme_color` e `background_color` do manifest atualizados para os tokens da marca (`#0B0B0F` / `#F4EFE3`)
 
 ---
 
@@ -130,8 +143,8 @@ Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento.
 ### Padrões de página (listas)
 
 ```jsx
-// Botão "+ Novo" — inline, não full-width
-<Link className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none">
+// Botão "+ Novo" — FAB fixo acima da bottom nav (Ingredientes, Receitas, Produtos)
+<Link className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim">
 
 // Item da lista — row com divider (sem card individual)
 <div className="flex items-center border-b border-line py-3 last:border-b-0">
@@ -163,6 +176,21 @@ Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento.
 
 ---
 
+## Bugs conhecidos / Armadilhas
+
+### Auth — dual storage (já corrigido)
+O Zustand persiste o token em `localStorage['quantum-auth']`. O axios interceptor lê/escreve em `localStorage['quantum_token']`. São chaves **separadas**. Se limpar uma sem a outra, o app entra em loop de redirect.
+- **Fix aplicado:** o interceptor 401 em `src/api/client.js` limpa ambas antes de redirecionar.
+- **Nunca** remover `quantum_token` sem também remover `quantum-auth` (e vice-versa). Usar sempre `useAuthStore.getState().logout()` ou o interceptor.
+
+### Deleção de ingredientes/receitas em uso
+O backend rejeita deleção de itens referenciados por FK (ingrediente em receita, receita em produto). O frontend agora exibe o erro em banner rust. Para deletar: remover primeiro das receitas/produtos que o referenciam.
+
+### PWA service worker
+`registerType: 'prompt'` — o SW não força reload automático. Se o usuário ficar com versão antiga em cache, o app exibirá o prompt de atualização quando o SW novo estiver pronto.
+
+---
+
 ## Deploy EasyPanel
 
 - **Build type:** `dockerfile` (usa o `Dockerfile` do repo — multi-stage node+nginx)
@@ -182,6 +210,7 @@ Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento.
 - [x] Testar fluxo completo login → cadastro → precificação (validado em 2026-05-20)
 - [x] Implementar design system Quantum v1.0 (2026-05-20)
 - [ ] Auditar bugs do fluxo completo (receita → produto → precificação) e anotar aqui
+- [ ] Adicionar página de Embalagens na bottom nav (atualmente acessível só pelo Dashboard)
 - [ ] Implementar upload de nota fiscal (OCR via IA)
 - [ ] Adicionar gráficos de evolução de custos
 - [ ] Adicionar relatório de margem por produto/canal
