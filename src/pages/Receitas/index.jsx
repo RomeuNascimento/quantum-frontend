@@ -10,6 +10,7 @@ const tipoLabel = { massa: 'Massa', recheio: 'Recheio' }
 export default function Receitas() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [erroDelete, setErroDelete] = useState('')
 
   const carregar = () =>
     listarReceitas().then((r) => setItems(r.data)).finally(() => setLoading(false))
@@ -18,21 +19,25 @@ export default function Receitas() {
 
   const handleDelete = async (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
-    await deletarReceita(id)
-    carregar()
+    setErroDelete('')
+    try {
+      await deletarReceita(id)
+      carregar()
+    } catch (e) {
+      setErroDelete(e.message)
+    }
   }
 
   return (
     <Layout title="Receitas">
       <div className="px-4 pt-4">
-        <div className="flex justify-end mb-4">
-          <Link
-            to="/receitas/novo"
-            className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none active:bg-lime-dim"
-          >
-            + Nova
-          </Link>
-        </div>
+        {erroDelete && (
+          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
+          </div>
+        )}
+
         {loading ? <LoadingSpinner /> : items.length === 0 ? (
           <EmptyState title="Nenhuma receita" description="Cadastre suas receitas com ingredientes e mão de obra"
             action={<Link to="/receitas/novo" className="btn-primary w-auto px-6">Cadastrar</Link>} />
@@ -60,6 +65,14 @@ export default function Receitas() {
           </div>
         )}
       </div>
+
+      {/* FAB fixo acima da bottom nav */}
+      <Link
+        to="/receitas/novo"
+        className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
+      >
+        + Nova
+      </Link>
     </Layout>
   )
 }

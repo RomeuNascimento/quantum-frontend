@@ -10,6 +10,7 @@ const formatCusto = (v) => (v != null ? `R$ ${v.toFixed(4)}` : '—')
 export default function Ingredientes() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [erroDelete, setErroDelete] = useState('')
 
   const carregar = () =>
     listarIngredientes()
@@ -20,21 +21,24 @@ export default function Ingredientes() {
 
   const handleDelete = async (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
-    await deletarIngrediente(id)
-    carregar()
+    setErroDelete('')
+    try {
+      await deletarIngrediente(id)
+      carregar()
+    } catch (e) {
+      setErroDelete(e.message)
+    }
   }
 
   return (
     <Layout title="Ingredientes">
       <div className="px-4 pt-4">
-        <div className="flex justify-end mb-4">
-          <Link
-            to="/ingredientes/novo"
-            className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none active:bg-lime-dim"
-          >
-            + Novo
-          </Link>
-        </div>
+        {erroDelete && (
+          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
+          </div>
+        )}
 
         {loading ? (
           <LoadingSpinner />
@@ -68,6 +72,14 @@ export default function Ingredientes() {
           </div>
         )}
       </div>
+
+      {/* FAB fixo acima da bottom nav */}
+      <Link
+        to="/ingredientes/novo"
+        className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
+      >
+        + Novo
+      </Link>
     </Layout>
   )
 }

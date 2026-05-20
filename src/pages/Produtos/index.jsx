@@ -8,6 +8,7 @@ import { listarProdutos, deletarProduto } from '../../api/produtos'
 export default function Produtos() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [erroDelete, setErroDelete] = useState('')
 
   const carregar = () =>
     listarProdutos().then((r) => setItems(r.data)).finally(() => setLoading(false))
@@ -16,21 +17,25 @@ export default function Produtos() {
 
   const handleDelete = async (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
-    await deletarProduto(id)
-    carregar()
+    setErroDelete('')
+    try {
+      await deletarProduto(id)
+      carregar()
+    } catch (e) {
+      setErroDelete(e.message)
+    }
   }
 
   return (
     <Layout title="Produtos">
       <div className="px-4 pt-4">
-        <div className="flex justify-end mb-4">
-          <Link
-            to="/produtos/novo"
-            className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none active:bg-lime-dim"
-          >
-            + Novo
-          </Link>
-        </div>
+        {erroDelete && (
+          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
+          </div>
+        )}
+
         {loading ? <LoadingSpinner /> : items.length === 0 ? (
           <EmptyState title="Nenhum produto" description="Monte seus produtos combinando receitas e ingredientes"
             action={<Link to="/produtos/novo" className="btn-primary w-auto px-6">Cadastrar</Link>} />
@@ -53,6 +58,14 @@ export default function Produtos() {
           </div>
         )}
       </div>
+
+      {/* FAB fixo acima da bottom nav */}
+      <Link
+        to="/produtos/novo"
+        className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
+      >
+        + Novo
+      </Link>
     </Layout>
   )
 }
