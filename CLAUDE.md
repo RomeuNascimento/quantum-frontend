@@ -21,13 +21,19 @@
 - [x] Páginas: Produtos (lista + formulário)
 - [x] Páginas: Precificação (canais + preços)
 - [x] Páginas: Custos Fixos (lista + formulário)
-- [x] Componentes base: Layout, BottomNav, Modal, FormField
+- [x] Componentes base: Layout, BottomNav, Modal, FormField, LoadingSpinner, EmptyState
 - [x] PWA manifest.json
 - [x] Dockerfile (multi-stage: node build + nginx serve)
 - [x] nginx.conf (SPA routing + gzip + cache estático)
 - [x] Push inicial para GitHub
 - [x] Deploy no EasyPanel via Dockerfile (build.type: dockerfile)
 - [x] SSL via Let's Encrypt (válido até jul/2026)
+- [x] **Redesign completo — Design System Quantum v1.0** (2026-05-20)
+  - `tailwind.config.js`: paleta `ink/bone/lime/lime-dim/plasma/rust/receipt/line/mute` + fontes `sans/mono`
+  - `index.html`: Space Grotesk + JetBrains Mono via Google Fonts, `theme-color: #0B0B0F`, favicon `/brand/favicon.svg`
+  - `src/index.css`: classes `.btn-primary` (lime), `.btn-secondary` (ink), `.btn-ghost`, `.card` (receipt/line, sem shadow), `.input` (border-ink, focus lime), `.label` (mono 11px uppercase), `.qtm-num` (mono tabular-nums), `body` bone
+  - Todos os componentes e páginas migrados (21 arquivos, 310 inserções / 210 remoções)
+  - Deploy manual via API EasyPanel disparado e concluído (action `cmpeen77m004j07t5fgcm1qe0`, status: done)
 
 ---
 
@@ -37,7 +43,8 @@
 - **Roteamento:** React Router v6
 - **Estado:** Zustand
 - **HTTP:** Axios
-- **Estilo:** TailwindCSS (mobile-first, 375px base)
+- **Estilo:** TailwindCSS (mobile-first, 375px base) — paleta Quantum v1.0
+- **Fontes:** Space Grotesk (UI) + JetBrains Mono (números) via Google Fonts
 - **PWA:** vite-plugin-pwa
 - **Deploy:** EasyPanel → https://quantumcalc.com.br
 
@@ -77,84 +84,95 @@ VITE_API_URL=https://api.quantumcalc.com.br
 
 ## Componentes base
 
-- `Layout` — wrapper com header + bottom nav
-- `BottomNav` — navegação inferior mobile (5 tabs)
-- `Modal` — dialog reutilizável
-- `FormField` — label + input/select + error
-- `LoadingSpinner` — loading state
+- `Layout` — header `bg-bone border-b border-line`, ícones `strokeLinecap="square"`
+- `BottomNav` — `bg-ink border-t border-plasma`, tab ativo `text-lime`, labels mono uppercase
+- `Modal` — `bg-bone rounded-none`, overlay `bg-ink/60`
+- `FormField` — label via `.label`, erros `text-rust font-mono`
+- `LoadingSpinner` — spinner `border-lime/30 border-t-lime`, texto mono uppercase
+- `EmptyState` — borda `border-line`, ícone ink, título mono uppercase
+
+---
+
+## Design System — Quantum v1.0
+
+> Implementado em 2026-05-20. Arquivo de referência em `public/brand/BRAND.md`.
+
+### Conceito
+Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento. **Preciso, sistêmico, modular, sem ruído.**
+
+### Paleta Tailwind (tokens configurados em `tailwind.config.js`)
+
+| Token Tailwind | HEX | Uso |
+|---|---|---|
+| `bone` | `#F4EFE3` | Fundo principal (60%) |
+| `ink` | `#0B0B0F` | Texto, estrutura (30%) |
+| `lime` | `#D6FF3F` | Sinal — CTAs, KPIs positivos (10%) |
+| `lime-dim` | `#B8E520` | Hover/pressed do lime |
+| `plasma` | `#1A1B20` | Dark surfaces (nav) |
+| `rust` | `#C44A2A` | Erros, valores negativos |
+| `receipt` | `#EBE5D6` | Superfície cards |
+| `line` | `#D9D2BF` | Bordas, divisórias |
+| `mute` | `#6B6A60` | Texto secundário, labels |
+
+### Classes utilitárias (em `src/index.css`)
+
+```css
+.btn-primary   → bg-lime text-ink font-mono uppercase tracking-widest rounded-none
+.btn-secondary → bg-ink text-bone font-mono uppercase tracking-widest rounded-none
+.btn-ghost     → border border-ink text-ink bg-transparent rounded-none
+.card          → bg-receipt border border-line rounded-none p-4  (SEM shadow)
+.input         → bg-white border border-ink rounded-none focus:border-lime (sem ring)
+.label         → font-mono text-[11px] uppercase tracking-widest text-mute mb-1
+.page          → min-h-screen pb-24 px-4 pt-4 bg-bone
+.qtm-num       → font-mono tabular-nums  (TODOS os números, sem exceção)
+```
+
+### Padrões de página (listas)
+
+```jsx
+// Botão "+ Novo" — inline, não full-width
+<Link className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none">
+
+// Item da lista — row com divider (sem card individual)
+<div className="flex items-center border-b border-line py-3 last:border-b-0">
+
+// Botão delete
+<button className="p-2 text-mute active:text-rust">
+
+// Erro de formulário
+<p className="text-xs font-mono text-rust">
+
+// Botão inline de seção (adicionar, histórico)
+<button className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+```
+
+### Badges de margem (Precificação)
+
+```jsx
+≥ 30% → bg-lime text-ink        "+" Saudável
+10–29% → bg-bone border border-ink text-ink  "±" Atenção
+< 10% → bg-rust text-bone       "−" Revisar
+```
+
+### Princípios inegociáveis
+1. **Cantos vivos** — `border-radius: 0` em tudo (exceto app icon)
+2. **Bordas, não sombras** — nunca `shadow-*` em cards/inputs
+3. **Mono para número** — usar `.qtm-num` sem exceção
+4. **Lime é sinal** — não decorativo, não repetitivo
+5. **Ícones com strokeLinecap="square" strokeLinejoin="miter" strokeWidth={1.75}**
 
 ---
 
 ## Deploy EasyPanel
 
 - **Build type:** `dockerfile` (usa o `Dockerfile` do repo — multi-stage node+nginx)
-- **Env vars:** `VITE_API_URL=https://api.quantumcalc.com.br` (+ vars NIXPACKS_* residuais, inofensivas)
+- **Env vars:** `VITE_API_URL=https://api.quantumcalc.com.br`
 - **Domínio:** `quantumcalc.com.br` porta 80, HTTPS true
 - **VITE_API_URL** é injetada como `ARG` no estágio de build do Dockerfile
+- **autoDeploy:** desabilitado — deploy manual via API: `POST /api/trpc/services.app.deployService` com `{"json":{"projectName":"quantum","serviceName":"frontend"}}`
 
-> **Atenção:** Se recriar o serviço do zero, usar build.type=dockerfile. nixpacks não tem startCommand
-> configurado e serviria os fontes em vez do dist/ buildado.
-
----
-
-## Marca — Quantum Brand (v1.0)
-
-> Arquivo completo em `public/brand/BRAND.md` e tokens em `public/brand/tokens.css`.
-> Importar `tokens.css` no root da app antes de aplicar qualquer estilo.
-
-### Conceito
-Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento. **Preciso, sistêmico, modular, sem ruído.**
-
-### Cores (proporção 60/30/10)
-| Token | HEX | Uso |
-|---|---|---|
-| `--qtm-bone` | `#F4EFE3` | **Fundo principal** (60%) — nunca branco puro |
-| `--qtm-ink` | `#0B0B0F` | Texto, estrutura (30%) |
-| `--qtm-lime` | `#D6FF3F` | **Sinal** — botões primários, KPIs positivos (10%) |
-| `--qtm-lime-dim` | `#B8E520` | Hover/pressed do lime |
-| `--qtm-plasma` | `#1A1B20` | Dark surfaces |
-| `--qtm-rust` | `#C44A2A` | Erros, valores negativos |
-| `--qtm-receipt` | `#EBE5D6` | Superfície secundária (cards) |
-| `--qtm-line` | `#D9D2BF` | Bordas |
-| `--qtm-mute` | `#6B6A60` | Texto secundário |
-
-### Tipografia
-- **Space Grotesk** — headlines, UI, body (sans)
-- **JetBrains Mono** — **TODO número sem exceção**: preços, gramas, %, datas, IDs
-- Classe `.qtm-num` ou atributo `data-numeric` aplica mono + tabular nums automaticamente
-
-```html
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-```
-
-### Componentes — regras rápidas
-- **Botão primário:** bg `--qtm-lime`, text `--qtm-ink`, cantos 0–2px, mono uppercase, `letter-spacing: 0.08em`
-- **Botão secundário:** bg `--qtm-ink`, text `--qtm-bone`
-- **Cards:** borda `--qtm-line`, padding 32px, **sem sombra**
-- **Inputs:** borda `--qtm-border-ink`, focus troca borda para `--qtm-lime` (sem glow)
-- **Tabelas:** header mono uppercase 11px `--qtm-mute`, números alinhados à direita
-
-### Badges de margem
-- `> 30%` → bg lime, text ink (`+ Saudável`)
-- `10–30%` → bg bone, border ink (`± Atenção`)
-- `< 10%` → bg rust, text bone (`− Revisar`)
-
-### Princípios inegociáveis
-1. **Cantos vivos** — `border-radius` máximo 4px (só app icon usa 24%)
-2. **Bordas, não sombras** — sombra só em modais/overlays
-3. **Mono para número** — sem exceção
-4. **Lime é sinal** — se cobre > 10% da viewport, está errado
-5. **Sem ícones decorativos** — cada ícone tem função semântica
-6. **Copy direto** — "Margem 2,1%" não "Sua performance precisa de atenção 📊"
-
-### Assets disponíveis em `public/brand/`
-- `logo-horizontal.svg` — header, materiais (mín. 96px)
-- `logo-mark.svg` — símbolo Q isolado (mín. 16px)
-- `favicon.svg` / `app-icon.svg`
-- `tokens.css` — importar no root
-
-> **Logo em fundo escuro:** definir `--qmark-bg` no contêiner pai (ex: `--qmark-bg: var(--qtm-ink)`).
-> Para `currentColor` funcionar, preferir inline SVG em vez de `<img>`.
+> **Atenção:** o serviço se chama `frontend` (não `quantum-frontend`) no EasyPanel.
+> Se recriar do zero, usar build.type=dockerfile. nixpacks serviria os fontes em vez do dist/.
 
 ---
 
@@ -162,8 +180,8 @@ Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento.
 
 - [x] Configurar VITE_API_URL no EasyPanel
 - [x] Testar fluxo completo login → cadastro → precificação (validado em 2026-05-20)
-- [ ] **Implementar design system** (tokens.css + Space Grotesk + JetBrains Mono + paleta Quantum)
-- [ ] Corrigir bugs encontrados no fluxo (rodar e anotar aqui)
+- [x] Implementar design system Quantum v1.0 (2026-05-20)
+- [ ] Auditar bugs do fluxo completo (receita → produto → precificação) e anotar aqui
 - [ ] Implementar upload de nota fiscal (OCR via IA)
 - [ ] Adicionar gráficos de evolução de custos
 - [ ] Adicionar relatório de margem por produto/canal
