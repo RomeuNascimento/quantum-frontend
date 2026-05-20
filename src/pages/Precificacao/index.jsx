@@ -101,7 +101,7 @@ export default function Precificacao() {
   }
 
   return (
-    <Layout title="Precificação">
+    <Layout title="Precificação" onBack>
       <div className="px-4 pt-4">
         {loading ? <LoadingSpinner /> : (
           <>
