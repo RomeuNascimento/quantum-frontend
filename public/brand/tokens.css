@@ -1,0 +1,121 @@
+/* =====================================================
+   Quantum · Design Tokens
+   v1.0 · maio/2026
+   Use em qualquer stack (Next/React/Tailwind/etc).
+   ===================================================== */
+
+:root {
+  /* ---------- COLOR ---------- */
+  /* Primárias */
+  --qtm-ink:        #0B0B0F;   /* texto, traços, superfícies escuras */
+  --qtm-bone:       #F4EFE3;   /* fundo principal, off-white quente */
+
+  /* Sinal (use com parcimônia — ações primárias, KPIs positivos) */
+  --qtm-lime:       #D6FF3F;
+  --qtm-lime-dim:   #B8E520;   /* hover / pressed */
+
+  /* Apoio */
+  --qtm-plasma:     #1A1B20;   /* sombra técnica, dark surfaces */
+  --qtm-rust:       #C44A2A;   /* alertas, valores negativos */
+
+  /* Neutros */
+  --qtm-receipt:    #EBE5D6;   /* superfície secundária (cards) */
+  --qtm-line:       #D9D2BF;   /* borda padrão */
+  --qtm-mute:       #6B6A60;   /* texto secundário */
+
+  /* Estados semânticos */
+  --qtm-success:    var(--qtm-lime);
+  --qtm-danger:     var(--qtm-rust);
+  --qtm-warning:    #E8A427;
+  --qtm-info:       var(--qtm-plasma);
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --qtm-font-sans:  'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --qtm-font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Escala tipográfica */
+  --qtm-text-xs:    11px;   /* labels mono, ticks */
+  --qtm-text-sm:    14px;   /* body small, tabela */
+  --qtm-text-base:  16px;   /* body */
+  --qtm-text-lg:    18px;   /* lead */
+  --qtm-text-xl:    24px;   /* h3 */
+  --qtm-text-2xl:   32px;   /* h2 */
+  --qtm-text-3xl:   48px;   /* h1 */
+  --qtm-text-4xl:   72px;   /* display */
+  --qtm-text-5xl:   120px;  /* hero */
+
+  /* Tracking (letter-spacing) */
+  --qtm-track-tight:  -0.03em;   /* display */
+  --qtm-track-snug:   -0.02em;   /* h1/h2 */
+  --qtm-track-normal: -0.005em;  /* body */
+  --qtm-track-wide:    0.08em;   /* mono uppercase labels */
+
+  /* Pesos */
+  --qtm-weight-regular: 400;
+  --qtm-weight-medium:  500;
+  --qtm-weight-bold:    700;
+
+  /* ---------- SPACING (escala 4px) ---------- */
+  --qtm-space-1:  4px;
+  --qtm-space-2:  8px;
+  --qtm-space-3:  12px;
+  --qtm-space-4:  16px;
+  --qtm-space-5:  20px;
+  --qtm-space-6:  24px;
+  --qtm-space-8:  32px;
+  --qtm-space-10: 40px;
+  --qtm-space-12: 48px;
+  --qtm-space-16: 64px;
+  --qtm-space-20: 80px;
+  --qtm-space-24: 96px;
+  --qtm-space-32: 128px;
+
+  /* ---------- BORDER / RADIUS ---------- */
+  /* Quantum usa cantos vivos. Raio máximo permitido = 4px (exceção: app icon 24%) */
+  --qtm-radius-none: 0;
+  --qtm-radius-sm:   2px;
+  --qtm-radius-md:   4px;
+  --qtm-radius-app:  24%;  /* somente para ícones de app */
+
+  --qtm-border:      1px solid var(--qtm-line);
+  --qtm-border-ink:  1px solid var(--qtm-ink);
+
+  /* ---------- ELEVATION ---------- */
+  /* Quantum prefere bordas a sombras. Sombras só para overlays/modals. */
+  --qtm-shadow-overlay: 0 12px 40px rgba(11,11,15,0.18);
+  --qtm-shadow-modal:   0 24px 64px rgba(11,11,15,0.28);
+
+  /* ---------- TRANSITIONS ---------- */
+  --qtm-ease:      cubic-bezier(.2,.7,.2,1);
+  --qtm-duration:  180ms;
+}
+
+/* =====================================================
+   Base styles
+   ===================================================== */
+
+body {
+  background: var(--qtm-bone);
+  color: var(--qtm-ink);
+  font-family: var(--qtm-font-sans);
+  font-size: var(--qtm-text-base);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Números, preços, IDs — SEMPRE mono */
+.qtm-num,
+.qtm-mono,
+[data-numeric] {
+  font-family: var(--qtm-font-mono);
+  font-feature-settings: "zero" on, "tnum" on;
+}
+
+/* Labels técnicos uppercase */
+.qtm-label {
+  font-family: var(--qtm-font-mono);
+  font-size: var(--qtm-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--qtm-track-wide);
+  color: var(--qtm-mute);
+}
