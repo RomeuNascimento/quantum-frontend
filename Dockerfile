@@ -4,7 +4,7 @@ WORKDIR /app
 ARG VITE_API_URL=https://api.quantumcalc.com.br
 ENV VITE_API_URL=$VITE_API_URL
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY . .
 RUN npm run build
 
