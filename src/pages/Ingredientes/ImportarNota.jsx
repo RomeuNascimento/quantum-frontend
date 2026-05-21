@@ -234,7 +234,7 @@ export default function ImportarNota() {
         </div>
 
         {/* Botão fixo */}
-        <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3">
+        <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
           <button onClick={salvar} disabled={selecionados.length === 0} className="btn-primary w-full">
             Salvar {selecionados.length} item{selecionados.length !== 1 ? 'ns' : ''}
           </button>
