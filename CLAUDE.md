@@ -3,7 +3,7 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-05-20
+**Última sessão:** 2026-05-21
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -33,7 +33,6 @@
   - `index.html`: Space Grotesk + JetBrains Mono via Google Fonts, `theme-color: #0B0B0F`, favicon `/brand/favicon.svg`
   - `src/index.css`: classes `.btn-primary` (lime), `.btn-secondary` (ink), `.btn-ghost`, `.card` (receipt/line, sem shadow), `.input` (border-ink, focus lime), `.label` (mono 11px uppercase), `.qtm-num` (mono tabular-nums), `body` bone
   - Todos os componentes e páginas migrados (21 arquivos, 310 inserções / 210 remoções)
-  - Deploy manual via API EasyPanel disparado e concluído (action `cmpeen77m004j07t5fgcm1qe0`, status: done)
 - [x] **Botão "+ Novo" fixo (FAB) nas listas** (2026-05-20)
   - Ingredientes, Receitas e Produtos: botão lime ancorado `fixed bottom-[88px] right-4 z-30`
   - Sem precisar rolar para o topo para acessar a ação principal
@@ -42,11 +41,45 @@
   - Ingredientes usados em receitas não podem ser deletados; o erro agora é exibido na tela
 - [x] **Fix loop infinito de autenticação** (2026-05-20)
   - Causa: interceptor 401 removia `quantum_token` mas não `quantum-auth` (chave do Zustand persist)
-  - Zustand reidratava com token antigo → PrivateRoute redirecionava para /dashboard → 401 → loop
-  - Fix: interceptor agora limpa `quantum_token` + `quantum-auth` antes de redirecionar para /login
+  - Fix: interceptor chama `useAuthStore.getState().logout()` diretamente (síncrono) — sem `window.location.href`
+  - `PrivateRoute` detecta `token: null` e faz `<Navigate to="/login">` via React Router (sem reload)
 - [x] **PWA registerType `autoUpdate` → `prompt`** (2026-05-20)
   - Evita que o service worker force reload automático da página a cada novo deploy
-  - `theme_color` e `background_color` do manifest atualizados para os tokens da marca (`#0B0B0F` / `#F4EFE3`)
+- [x] **Seta voltar no header das seções de lista** (2026-05-20)
+  - `Layout` aceita `onBack` como função ou booleano
+  - Ingredientes, Receitas, Produtos, Precificação: `onBack={() => navigate('/dashboard')}`
+  - **Armadilha:** usar sempre função explícita com rota destino — nunca `onBack` booleano (que usa `navigate(-1)` e causa loop quando o usuário alterna entre seções)
+- [x] **Nomenclatura neutra em Receitas** (2026-05-20)
+  - Campo `tipo` virou texto livre (input, opcional) — remove select fixo "Massa / Recheio"
+  - Badge na lista exibe o valor digitado; some se vazio
+- [x] **Produtos: seção unificada "Preparações"** (2026-05-20)
+  - Remove as duas seções "Massas" e "Recheios" do formulário de produto
+  - Uma única seção "Preparações" — mostra todas as receitas, sem filtro por tipo
+  - Na option do select: `Nome da receita (Tipo)` se tipo preenchido
+  - Backend: leitura une `produto.massas + produto.recheios`; escrita salva tudo em `produto_massas`
+- [x] **Importação via IA — Nota Fiscal** (2026-05-20)
+  - Card de ação full-width no topo da lista de ingredientes → `/ingredientes/importar-nota`
+  - Fluxo: upload (foto/PDF, captura de câmera nativa) → IA processa → revisão → salvar
+  - Revisão: cada item tem checkbox + campos editáveis (nome, marca, quantidade, unidade, preço)
+  - Detecta ingredientes já existentes por nome → toggle "adicionar preço ao existente" vs "criar novo"
+  - Salva via `criarIngrediente` (com marca) + `adicionarPrecoIngrediente` com `origem: 'nota_fiscal_ia'`
+- [x] **Importação via IA — Receitas** (2026-05-20)
+  - Botão "IA Import" (FAB ink, `fixed bottom-[132px]`) em Receitas → `/receitas/importar`
+  - Fluxo: upload (foto/PDF/Excel/CSV) → IA processa → revisão → salvar
+  - Revisão: cards expansíveis por receita — editar nome, tipo, rendimento; ver ingredientes e etapas
+  - Ingredientes não encontrados no cadastro são criados automaticamente (sem preço)
+  - Ingredientes já existentes (match por nome) têm o `ingrediente_id` reutilizado
+- [x] **Fix botão salvar nota fiscal** (2026-05-21)
+  - Botão estava oculto atrás da BottomNav (`fixed bottom-0` vs `fixed bottom-0 z-20`)
+  - Fix: `fixed bottom-16 z-30` — posicionado acima da nav
+- [x] **Campo `marca` em ingredientes** (2026-05-21)
+  - Formulário: campo "Marca (opcional)"
+  - Lista: exibe `Nome · Marca` quando marca preenchida
+  - Importação nota: campo marca editável na revisão; IA retorna nome genérico + marca separados
+  - Matching de ingredientes usa só `nome` (normalizado) — marca não interfere no match
+- [x] **Importar nota fiscal virou card de ação** (2026-05-21)
+  - Substituiu o pequeno FAB "IA Nota" do canto por um card `bg-ink` full-width no topo da lista
+  - Card exibe ícone + título "Importar nota fiscal" + subtítulo explicativo + seta
 
 ---
 
@@ -77,13 +110,15 @@ VITE_API_URL=https://api.quantumcalc.com.br
 / → redirect para /dashboard (se autenticado) ou /login
 /login
 /dashboard
-/ingredientes → lista
-/ingredientes/novo → formulário
+/ingredientes → lista (card "Importar nota fiscal" no topo)
+/ingredientes/importar-nota → importação via IA de nota fiscal
+/ingredientes/novo → formulário (campos: nome, marca, unidade, fator_correcao)
 /ingredientes/:id → editar
 /embalagens → lista
 /embalagens/novo
 /embalagens/:id
 /receitas → lista
+/receitas/importar → importação via IA de receitas
 /receitas/novo
 /receitas/:id
 /produtos → lista
@@ -97,8 +132,8 @@ VITE_API_URL=https://api.quantumcalc.com.br
 
 ## Componentes base
 
-- `Layout` — header `bg-bone border-b border-line`, ícones `strokeLinecap="square"`
-- `BottomNav` — `bg-ink border-t border-plasma`, tab ativo `text-lime`, labels mono uppercase
+- `Layout` — header `bg-bone border-b border-line`, ícones `strokeLinecap="square"`; prop `onBack` aceita função ou booleano
+- `BottomNav` — `bg-ink border-t border-plasma`, tab ativo `text-lime`, labels mono uppercase, **altura h-16 (64px)**
 - `Modal` — `bg-bone rounded-none`, overlay `bg-ink/60`
 - `FormField` — label via `.label`, erros `text-rust font-mono`
 - `LoadingSpinner` — spinner `border-lime/30 border-t-lime`, texto mono uppercase
@@ -143,20 +178,20 @@ Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento.
 ### Padrões de página (listas)
 
 ```jsx
-// Botão "+ Novo" — FAB fixo acima da bottom nav (Ingredientes, Receitas, Produtos)
+// FAB principal "+ Novo" — lime
 <Link className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim">
+
+// Card de ação IA — full-width no topo da lista (padrão para Ingredientes)
+<Link className="flex items-center gap-3 bg-ink text-bone border border-ink px-4 py-3 mb-4 active:opacity-80">
+
+// FAB secundário (IA) — ink, ainda usado em Receitas
+<Link className="fixed bottom-[132px] right-4 z-30 bg-ink text-bone font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:opacity-80">
 
 // Item da lista — row com divider (sem card individual)
 <div className="flex items-center border-b border-line py-3 last:border-b-0">
 
-// Botão delete
-<button className="p-2 text-mute active:text-rust">
-
-// Erro de formulário
-<p className="text-xs font-mono text-rust">
-
-// Botão inline de seção (adicionar, histórico)
-<button className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+// Botão salvar fixo acima da BottomNav (h-16 = bottom-16)
+<div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
 ```
 
 ### Badges de margem (Precificação)
@@ -180,14 +215,28 @@ Instrumento de precisão. Grade rígida, números mono alinhados, sem ornamento.
 
 ### Auth — dual storage (já corrigido)
 O Zustand persiste o token em `localStorage['quantum-auth']`. O axios interceptor lê/escreve em `localStorage['quantum_token']`. São chaves **separadas**. Se limpar uma sem a outra, o app entra em loop de redirect.
-- **Fix aplicado:** o interceptor 401 em `src/api/client.js` limpa ambas antes de redirecionar.
-- **Nunca** remover `quantum_token` sem também remover `quantum-auth` (e vice-versa). Usar sempre `useAuthStore.getState().logout()` ou o interceptor.
+- **Fix aplicado:** o interceptor 401 em `src/api/client.js` chama `useAuthStore.getState().logout()` (síncrono). Sem `window.location.href` — o `PrivateRoute` faz o redirect via React Router.
+- **Nunca** usar `window.location.href` para redirecionar após 401 — cria race condition com o Zustand persist.
+
+### Seta "voltar" nas páginas de lista
+`onBack` booleano usa `navigate(-1)` — causa loop se o usuário alternou entre seções.
+- **Sempre** passar função explícita: `onBack={() => navigate('/dashboard')}` nas páginas de lista.
+- `navigate(-1)` só é adequado em sub-páginas (formulários, detalhes) onde a origem é sempre a lista.
+
+### Botões fixos e BottomNav
+A BottomNav é `fixed bottom-0 z-20 h-16`. Qualquer botão fixo na parte inferior deve usar `bottom-16` (não `bottom-0`) e `z-30` para aparecer acima da nav. Errar isso torna o botão invisível.
 
 ### Deleção de ingredientes/receitas em uso
-O backend rejeita deleção de itens referenciados por FK (ingrediente em receita, receita em produto). O frontend agora exibe o erro em banner rust. Para deletar: remover primeiro das receitas/produtos que o referenciam.
+O backend rejeita deleção de itens referenciados por FK. O frontend exibe o erro em banner rust. Para deletar: remover primeiro das receitas/produtos que o referenciam.
+
+### Produtos — tabelas massas/recheios no banco
+O banco ainda tem as tabelas `produto_massas` e `produto_recheios`. A leitura une as duas em `preparacoes`. A escrita salva tudo em `produto_massas`. A tabela `produto_recheios` existe mas fica vazia para novos produtos — não dropar por ora.
 
 ### PWA service worker
 `registerType: 'prompt'` — o SW não força reload automático. Se o usuário ficar com versão antiga em cache, o app exibirá o prompt de atualização quando o SW novo estiver pronto.
+
+### "Erro ao conectar com o servidor"
+Mensagem genérica do `client.js` quando `error.response` é undefined (sem resposta HTTP). Causa mais comum: backend reiniciando após deploy. Aguardar o serviço subir (~30s) e tentar novamente.
 
 ---
 
@@ -197,7 +246,13 @@ O backend rejeita deleção de itens referenciados por FK (ingrediente em receit
 - **Env vars:** `VITE_API_URL=https://api.quantumcalc.com.br`
 - **Domínio:** `quantumcalc.com.br` porta 80, HTTPS true
 - **VITE_API_URL** é injetada como `ARG` no estágio de build do Dockerfile
-- **autoDeploy:** desabilitado — deploy manual via API: `POST /api/trpc/services.app.deployService` com `{"json":{"projectName":"quantum","serviceName":"frontend"}}`
+- **autoDeploy:** desabilitado — deploy manual via API:
+  ```bash
+  curl -X POST https://panel.quantumcalc.com.br/api/trpc/services.app.deployService \
+    -H "Authorization: Bearer <EASYPANEL_TOKEN>" \
+    -H "Content-Type: application/json" \
+    -d '{"json":{"projectName":"quantum","serviceName":"frontend"}}'
+  ```
 
 > **Atenção:** o serviço se chama `frontend` (não `quantum-frontend`) no EasyPanel.
 > Se recriar do zero, usar build.type=dockerfile. nixpacks serviria os fontes em vez do dist/.
@@ -209,9 +264,12 @@ O backend rejeita deleção de itens referenciados por FK (ingrediente em receit
 - [x] Configurar VITE_API_URL no EasyPanel
 - [x] Testar fluxo completo login → cadastro → precificação (validado em 2026-05-20)
 - [x] Implementar design system Quantum v1.0 (2026-05-20)
-- [ ] Auditar bugs do fluxo completo (receita → produto → precificação) e anotar aqui
+- [x] Importação via IA de nota fiscal e receitas (2026-05-20)
+- [x] ANTHROPIC_API_KEY configurada no EasyPanel (IA ativa)
+- [x] Fix botão salvar nota fiscal (oculto atrás da BottomNav) (2026-05-21)
+- [x] Campo marca em ingredientes + card de ação na lista (2026-05-21)
+- [ ] Auditar bugs do fluxo completo (receita → produto → precificação)
 - [ ] Adicionar página de Embalagens na bottom nav (atualmente acessível só pelo Dashboard)
-- [ ] Implementar upload de nota fiscal (OCR via IA)
 - [ ] Adicionar gráficos de evolução de custos
 - [ ] Adicionar relatório de margem por produto/canal
 - [ ] Implementar modo offline (PWA cache — service worker já configurado no vite.config.js)
