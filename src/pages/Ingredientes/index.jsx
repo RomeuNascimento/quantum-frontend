@@ -34,10 +34,11 @@ export default function Ingredientes() {
   return (
     <Layout title="Ingredientes" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
+
         {/* Importar nota fiscal via IA */}
         <Link
           to="/ingredientes/importar-nota"
-          className="flex items-center gap-3 bg-ink text-bone border border-ink px-4 py-3 mb-4 active:opacity-80"
+          className="flex items-center gap-3 bg-ink text-bone border border-ink px-4 py-3 mb-3 active:opacity-80"
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
@@ -53,6 +54,18 @@ export default function Ingredientes() {
           </svg>
         </Link>
 
+        {/* + Novo ingrediente */}
+        <Link
+          to="/ingredientes/novo"
+          className="flex items-center justify-center gap-2 btn-primary w-full py-3 mb-4"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Novo Ingrediente
+        </Link>
+
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
             <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
@@ -66,7 +79,6 @@ export default function Ingredientes() {
           <EmptyState
             title="Nenhum ingrediente"
             description="Cadastre seus ingredientes para calcular custos"
-            action={<Link to="/ingredientes/novo" className="btn-primary w-auto px-6">Cadastrar</Link>}
           />
         ) : (
           <div>
@@ -94,14 +106,6 @@ export default function Ingredientes() {
           </div>
         )}
       </div>
-
-      {/* FAB fixo — novo ingrediente */}
-      <Link
-        to="/ingredientes/novo"
-        className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
-      >
-        + Novo
-      </Link>
     </Layout>
   )
 }
