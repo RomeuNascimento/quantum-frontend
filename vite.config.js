@@ -25,7 +25,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.quantumcalc\.com\.br\/.*/i,
+            urlPattern: ({ request }) =>
+              /^https:\/\/api\.quantumcalc\.com\.br\//i.test(request.url) &&
+              request.method === 'GET',
             handler: 'NetworkFirst',
             options: { cacheName: 'api-cache', networkTimeoutSeconds: 10 },
           },
