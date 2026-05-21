@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
 import { listarEmbalagens, deletarEmbalagem } from '../../api/embalagens'
 
 export default function Embalagens() {
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -21,16 +22,18 @@ export default function Embalagens() {
   }
 
   return (
-    <Layout title="Embalagens">
+    <Layout title="Embalagens" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
-        <div className="flex justify-end mb-4">
-          <Link
-            to="/embalagens/novo"
-            className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none active:bg-lime-dim"
-          >
-            + Nova
-          </Link>
-        </div>
+        <Link
+          to="/embalagens/novo"
+          className="flex items-center justify-center gap-2 btn-primary w-full py-3 mb-4"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Nova Embalagem
+        </Link>
         {loading ? <LoadingSpinner /> : items.length === 0 ? (
           <EmptyState title="Nenhuma embalagem" description="Cadastre suas embalagens"
             action={<Link to="/embalagens/novo" className="btn-primary w-auto px-6">Cadastrar</Link>} />

@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import useAuthStore from './store/authStore'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -16,6 +17,12 @@ import Precificacao from './pages/Precificacao/index'
 import CustosFixos from './pages/CustosFixos/index'
 import Planejamento from './pages/Planejamento/index'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
 function PrivateRoute({ children }) {
   const token = useAuthStore((s) => s.token)
   return token ? children : <Navigate to="/login" replace />
@@ -29,6 +36,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
