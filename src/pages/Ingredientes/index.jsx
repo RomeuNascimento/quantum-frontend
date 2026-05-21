@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
@@ -8,6 +8,7 @@ import { listarIngredientes, deletarIngrediente } from '../../api/ingredientes'
 const formatCusto = (v) => (v != null ? `R$ ${v.toFixed(4)}` : '—')
 
 export default function Ingredientes() {
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [erroDelete, setErroDelete] = useState('')
@@ -31,7 +32,7 @@ export default function Ingredientes() {
   }
 
   return (
-    <Layout title="Ingredientes" onBack>
+    <Layout title="Ingredientes" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">

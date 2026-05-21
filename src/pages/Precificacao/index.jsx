@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import Modal from '../../components/Modal'
@@ -33,6 +34,7 @@ function MargemBadge({ margem }) {
 }
 
 export default function Precificacao() {
+  const navigate = useNavigate()
   const [produtos, setProdutos] = useState([])
   const [canais, setCanais] = useState([])
   const [produtoSelecionado, setProdutoSelecionado] = useState(null)
@@ -101,7 +103,7 @@ export default function Precificacao() {
   }
 
   return (
-    <Layout title="Precificação" onBack>
+    <Layout title="Precificação" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
         {loading ? <LoadingSpinner /> : (
           <>
