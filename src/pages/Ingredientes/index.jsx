@@ -54,7 +54,9 @@ export default function Ingredientes() {
             {items.map((ing) => (
               <div key={ing.id} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
                 <Link to={`/ingredientes/${ing.id}`} className="flex-1 min-w-0">
-                  <p className="font-medium text-ink truncate">{ing.nome}</p>
+                  <p className="font-medium text-ink truncate">
+                    {ing.nome}{ing.marca ? <span className="text-mute font-normal"> · {ing.marca}</span> : null}
+                  </p>
                   <p className="font-mono text-xs text-mute mt-0.5">
                     {ing.unidade} · fator {ing.fator_correcao} · {formatCusto(ing.custo_unitario_atual)}/un
                   </p>

@@ -75,6 +75,10 @@ export default function IngredienteForm() {
             <input className="input" placeholder="Ex: Farinha de trigo" {...register('nome', { required: 'Obrigatório' })} />
           </FormField>
 
+          <FormField label="Marca (opcional)">
+            <input className="input" placeholder="Ex: Fleischmann" {...register('marca')} />
+          </FormField>
+
           <FormField label="Unidade" error={errors.unidade?.message}>
             <select className="input" {...register('unidade', { required: 'Obrigatório' })}>
               <option value="">Selecione</option>

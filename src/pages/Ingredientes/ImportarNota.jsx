@@ -45,6 +45,7 @@ export default function ImportarNota() {
             _id: idx,
             selecionado: true,
             nome: item.nome,
+            marca: item.marca ?? '',
             quantidade: item.quantidade ?? 1,
             unidade: item.unidade ?? 'unid',
             preco_total: item.preco_total ?? 0,
@@ -85,7 +86,12 @@ export default function ImportarNota() {
         if (item.acao === 'adicionar_preco' && item.match) {
           ingId = item.match.id
         } else {
-          const r = await criarIngrediente({ nome: item.nome, unidade: item.unidade, fator_correcao: 1.0 })
+          const r = await criarIngrediente({
+            nome: item.nome,
+            marca: item.marca || null,
+            unidade: item.unidade,
+            fator_correcao: 1.0,
+          })
           ingId = r.data.id
         }
         await adicionarPrecoIngrediente(ingId, {
@@ -186,6 +192,16 @@ export default function ImportarNota() {
                     className="input flex-1 text-sm"
                     value={item.nome}
                     onChange={(e) => atualizarItem(item._id, 'nome', e.target.value)}
+                  />
+                </div>
+
+                {/* Linha 1b: marca */}
+                <div className="mt-1 ml-7">
+                  <input
+                    className="input w-full text-sm"
+                    placeholder="Marca (opcional)"
+                    value={item.marca}
+                    onChange={(e) => atualizarItem(item._id, 'marca', e.target.value)}
                   />
                 </div>
 
