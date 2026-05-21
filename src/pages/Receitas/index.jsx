@@ -5,8 +5,6 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
 import { listarReceitas, deletarReceita } from '../../api/receitas'
 
-const tipoLabel = { massa: 'Massa', recheio: 'Recheio' }
-
 export default function Receitas() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -46,11 +44,13 @@ export default function Receitas() {
             {items.map((r) => (
               <div key={r.id} className="flex items-center gap-3 border-b border-line py-3 last:border-b-0">
                 <Link to={`/receitas/${r.id}`} className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-mute border border-line px-1.5 py-0.5">
-                      {tipoLabel[r.tipo]}
-                    </span>
-                  </div>
+                  {r.tipo && (
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-mute border border-line px-1.5 py-0.5">
+                        {r.tipo}
+                      </span>
+                    </div>
+                  )}
                   <p className="font-medium text-ink truncate">{r.nome}</p>
                   <p className="font-mono text-xs text-mute">Rendimento: {r.rendimento_g}g</p>
                 </Link>

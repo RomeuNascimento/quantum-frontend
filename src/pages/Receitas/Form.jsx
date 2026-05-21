@@ -77,12 +77,9 @@ export default function ReceitaForm() {
           <input className="input" {...register('nome', { required: 'Obrigatório' })} />
         </FormField>
 
-        <FormField label="Tipo" error={errors.tipo?.message}>
-          <select className="input" {...register('tipo', { required: 'Obrigatório' })}>
-            <option value="">Selecione</option>
-            <option value="massa">Massa</option>
-            <option value="recheio">Recheio</option>
-          </select>
+        <FormField label="Tipo / Categoria (opcional)">
+          <input className="input" placeholder="ex: Base, Recheio, Guarnição, Proteína…"
+            {...register('tipo')} />
         </FormField>
 
         <FormField label="Rendimento (g)" error={errors.rendimento_g?.message}>
