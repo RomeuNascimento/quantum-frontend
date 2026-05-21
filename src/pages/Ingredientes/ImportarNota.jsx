@@ -40,15 +40,20 @@ export default function ImportarNota() {
       if (data.data_compra) setDataCompra(data.data_compra)
       setItens(
         (data.itens || []).map((item, idx) => {
-          const match = matchIngrediente(item.nome)
+          const nome = item.nome ?? item.nome_original ?? ''
+          const match = matchIngrediente(nome)
+          // peso_embalagem_g = peso de UMA embalagem → é o que vai em quantidade_embalagem
+          // preco_unitario = preço de UMA embalagem → é o que vai em preco
+          const temPeso = item.peso_embalagem_g != null && item.peso_embalagem_g > 0
           return {
             _id: idx,
             selecionado: true,
-            nome: item.nome,
+            nome,
+            nome_original: item.nome_original ?? '',
             marca: item.marca ?? '',
-            quantidade: item.quantidade ?? 1,
-            unidade: item.unidade ?? 'unid',
-            preco_total: item.preco_total ?? 0,
+            quantidade: temPeso ? item.peso_embalagem_g : (item.quantidade ?? 1),
+            unidade: temPeso ? 'g' : (item.unidade ?? 'unid'),
+            preco_total: item.preco_unitario ?? item.preco_total ?? 0,
             match,
             acao: match ? 'adicionar_preco' : 'criar_novo',
           }
@@ -188,11 +193,16 @@ export default function ImportarNota() {
                   <input type="checkbox" checked={item.selecionado}
                     onChange={(e) => atualizarItem(item._id, 'selecionado', e.target.checked)}
                     className="mt-1 flex-shrink-0 w-4 h-4 accent-lime" />
-                  <input
-                    className="input flex-1 text-sm"
-                    value={item.nome}
-                    onChange={(e) => atualizarItem(item._id, 'nome', e.target.value)}
-                  />
+                  <div className="flex-1 min-w-0">
+                    <input
+                      className="input w-full text-sm"
+                      value={item.nome}
+                      onChange={(e) => atualizarItem(item._id, 'nome', e.target.value)}
+                    />
+                    {item.nome_original && (
+                      <p className="font-mono text-[10px] text-mute mt-0.5 truncate">{item.nome_original}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Linha 1b: marca */}
