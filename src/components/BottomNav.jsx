@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 
 const iconProps = {
-  className: 'w-6 h-6',
+  className: 'w-5 h-5',
   fill: 'none',
   stroke: 'currentColor',
   viewBox: '0 0 24 24',
@@ -39,6 +39,15 @@ const tabs = [
     ),
   },
   {
+    to: '/planejamento',
+    label: 'Produção',
+    icon: (
+      <svg {...iconProps}>
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
     to: '/produtos',
     label: 'Produtos',
     icon: (
@@ -68,12 +77,12 @@ export default function BottomNav() {
             key={tab.to}
             to={tab.to}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1 flex-1
+              `flex flex-col items-center gap-0.5 px-1 py-1 flex-1
                ${isActive ? 'text-lime' : 'text-mute'}`
             }
           >
             {tab.icon}
-            <span className="font-mono text-[10px] uppercase tracking-wide">{tab.label}</span>
+            <span className="font-mono text-[9px] uppercase tracking-wide">{tab.label}</span>
           </NavLink>
         ))}
       </div>

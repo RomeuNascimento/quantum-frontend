@@ -14,6 +14,7 @@ import Produtos from './pages/Produtos/index'
 import ProdutoForm from './pages/Produtos/Form'
 import Precificacao from './pages/Precificacao/index'
 import CustosFixos from './pages/CustosFixos/index'
+import Planejamento from './pages/Planejamento/index'
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((s) => s.token)
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/produtos/novo" element={<PrivateRoute><ProdutoForm /></PrivateRoute>} />
         <Route path="/produtos/:id" element={<PrivateRoute><ProdutoForm /></PrivateRoute>} />
 
+        <Route path="/planejamento" element={<PrivateRoute><Planejamento /></PrivateRoute>} />
         <Route path="/precificacao" element={<PrivateRoute><Precificacao /></PrivateRoute>} />
         <Route path="/custos-fixos" element={<PrivateRoute><CustosFixos /></PrivateRoute>} />
 
