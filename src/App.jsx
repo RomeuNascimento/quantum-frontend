@@ -8,6 +8,8 @@ import Embalagens from './pages/Embalagens/index'
 import EmbalagemForm from './pages/Embalagens/Form'
 import Receitas from './pages/Receitas/index'
 import ReceitaForm from './pages/Receitas/Form'
+import ImportarReceitas from './pages/Receitas/Importar'
+import ImportarNota from './pages/Ingredientes/ImportarNota'
 import Produtos from './pages/Produtos/index'
 import ProdutoForm from './pages/Produtos/Form'
 import Precificacao from './pages/Precificacao/index'
@@ -32,6 +34,7 @@ export default function App() {
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
         <Route path="/ingredientes" element={<PrivateRoute><Ingredientes /></PrivateRoute>} />
+        <Route path="/ingredientes/importar-nota" element={<PrivateRoute><ImportarNota /></PrivateRoute>} />
         <Route path="/ingredientes/novo" element={<PrivateRoute><IngredienteForm /></PrivateRoute>} />
         <Route path="/ingredientes/:id" element={<PrivateRoute><IngredienteForm /></PrivateRoute>} />
 
@@ -40,6 +43,7 @@ export default function App() {
         <Route path="/embalagens/:id" element={<PrivateRoute><EmbalagemForm /></PrivateRoute>} />
 
         <Route path="/receitas" element={<PrivateRoute><Receitas /></PrivateRoute>} />
+        <Route path="/receitas/importar" element={<PrivateRoute><ImportarReceitas /></PrivateRoute>} />
         <Route path="/receitas/novo" element={<PrivateRoute><ReceitaForm /></PrivateRoute>} />
         <Route path="/receitas/:id" element={<PrivateRoute><ReceitaForm /></PrivateRoute>} />
 

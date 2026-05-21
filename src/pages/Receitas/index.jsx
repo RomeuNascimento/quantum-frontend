@@ -66,7 +66,13 @@ export default function Receitas() {
         )}
       </div>
 
-      {/* FAB fixo acima da bottom nav */}
+      {/* FABs fixos acima da bottom nav */}
+      <Link
+        to="/receitas/importar"
+        className="fixed bottom-[132px] right-4 z-30 bg-ink text-bone font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:opacity-80"
+      >
+        IA Import
+      </Link>
       <Link
         to="/receitas/novo"
         className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
