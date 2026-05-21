@@ -19,10 +19,9 @@ export default function ProdutoForm() {
   const [embalagens, setEmbalagens] = useState([])
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
-    defaultValues: { massas: [], recheios: [], ingredientes: [], embalagens: [], mo_montagem: [] },
+    defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
   })
-  const { fields: massaFields, append: appendMassa, remove: removeMassa } = useFieldArray({ control, name: 'massas' })
-  const { fields: recheioFields, append: appendRecheio, remove: removeRecheio } = useFieldArray({ control, name: 'recheios' })
+  const { fields: prepFields, append: appendPrep, remove: removePrep } = useFieldArray({ control, name: 'preparacoes' })
   const { fields: ingFields, append: appendIng, remove: removeIng } = useFieldArray({ control, name: 'ingredientes' })
   const { fields: embFields, append: appendEmb, remove: removeEmb } = useFieldArray({ control, name: 'embalagens' })
   const { fields: moFields, append: appendMo, remove: removeMo } = useFieldArray({ control, name: 'mo_montagem' })
@@ -37,8 +36,7 @@ export default function ProdutoForm() {
       detalharProduto(id).then((r) => {
         reset({
           nome: r.data.nome,
-          massas: r.data.massas.map((m) => ({ receita_id: m.id, quantidade_g: m.quantidade })),
-          recheios: r.data.recheios.map((m) => ({ receita_id: m.id, quantidade_g: m.quantidade })),
+          preparacoes: r.data.preparacoes.map((m) => ({ receita_id: m.id, quantidade_g: m.quantidade })),
           ingredientes: r.data.ingredientes_avulsos.map((m) => ({ ingrediente_id: m.id, quantidade_g: m.quantidade })),
           embalagens: r.data.embalagens.map((m) => ({ embalagem_id: m.id, quantidade: m.quantidade })),
           mo_montagem: r.data.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: m.tempo_min })),
@@ -54,8 +52,7 @@ export default function ProdutoForm() {
       const toFloat = (v) => parseFloat(v) || 0
       const payload = {
         nome: dados.nome,
-        massas: dados.massas.map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
-        recheios: dados.recheios.map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
+        preparacoes: dados.preparacoes.map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
         ingredientes: dados.ingredientes.map((m) => ({ ingrediente_id: parseInt(m.ingrediente_id), quantidade_g: toFloat(m.quantidade_g) })),
         embalagens: dados.embalagens.map((m) => ({ embalagem_id: parseInt(m.embalagem_id), quantidade: toFloat(m.quantidade) })),
         mo_montagem: dados.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: toFloat(m.tempo_min) })),
@@ -83,9 +80,6 @@ export default function ProdutoForm() {
     </div>
   )
 
-  const massasReceitas = receitas.filter((r) => r.tipo === 'massa')
-  const recheitosReceitas = receitas.filter((r) => r.tipo === 'recheio')
-
   return (
     <Layout title={isEdit ? 'Editar produto' : 'Novo produto'} onBack={() => navigate('/produtos')}>
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-6">
@@ -94,31 +88,16 @@ export default function ProdutoForm() {
             {...register('nome', { required: 'Obrigatório' })} />
         </FormField>
 
-        <Section title="Massas" onAdd={() => appendMassa({ receita_id: '', quantidade_g: '' })}>
-          {massaFields.map((f, i) => (
+        <Section title="Preparações" onAdd={() => appendPrep({ receita_id: '', quantidade_g: '' })}>
+          {prepFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
-              <select className="input flex-1" {...register(`massas.${i}.receita_id`)}>
+              <select className="input flex-1" {...register(`preparacoes.${i}.receita_id`)}>
                 <option value="">Receita</option>
-                {massasReceitas.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+                {receitas.map((r) => <option key={r.id} value={r.id}>{r.nome}{r.tipo ? ` (${r.tipo})` : ''}</option>)}
               </select>
               <input className="input w-24" type="number" step="0.1" placeholder="g"
-                {...register(`massas.${i}.quantidade_g`)} />
-              <button type="button" onClick={() => removeMassa(i)}
-                className="p-3 font-mono text-mute active:text-rust">✕</button>
-            </div>
-          ))}
-        </Section>
-
-        <Section title="Recheios" onAdd={() => appendRecheio({ receita_id: '', quantidade_g: '' })}>
-          {recheioFields.map((f, i) => (
-            <div key={f.id} className="flex gap-2">
-              <select className="input flex-1" {...register(`recheios.${i}.receita_id`)}>
-                <option value="">Receita</option>
-                {recheitosReceitas.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
-              </select>
-              <input className="input w-24" type="number" step="0.1" placeholder="g"
-                {...register(`recheios.${i}.quantidade_g`)} />
-              <button type="button" onClick={() => removeRecheio(i)}
+                {...register(`preparacoes.${i}.quantidade_g`)} />
+              <button type="button" onClick={() => removePrep(i)}
                 className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
           ))}
