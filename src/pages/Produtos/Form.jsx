@@ -36,9 +36,9 @@ export default function ProdutoForm() {
       detalharProduto(id).then((r) => {
         reset({
           nome: r.data.nome,
-          preparacoes: r.data.preparacoes.map((m) => ({ receita_id: m.id, quantidade_g: m.quantidade })),
-          ingredientes: r.data.ingredientes_avulsos.map((m) => ({ ingrediente_id: m.id, quantidade_g: m.quantidade })),
-          embalagens: r.data.embalagens.map((m) => ({ embalagem_id: m.id, quantidade: m.quantidade })),
+          preparacoes: r.data.preparacoes.map((m) => ({ receita_id: m.receita_id, quantidade_g: m.quantidade })),
+          ingredientes: r.data.ingredientes_avulsos.map((m) => ({ ingrediente_id: m.ingrediente_id, quantidade_g: m.quantidade })),
+          embalagens: r.data.embalagens.map((m) => ({ embalagem_id: m.embalagem_id, quantidade: m.quantidade })),
           mo_montagem: r.data.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: m.tempo_min })),
         })
       })
@@ -82,7 +82,7 @@ export default function ProdutoForm() {
 
   return (
     <Layout title={isEdit ? 'Editar produto' : 'Novo produto'} onBack={() => navigate('/produtos')}>
-      <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24">
         <FormField label="Nome do produto" error={errors.nome?.message}>
           <input className="input" placeholder="Ex: Bolo de chocolate 1kg"
             {...register('nome', { required: 'Obrigatório' })} />
@@ -146,10 +146,17 @@ export default function ProdutoForm() {
         </Section>
 
         {erro && <p className="font-mono text-sm text-rust mt-4">{erro}</p>}
-        <button type="submit" className="btn-primary mt-6" disabled={loading}>
+      </form>
+      <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <button
+          type="button"
+          onClick={handleSubmit(onSubmit)}
+          className="btn-primary w-full"
+          disabled={loading}
+        >
           {loading ? 'Salvando...' : 'Salvar produto'}
         </button>
-      </form>
+      </div>
     </Layout>
   )
 }

@@ -35,6 +35,7 @@ export default function ReceitaForm() {
           etapas_mo: r.data.etapas_mo.map((e) => ({
             descricao: e.descricao,
             tempo_min: e.tempo_min,
+            colaborador_id: e.colaborador_id ?? null,
           })),
         })
       })
@@ -46,7 +47,8 @@ export default function ReceitaForm() {
     setLoading(true)
     try {
       const payload = {
-        ...dados,
+        nome: dados.nome,
+        tipo: dados.tipo || null,
         rendimento_g: parseFloat(dados.rendimento_g),
         ingredientes: dados.ingredientes.map((i) => ({
           ingrediente_id: parseInt(i.ingrediente_id),
@@ -55,6 +57,7 @@ export default function ReceitaForm() {
         etapas_mo: dados.etapas_mo.map((e) => ({
           descricao: e.descricao,
           tempo_min: parseFloat(e.tempo_min),
+          colaborador_id: e.colaborador_id ?? null,
         })),
       }
       if (isEdit) {
@@ -72,7 +75,7 @@ export default function ReceitaForm() {
 
   return (
     <Layout title={isEdit ? 'Editar receita' : 'Nova receita'} onBack={() => navigate('/receitas')}>
-      <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24 space-y-4">
         <FormField label="Nome da receita" error={errors.nome?.message}>
           <input className="input" {...register('nome', { required: 'Obrigatório' })} />
         </FormField>
@@ -136,10 +139,17 @@ export default function ReceitaForm() {
         </div>
 
         {erro && <p className="font-mono text-sm text-rust">{erro}</p>}
-        <button type="submit" className="btn-primary" disabled={loading}>
+      </form>
+      <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <button
+          type="button"
+          onClick={handleSubmit(onSubmit)}
+          className="btn-primary w-full"
+          disabled={loading}
+        >
           {loading ? 'Salvando...' : 'Salvar receita'}
         </button>
-      </form>
+      </div>
     </Layout>
   )
 }

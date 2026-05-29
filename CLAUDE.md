@@ -3,7 +3,7 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-05-21
+**Última sessão:** 2026-05-29
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -268,7 +268,11 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 - [x] ANTHROPIC_API_KEY configurada no EasyPanel (IA ativa)
 - [x] Fix botão salvar nota fiscal (oculto atrás da BottomNav) (2026-05-21)
 - [x] Campo marca em ingredientes + card de ação na lista (2026-05-21)
-- [ ] Auditar bugs do fluxo completo (receita → produto → precificação)
+- [x] **Auditoria e correção de bugs do fluxo completo** (2026-05-29)
+  - `Produtos/Form.jsx:39-41`: IDs de origem corrigidos — `m.receita_id`, `m.ingrediente_id`, `m.embalagem_id` (antes usava `m.id` que era o ID da associação, não da entidade)
+  - `Receitas/Form.jsx`: `colaborador_id` preservado ao editar etapas MO
+  - `Receitas/Form.jsx`: `tipo: dados.tipo || null` — campo vazio envia null ao invés de string vazia
+  - `Receitas/Form.jsx` + `Produtos/Form.jsx`: botão salvar movido para `fixed bottom-16 z-30` (padrão do design system)
 - [ ] Adicionar página de Embalagens na bottom nav (atualmente acessível só pelo Dashboard)
 - [ ] Adicionar gráficos de evolução de custos
 - [ ] Adicionar relatório de margem por produto/canal
