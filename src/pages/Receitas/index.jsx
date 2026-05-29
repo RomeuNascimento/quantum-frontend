@@ -31,36 +31,6 @@ export default function Receitas() {
     <Layout title="Receitas" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
 
-        {/* Importar receitas via IA */}
-        <Link
-          to="/receitas/importar"
-          className="flex items-center gap-3 bg-ink text-bone border border-ink px-4 py-3 mb-3 active:opacity-80"
-        >
-          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-          <div className="flex-1">
-            <p className="font-mono text-xs uppercase tracking-widest">Importar receitas via IA</p>
-            <p className="font-mono text-[10px] text-bone/60 mt-0.5">Foto, PDF ou planilha — IA extrai automaticamente</p>
-          </div>
-          <svg className="w-4 h-4 flex-shrink-0 text-bone/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </Link>
-
-        {/* + Nova receita */}
-        <Link
-          to="/receitas/novo"
-          className="flex items-center justify-center gap-2 btn-primary w-full py-3 mb-4"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Nova Receita
-        </Link>
 
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
