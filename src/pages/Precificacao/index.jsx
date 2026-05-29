@@ -74,6 +74,39 @@ function CustoLineChart({ pontos }) {
 }
 
 const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+const pctStr = (v) => `${Math.max(0, v).toFixed(0)}%`
+
+function PrecoDecomposicao({ pp }) {
+  const preco = pp.preco_sugerido
+  if (!preco || preco <= 0) return null
+  const custoR = pp.custo_total
+  const margemR = preco * pp.margem_pct / 100
+  const taxasR = Math.max(0, preco - custoR - margemR)
+  const pct = (v) => `${Math.max(0, (v / preco) * 100).toFixed(1)}%`
+  return (
+    <div className="mt-3 pt-3 border-t border-line">
+      <div className="flex h-2.5 w-full overflow-hidden border border-ink/15">
+        <div style={{ width: pct(custoR) }} className="bg-ink flex-shrink-0" />
+        <div style={{ width: pct(margemR) }} className="bg-lime flex-shrink-0" />
+        <div style={{ width: pct(taxasR) }} className="bg-line flex-shrink-0" />
+      </div>
+      <div className="flex gap-3 mt-1.5 flex-wrap">
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 bg-ink inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Custo {pctStr((custoR/preco)*100)}</span>
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 bg-lime inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Margem {pctStr(pp.margem_pct)}</span>
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 bg-line border border-ink/20 inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Taxas {pctStr((taxasR/preco)*100)}</span>
+        </span>
+      </div>
+    </div>
+  )
+}
 
 function MargemBadge({ margem }) {
   if (margem >= 30) {
@@ -252,6 +285,7 @@ export default function Precificacao() {
                       <p className="qtm-num text-sm text-mute">{pp.preco_final ? brl(pp.preco_final) : '—'}</p>
                     </div>
                   </div>
+                  <PrecoDecomposicao pp={pp} />
                 </button>
               ))}
             </div>
