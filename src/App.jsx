@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import useAuthStore from './store/authStore'
+import OfflineBanner from './components/OfflineBanner'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Ingredientes from './pages/Ingredientes/index'
@@ -36,6 +37,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <OfflineBanner />
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

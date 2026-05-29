@@ -26,12 +26,32 @@ export default defineConfig({
         clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
+          // Fontes Google — stylesheet (muda raramente)
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\//i,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'google-fonts-stylesheets' },
+          },
+          // Fontes Google — arquivos de fonte (imutáveis por URL)
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\//i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+          // API Quantum — GETs com fallback para cache
           {
             urlPattern: ({ request }) =>
               /^https:\/\/api\.quantumcalc\.com\.br\//i.test(request.url) &&
               request.method === 'GET',
             handler: 'NetworkFirst',
-            options: { cacheName: 'api-cache', networkTimeoutSeconds: 10 },
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 150, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
           },
         ],
       },

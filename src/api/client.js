@@ -7,6 +7,9 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+  if (!navigator.onLine && config.method !== 'get') {
+    return Promise.reject(new Error('Sem conexão. Tente novamente quando estiver online.'))
+  }
   const token = localStorage.getItem('quantum_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
