@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
+import useVoltar from '../../hooks/useVoltar'
 import { criarReceita, detalharReceita, atualizarReceita } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
 
@@ -10,6 +11,7 @@ export default function ReceitaForm() {
   const { id } = useParams()
   const isEdit = !!id
   const navigate = useNavigate()
+  const voltar = useVoltar('/receitas')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [ingredientes, setIngredientes] = useState([])
@@ -65,7 +67,7 @@ export default function ReceitaForm() {
       } else {
         await criarReceita(payload)
       }
-      navigate('/receitas')
+      voltar()
     } catch (e) {
       setErro(e.message)
     } finally {
@@ -74,7 +76,7 @@ export default function ReceitaForm() {
   }
 
   return (
-    <Layout title={isEdit ? 'Editar receita' : 'Nova receita'} onBack={() => navigate('/receitas')}>
+    <Layout title={isEdit ? 'Editar receita' : 'Nova receita'} onBack={voltar}>
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24 space-y-4">
         {isEdit && (
           <button type="button" onClick={() => navigate(`/receitas/${id}/ficha`)}

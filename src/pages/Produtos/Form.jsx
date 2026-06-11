@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
 import SimuladorPreco from '../../components/SimuladorPreco'
+import useVoltar from '../../hooks/useVoltar'
 import { criarProduto, detalharProduto, atualizarProduto } from '../../api/produtos'
 import { listarReceitas } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
@@ -13,6 +14,7 @@ export default function ProdutoForm() {
   const { id } = useParams()
   const isEdit = !!id
   const navigate = useNavigate()
+  const voltar = useVoltar('/produtos')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [receitas, setReceitas] = useState([])
@@ -72,7 +74,7 @@ export default function ProdutoForm() {
       }
       if (isEdit) await atualizarProduto(id, payload)
       else await criarProduto(payload)
-      navigate('/produtos')
+      voltar()
     } catch (e) {
       setErro(e.message)
     } finally {
@@ -94,7 +96,7 @@ export default function ProdutoForm() {
   )
 
   return (
-    <Layout title={isEdit ? 'Editar produto' : 'Novo produto'} onBack={() => navigate('/produtos')}>
+    <Layout title={isEdit ? 'Editar produto' : 'Novo produto'} onBack={voltar}>
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24">
         {isEdit && (
           <button type="button" onClick={() => navigate(`/produtos/${id}/ficha`)}

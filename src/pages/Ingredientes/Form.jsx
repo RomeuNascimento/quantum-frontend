@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import useVoltar from '../../hooks/useVoltar'
 import { useForm } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
@@ -11,6 +12,7 @@ export default function IngredienteForm() {
   const { id } = useParams()
   const isEdit = !!id
   const navigate = useNavigate()
+  const voltar = useVoltar('/ingredientes')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [historico, setHistorico] = useState([])
@@ -47,7 +49,7 @@ export default function IngredienteForm() {
         }
         await criarIngrediente(payload)
       }
-      navigate('/ingredientes')
+      voltar()
     } catch (e) {
       setErro(e.message)
     } finally {
@@ -74,7 +76,7 @@ export default function IngredienteForm() {
   }
 
   return (
-    <Layout title={isEdit ? 'Editar ingrediente' : 'Novo ingrediente'} onBack={() => navigate('/ingredientes')}>
+    <Layout title={isEdit ? 'Editar ingrediente' : 'Novo ingrediente'} onBack={voltar}>
       <div className="px-4 pt-4">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
           <FormField label="Nome" error={errors.nome?.message}>
