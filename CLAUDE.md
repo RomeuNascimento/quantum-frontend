@@ -3,8 +3,8 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-11 (tarde — branch `claude/keen-ptolemy-mmed2k`, continua a `claude/sharp-noether-6ml8uh`)
-**Próxima sessão:** Fase 2 item 3 (gráfico no detalhe do produto) ou Fase 1 restante (TanStack Query, M7 Dashboard)
+**Última sessão:** 2026-06-11 (noite — branch `claude/keen-ptolemy-mmed2k`)
+**Próxima sessão:** Fase 1 restante (TanStack Query) ou Fase 2 backend (snapshot de custo)
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -385,6 +385,16 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 1. [x] **Página de relatório de margem `/relatorio`** ✅ 2026-06-11 (branch `claude/keen-ptolemy-mmed2k`) — `src/pages/Relatorio/index.jsx`: resumo saudável/atenção/revisar + card por produto com margem real por canal (badge), preço praticado, lucro unitário; seção "Sem precificação" com atalho. Consome `GET /precificacao/relatorio-margem` (novo no backend). Entrada: link "Relatório de margem" na seção Gerenciar do Dashboard.
 2. [x] **`CustoLineChart` e `MargemBadge` extraídos** ✅ 2026-06-11 — `src/components/CustoLineChart.jsx` + `src/components/MargemBadge.jsx`; `Precificacao/index.jsx` importa dos components.
 3. [ ] **Gráfico de evolução de custos** no detalhe do produto (endpoint `/produtos/{id}/historico-custo` já existe; componente já extraído)
+
+### Sessão 2026-06-11 (noite) — UX + gráficos + demo
+
+- **`src/hooks/useVoltar.js`** (novo) — `useVoltar(fallback)`: usa `location.key !== 'default'` para `navigate(-1)` quando há histórico, senão vai ao fallback. Aplicado nos 4 forms (Ingredientes, Embalagens, Receitas, Produtos) em `onBack` e após salvar — resolve "voltar do form abre a lista em vez do Dashboard".
+- **Gráfico de margens no Dashboard** — `src/components/MargemBarChart.jsx` (novo): barras horizontais do pior canal de cada produto (até 5, ordenado pior→melhor, cores lime/ink/rust, link "Ver tudo →" para `/relatorio`). Montado no Dashboard entre o alerta e "Cadastrar".
+- **Evolução de custo no form de produto** — `Produtos/Form.jsx` consome `historicoCustoProduto(id)` e mostra `CustoLineChart` em card (edição, quando há pontos).
+- **Botão Sair no Dashboard** — chama `logout()` do authStore (já limpa api-cache).
+- **Atalhos "Cadastrar"** — layout em coluna (`+` em cima, label `text-[10px]` embaixo) — fix da quebra feia de "INGREDIENTE" na grade 2 colunas. Decisão do usuário: **sem sombras** (mantido princípio "bordas, não sombras").
+- **fator_correcao aceita 0** — `Ingredientes/Form.jsx`: `min: 0`, help "0 = sem correção" (backend trata 0 como 1).
+- ⚠️ **Deploy frontend no EasyPanel**: build estava em Nixpacks → erro `workbox-build dynamic require`. Selecionar **Dockerfile** na tela de build (não clicar "Pular").
 
 **Fix botões voltar (2026-06-11, mesma branch):**
 - Telas "Salvando..." de `Receitas/Importar.jsx` e `Ingredientes/ImportarNota.jsx` tinham `onBack={() => {}}` — seta de voltar visível que não fazia nada. Removida durante o salvamento.

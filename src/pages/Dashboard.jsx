@@ -114,9 +114,10 @@ export default function Dashboard() {
               <Link
                 key={a.to}
                 to={a.to}
-                className="border border-ink bg-bone flex items-center gap-2 px-3 py-3 active:bg-ink active:text-bone transition-colors"
+                className="border border-ink bg-bone flex flex-col gap-0.5 px-3 py-3 active:bg-ink active:text-bone transition-colors"
               >
-                <span className="font-mono text-xs uppercase tracking-widest text-ink">+ {a.label}</span>
+                <span className="font-mono text-xs font-bold text-ink">+</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-ink leading-tight">{a.label}</span>
               </Link>
             ))}
           </div>
