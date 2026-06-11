@@ -70,6 +70,7 @@ export default function Dashboard() {
           <p className="label mb-3">Gerenciar</p>
           <div>
             {[
+              { to: '/relatorio', label: 'Relatório de margem' },
               { to: '/embalagens', label: 'Embalagens' },
               { to: '/custos-fixos', label: 'Custos fixos' },
             ].map((g) => (

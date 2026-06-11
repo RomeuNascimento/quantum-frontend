@@ -1,5 +1,7 @@
 import api from './client'
 
+export const relatorioMargem = () => api.get('/precificacao/relatorio-margem')
+
 export const listarCanais = () => api.get('/precificacao/canais')
 export const criarCanal = (dados) => api.post('/precificacao/canais', dados)
 export const atualizarCanal = (id, dados) => api.put(`/precificacao/canais/${id}`, dados)

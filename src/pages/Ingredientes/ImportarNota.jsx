@@ -300,7 +300,7 @@ export default function ImportarNota() {
   // ── Salvando ──────────────────────────────────────────────────────────────
   if (fase === 'salvando') {
     return (
-      <Layout title="Salvando..." onBack={() => {}}>
+      <Layout title="Salvando...">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-8 h-8 border-2 border-lime/30 border-t-lime rounded-full animate-spin" />
           <p className="font-mono text-xs uppercase tracking-widest text-mute">Cadastrando ingredientes...</p>
