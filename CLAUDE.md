@@ -318,11 +318,11 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 3. Embalagens e Custos Fixos acessíveis na navegação
 
 **Fase 3 — Features novas (ordem de valor)**
-1. **Alerta de margem corroída** — novo preço de ingrediente derruba margem de produto abaixo de 10% → destaque no Dashboard ("3 produtos precisam de reajuste")
-2. **Rateio de custos fixos por produto** — custos fixos hoje não entram no preço sugerido; incluir rateio (por hora de produção ou % faturamento) fecha o ciclo
-3. **Simulador "e se"** — sliders de margem/taxa na tela do produto com preço em tempo real (padrão de cálculo derivado já existe em Planejamento)
-4. **Ficha técnica exportável (PDF)** da receita/produto
-5. **Modo offline com fila de escrita** — só depois do TanStack Query
+1. [x] **Alerta de margem corroída** ✅ 2026-06-11 — Dashboard consome `relatorioMargem()`; banner rust clicável "N produtos precisam de reajuste" (algum canal com margem real < 10%) → `/relatorio`
+2. [ ] **Rateio de custos fixos por produto** — ⏸️ ADIADO por decisão do usuário em 2026-06-11 (opções apresentadas: por hora de produção / % sobre custo / valor por unidade — escolheu "deixar para depois")
+3. [x] **Simulador "e se"** ✅ 2026-06-11 — `src/components/SimuladorPreco.jsx`: sliders de margem (0–70%) e taxas (0–40%) com preço de venda e lucro em tempo real; montado em `Produtos/Form.jsx` (edição, quando custo_total > 0)
+4. [x] **Ficha técnica exportável (PDF)** ✅ 2026-06-11 — **da receita**: `/receitas/:id/ficha` (`Receitas/Ficha.jsx`) — ingredientes, etapas numeradas, totais, botão Imprimir/Salvar PDF via `window.print()`; `Layout`/`BottomNav` com `print:hidden`. Entrada: botão no form de edição da receita. *Ficha do produto ainda não feita.*
+5. [ ] **Modo offline com fila de escrita** — só depois do TanStack Query
 
 ---
 
