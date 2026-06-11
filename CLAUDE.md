@@ -282,7 +282,7 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 - [x] **M4. Validações numéricas fracas** ✅ 2026-06-11 — rendimento_g valida > 0; Produtos/Form filtra linhas com select vazio (sem NaN no payload) — `rendimento_g` aceita 0/negativo (divisão por zero no custo proporcional); selects de Produtos sem `required` → `NaN` enviado; `min: 0.01` sem mensagem de erro.
 - [x] **M5. Cache da API persiste após logout** ✅ 2026-06-11 — logout() deleta `api-cache` do Cache Storage — runtimeCaching `api-cache` (7 dias) não é limpo no `logout()`. Privacidade em aparelho compartilhado.
 - [x] **M6. nginx** ✅ 2026-06-11 — no-cache para index.html/sw.js/registerSW.js/manifest.webmanifest + nosniff/X-Frame-Options/Referrer-Policy (risco de tela branca pós-deploy) e sem headers de segurança (X-Content-Type-Options, X-Frame-Options, Referrer-Policy).
-- [ ] **M7. Dashboard**: fetches com `.catch(() => {})` — "R$ 0.00" pode ser erro de rede; "Bem-vinda" hardcoded; formatação de moeda inconsistente (ponto vs vírgula) — padronizar `Intl.NumberFormat('pt-BR')` no app todo.
+- [x] **M7. Dashboard** ✅ 2026-06-11 — `Intl.NumberFormat('pt-BR')` no card Custos/mês; 'Olá' sem gênero; erro de rede mostra '—' e carregamento '…' (antes parecia 0 produtos / R$ 0.00). *Padronizar pt-BR no resto do app fica para a sessão do TanStack Query.*
 
 ### 🔵 Menores (oportunista)
 
