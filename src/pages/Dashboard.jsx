@@ -14,16 +14,20 @@ const atalhos = [
   { to: '/produtos/novo', label: 'Produto' },
 ]
 
+const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+
 export default function Dashboard() {
   const { user, setUser } = useAuthStore()
-  const [produtos, setProdutos] = useState([])
+  const [produtos, setProdutos] = useState(null)   // null = carregando/erro
   const [resumo, setResumo] = useState(null)
+  const [erroResumo, setErroResumo] = useState(false)
+  const [erroProdutos, setErroProdutos] = useState(false)
   const [margemAlerta, setMargemAlerta] = useState([])
 
   useEffect(() => {
     getMe().then((r) => setUser(r.data)).catch(() => {})
-    listarProdutos().then((r) => setProdutos(r.data)).catch(() => {})
-    resumoCustosFixos().then((r) => setResumo(r.data)).catch(() => {})
+    listarProdutos().then((r) => setProdutos(r.data)).catch(() => setErroProdutos(true))
+    resumoCustosFixos().then((r) => setResumo(r.data)).catch(() => setErroResumo(true))
     relatorioMargem().then((r) => {
       const corroidos = r.data.produtos.filter((p) =>
         p.canais.some((c) => c.margem_real_pct < 10)
@@ -32,14 +36,15 @@ export default function Dashboard() {
     }).catch(() => {})
   }, [])
 
-  const totalMensal = resumo?.total_mensal ?? 0
+  const totalMensal = resumo?.total_mensal ?? null
+  const listaProdutos = produtos ?? []
 
   return (
     <Layout title="Quantum">
       <div className="px-4 pt-4 space-y-5">
         {/* Saudação */}
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-mute">Bem-vinda</p>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-mute">Olá</p>
           <h2 className="text-xl font-bold text-ink font-sans">{user?.nome || '...'}</h2>
         </div>
 
@@ -71,12 +76,14 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <Link to="/produtos" className="card active:bg-line/50">
             <p className="label">Produtos</p>
-            <p className="qtm-num text-2xl font-bold text-ink">{produtos.length}</p>
+            <p className="qtm-num text-2xl font-bold text-ink">
+              {erroProdutos ? '—' : produtos === null ? '…' : produtos.length}
+            </p>
           </Link>
           <Link to="/custos-fixos" className="card active:bg-line/50">
             <p className="label">Custos/mês</p>
             <p className={`qtm-num text-2xl font-bold ${totalMensal > 0 ? 'text-rust' : 'text-ink'}`}>
-              R$ {totalMensal.toFixed(2)}
+              {erroResumo ? '—' : totalMensal === null ? '…' : brl.format(totalMensal)}
             </p>
           </Link>
         </div>
@@ -122,11 +129,11 @@ export default function Dashboard() {
         </div>
 
         {/* Últimos produtos */}
-        {produtos.length > 0 && (
+        {listaProdutos.length > 0 && (
           <div>
             <p className="label mb-3">Produtos recentes</p>
             <div>
-              {produtos.slice(0, 5).map((p) => (
+              {listaProdutos.slice(0, 5).map((p) => (
                 <Link
                   key={p.id}
                   to={`/produtos/${p.id}`}
