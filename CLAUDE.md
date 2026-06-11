@@ -3,7 +3,7 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-05-29
+**Última sessão:** 2026-06-11
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -256,6 +256,68 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 
 > **Atenção:** o serviço se chama `frontend` (não `quantum-frontend`) no EasyPanel.
 > Se recriar do zero, usar build.type=dockerfile. nixpacks serviria os fontes em vez do dist/.
+
+---
+
+## Auditoria 2026-06-11 — Revisão completa (frontend)
+
+> Revisão de código completa feita em 2026-06-11. Achados do backend: ver seção equivalente no CLAUDE.md do **quantum-backend**.
+
+### 🔴 Críticos (Fase 0 — corrigir antes de features novas)
+
+- [ ] **C1. Receitas perdeu os botões "+ Novo" e "IA Import"** — `src/pages/Receitas/index.jsx:32-34`: regressão — não existe NENHUM link na UI para `/receitas/novo` (só atalho do Dashboard) nem para `/receitas/importar` (rota órfã, inacessível). Restaurar FAB lime + FAB ink conforme padrões do design system.
+- [ ] **C2. Páginas órfãs** — `/custos-fixos` sem nenhum ponto de entrada (card "Custos/mês" do Dashboard é `<div>`, não link); `/embalagens` (lista) só alcançável indiretamente. Fix: card do Dashboard vira link + revisar atalhos.
+- [ ] **C3. Botão salvar da importação de receitas oculto** — `src/pages/Receitas/Importar.jsx:245`: `fixed bottom-0` sem `bottom-16 z-30` — coberto pela BottomNav (mesma armadilha já corrigida em `ImportarNota.jsx:263`).
+- [ ] **C4. PWA: ícones do manifest não existem** — `vite.config.js` declara `icons/icon-192.png`, `icons/icon-512.png`, `favicon.ico`, `apple-touch-icon.png` — nenhum existe em `public/` (só `brand/`). Instalação na home screen quebrada. Remover também `public/manifest.json` morto (tema roxo pré-design-system, servido em paralelo ao `manifest.webmanifest` do plugin).
+- [ ] **C5. PWA: prompt de update nunca aparece** — `vite.config.js`: `registerType: 'prompt'` é ANULADO por `workbox.skipWaiting: true` + `clientsClaim: true`; e não há nenhum `useRegisterSW`/`virtual:pwa-register` no src. Fix: remover skipWaiting/clientsClaim + implementar UI de prompt.
+- [ ] **C6. Importação cria ingredientes duplicados** — `Receitas/Importar.jsx:75-86` e `ImportarNota.jsx:85-115`: match calculado uma única vez; mesmo nome em duas receitas/itens com "criar novo" → ingrediente duplicado. Fix: cache por nome normalizado durante o loop de salvar.
+- [ ] **C7. Nota fiscal: sem conversão de unidade ao adicionar preço a ingrediente existente** — `ImportarNota.jsx:91-107`: preço registrado na unidade da nota (kg) num ingrediente cadastrado em g → custo até 1000× errado. Mínimo: avisar quando unidade divergir. (Ligado à decisão pendente M3 do backend.)
+
+### 🟡 Médios (Fase 1)
+
+- [ ] **M1. Tratamento de erro sistêmico** — Precificação/CustosFixos: `carregar()` sem try/catch/finally → spinner infinito em falha; listas com `.finally()` sem `.catch()` → EmptyState enganoso em erro de rede; `selecionarProduto` sem catch e sem cancelamento (race ao trocar produto rápido). Mutações sem feedback de erro: `Embalagens handleDelete`, `CustosFixos onSubmit/handleDelete`, `Precificacao onCriarCanal/onSalvarPreco`, `onAddPreco` (Ingredientes/Embalagens Form).
+- [ ] **M2. Adotar TanStack Query** — resolve loading/error/refetch/race de uma vez, corta ~30% do código das listas. Recomendação nº 1 de arquitetura; pré-requisito para modo offline com fila de escrita.
+- [ ] **M3. Erros 422 do FastAPI viram "[object Object]"** — `src/api/client.js:29`: `detail` é array de objetos em erro de validação; normalizar antes de criar `Error`.
+- [ ] **M4. Validações numéricas fracas** — `rendimento_g` aceita 0/negativo (divisão por zero no custo proporcional); selects de Produtos sem `required` → `NaN` enviado; `min: 0.01` sem mensagem de erro.
+- [ ] **M5. Cache da API persiste após logout** — runtimeCaching `api-cache` (7 dias) não é limpo no `logout()`. Privacidade em aparelho compartilhado.
+- [ ] **M6. nginx sem `no-cache` para index.html** (risco de tela branca pós-deploy) e sem headers de segurança (X-Content-Type-Options, X-Frame-Options, Referrer-Policy).
+- [ ] **M7. Dashboard**: fetches com `.catch(() => {})` — "R$ 0.00" pode ser erro de rede; "Bem-vinda" hardcoded; formatação de moeda inconsistente (ponto vs vírgula) — padronizar `Intl.NumberFormat('pt-BR')` no app todo.
+
+### 🔵 Menores (oportunista)
+
+- Números sem `.qtm-num` em Ingredientes/Receitas/Precificacao/Embalagens (usam `font-mono` sem `tabular-nums`); `rounded-full` no dot de status em `Receitas/Importar.jsx:212`; 3 padrões diferentes de botão "novo" entre listas.
+- `window.confirm()` nativo nas deleções (usar o `Modal` do design system); `Modal.jsx` sem Escape/focus trap/aria.
+- `Produtos/Form.jsx:70-81`: componente `Section` definido dentro do render — mover para fora.
+- Sem ErrorBoundary (exceção de render → tela branca); Dockerfile com `npm install` em vez de `npm ci`; sem testes.
+
+### ✅ Pontos fortes confirmados na revisão
+Código enxuto e consistente, camada de API organizada, fluxos de importação IA com boa máquina de estados, auth resolvido (loop 401 de fato corrigido), `Planejamento/index.jsx` é o melhor arquivo do projeto (useMemo + pt-BR + inputMode — usar como modelo). `CustoLineChart` SVG em Precificação é o embrião dos gráficos — extrair para `src/components/`.
+
+---
+
+## Roadmap de funcionalidades (planejado em 2026-06-11)
+
+> Fases acordadas com o usuário. Fase 0 em execução na branch `claude/sharp-noether-6ml8uh` (frontend + backend).
+
+**Fase 0 — Estabilização** *(em andamento)*
+Corrigir os críticos da auditoria nos dois repos (IDOR, IA bloqueante/rate limit, fluxos quebrados de Receitas/Custos Fixos, PWA, duplicação na importação, validação numérica).
+
+**Fase 1 — Fundação para relatórios**
+1. Backend: `Decimal/Numeric` para dinheiro + índices + eager loading (M1/M2 backend)
+2. Frontend: TanStack Query (M2 frontend) + tratamento de erro sistêmico (M1)
+3. Backend: snapshot/histórico de preços para séries temporais de margem
+
+**Fase 2 — Features já planejadas**
+1. Relatório de margem por produto/canal (dados já prontos em `listarPrecosProduto` — falta página agregadora + endpoint de agregação)
+2. Gráficos de evolução de custos (extrair `CustoLineChart` para componente)
+3. Embalagens e Custos Fixos acessíveis na navegação
+
+**Fase 3 — Features novas (ordem de valor)**
+1. **Alerta de margem corroída** — novo preço de ingrediente derruba margem de produto abaixo de 10% → destaque no Dashboard ("3 produtos precisam de reajuste")
+2. **Rateio de custos fixos por produto** — custos fixos hoje não entram no preço sugerido; incluir rateio (por hora de produção ou % faturamento) fecha o ciclo
+3. **Simulador "e se"** — sliders de margem/taxa na tela do produto com preço em tempo real (padrão de cálculo derivado já existe em Planejamento)
+4. **Ficha técnica exportável (PDF)** da receita/produto
+5. **Modo offline com fila de escrita** — só depois do TanStack Query
 
 ---
 
