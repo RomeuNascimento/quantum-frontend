@@ -18,7 +18,7 @@ const atalhos = [
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export default function Dashboard() {
-  const { user, setUser } = useAuthStore()
+  const { user, setUser, logout } = useAuthStore()
   const [produtos, setProdutos] = useState(null)   // null = carregando/erro
   const [resumo, setResumo] = useState(null)
   const [erroResumo, setErroResumo] = useState(false)
@@ -46,9 +46,21 @@ export default function Dashboard() {
     <Layout title="Quantum">
       <div className="px-4 pt-4 space-y-5">
         {/* Saudação */}
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-mute">Olá</p>
-          <h2 className="text-xl font-bold text-ink font-sans">{user?.nome || '...'}</h2>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-widest text-mute">Olá</p>
+            <h2 className="text-xl font-bold text-ink font-sans">{user?.nome || '...'}</h2>
+          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-mute border border-line px-3 py-1.5 active:bg-ink active:text-bone"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sair
+          </button>
         </div>
 
         {/* Alerta de margem corroída */}
