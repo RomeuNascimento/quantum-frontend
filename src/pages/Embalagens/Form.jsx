@@ -54,15 +54,21 @@ export default function EmbalagemForm() {
   }
 
   const onAddPreco = async (dados) => {
-    await adicionarPrecoEmbalagem(id, {
-      ...dados,
-      preco: parseFloat(dados.preco),
-      quantidade_embalagem: parseFloat(dados.quantidade_embalagem),
-      data_compra: new Date().toISOString(),
-    })
-    resetPreco()
-    setShowPreco(false)
-    detalharEmbalagem(id).then((r) => setHistorico(r.data.historico_precos || []))
+    setErro('')
+    try {
+      await adicionarPrecoEmbalagem(id, {
+        ...dados,
+        preco: parseFloat(dados.preco),
+        quantidade_embalagem: parseFloat(dados.quantidade_embalagem),
+        data_compra: new Date().toISOString(),
+      })
+      resetPreco()
+      setShowPreco(false)
+      detalharEmbalagem(id).then((r) => setHistorico(r.data.historico_precos || []))
+    } catch (e) {
+      setErro(e.message)
+      setShowPreco(false)
+    }
   }
 
   return (

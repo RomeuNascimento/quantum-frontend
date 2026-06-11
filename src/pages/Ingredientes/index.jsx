@@ -16,6 +16,7 @@ export default function Ingredientes() {
   const carregar = () =>
     listarIngredientes()
       .then((r) => setItems(r.data))
+      .catch((e) => setErroDelete(e.message))
       .finally(() => setLoading(false))
 
   useEffect(() => { carregar() }, [])

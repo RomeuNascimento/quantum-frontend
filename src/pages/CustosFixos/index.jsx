@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import Modal from '../../components/Modal'
 import FormField from '../../components/FormField'
@@ -9,19 +10,26 @@ import { useForm } from 'react-hook-form'
 const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
 
 export default function CustosFixos() {
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [resumo, setResumo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState(null)
+  const [erro, setErro] = useState('')
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm()
 
   const carregar = async () => {
-    const [c, r] = await Promise.all([listarCustosFixos(), resumoCustosFixos()])
-    setItems(c.data)
-    setResumo(r.data)
-    setLoading(false)
+    try {
+      const [c, r] = await Promise.all([listarCustosFixos(), resumoCustosFixos()])
+      setItems(c.data)
+      setResumo(r.data)
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { carregar() }, [])
@@ -42,22 +50,39 @@ export default function CustosFixos() {
 
   const onSubmit = async (dados) => {
     const payload = { ...dados, valor: parseFloat(dados.valor) }
-    if (editItem) await atualizarCustoFixo(editItem.id, payload)
-    else await criarCustoFixo(payload)
-    setShowModal(false)
-    setEditItem(null)
-    carregar()
+    try {
+      if (editItem) await atualizarCustoFixo(editItem.id, payload)
+      else await criarCustoFixo(payload)
+      setShowModal(false)
+      setEditItem(null)
+      carregar()
+    } catch (e) {
+      setErro(e.message)
+      setShowModal(false)
+      setEditItem(null)
+    }
   }
 
   const handleDelete = async (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
-    await deletarCustoFixo(id)
-    carregar()
+    setErro('')
+    try {
+      await deletarCustoFixo(id)
+      carregar()
+    } catch (e) {
+      setErro(e.message)
+    }
   }
 
   return (
-    <Layout title="Custos Fixos">
+    <Layout title="Custos Fixos" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
+        {erro && (
+          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs text-rust flex-1">{erro}</p>
+            <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
+          </div>
+        )}
         {/* Resumo */}
         {resumo && (
           <div className="grid grid-cols-2 gap-3 mb-5">

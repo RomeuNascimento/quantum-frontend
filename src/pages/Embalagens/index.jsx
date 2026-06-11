@@ -9,21 +9,34 @@ export default function Embalagens() {
   const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [erroDelete, setErroDelete] = useState('')
 
   const carregar = () =>
-    listarEmbalagens().then((r) => setItems(r.data)).finally(() => setLoading(false))
+    listarEmbalagens().then((r) => setItems(r.data))
+      .catch((e) => setErroDelete(e.message)).finally(() => setLoading(false))
 
   useEffect(() => { carregar() }, [])
 
   const handleDelete = async (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
-    await deletarEmbalagem(id)
-    carregar()
+    setErroDelete('')
+    try {
+      await deletarEmbalagem(id)
+      carregar()
+    } catch (e) {
+      setErroDelete(e.message)
+    }
   }
 
   return (
     <Layout title="Embalagens" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
+        {erroDelete && (
+          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
+          </div>
+        )}
         <Link
           to="/embalagens/novo"
           className="flex items-center justify-center gap-2 btn-primary w-full py-3 mb-4"

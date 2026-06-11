@@ -12,7 +12,7 @@ export default function Receitas() {
   const [erroDelete, setErroDelete] = useState('')
 
   const carregar = () =>
-    listarReceitas().then((r) => setItems(r.data)).finally(() => setLoading(false))
+    listarReceitas().then((r) => setItems(r.data)).catch((e) => setErroDelete(e.message)).finally(() => setLoading(false))
 
   useEffect(() => { carregar() }, [])
 

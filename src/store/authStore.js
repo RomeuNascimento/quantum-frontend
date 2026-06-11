@@ -18,6 +18,12 @@ const useAuthStore = create(
       logout: () => {
         localStorage.removeItem('quantum_token')
         set({ token: null, user: null })
+        // O runtimeCaching do SW guarda respostas autenticadas da API por
+        // 7 dias — sem isso, dados ficam legíveis após logout em aparelho
+        // compartilhado. Fire-and-forget: logout deve permanecer síncrono.
+        if (typeof caches !== 'undefined') {
+          caches.delete('api-cache').catch(() => {})
+        }
       },
     }),
     {

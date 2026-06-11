@@ -12,7 +12,7 @@ export default function Produtos() {
   const [erroDelete, setErroDelete] = useState('')
 
   const carregar = () =>
-    listarProdutos().then((r) => setItems(r.data)).finally(() => setLoading(false))
+    listarProdutos().then((r) => setItems(r.data)).catch((e) => setErroDelete(e.message)).finally(() => setLoading(false))
 
   useEffect(() => { carregar() }, [])
 

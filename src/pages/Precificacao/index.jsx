@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
@@ -141,39 +141,59 @@ export default function Precificacao() {
   const [showModalCanal, setShowModalCanal] = useState(false)
   const [showModalPreco, setShowModalPreco] = useState(false)
   const [editPreco, setEditPreco] = useState(null)
+  const [erro, setErro] = useState('')
+  // Guarda contra race: ao trocar de produto rápido, só a resposta da
+  // seleção mais recente pode escrever no estado
+  const selecaoAtual = useRef(null)
 
   const { register: regCanal, handleSubmit: submitCanal, reset: resetCanal } = useForm()
   const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco, setValue } = useForm()
 
   const carregar = async () => {
-    const [p, c] = await Promise.all([listarProdutos(), listarCanais()])
-    setProdutos(p.data)
-    setCanais(c.data)
-    if (p.data.length > 0 && !produtoSelecionado) {
-      selecionarProduto(p.data[0].id)
+    try {
+      const [p, c] = await Promise.all([listarProdutos(), listarCanais()])
+      setProdutos(p.data)
+      setCanais(c.data)
+      if (p.data.length > 0 && !produtoSelecionado) {
+        selecionarProduto(p.data[0].id)
+      }
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const selecionarProduto = async (id) => {
     setProdutoSelecionado(id)
-    const [r, h] = await Promise.all([listarPrecosProduto(id), historicoCustoProduto(id)])
-    setPrecos(r.data)
-    setHistorico(h.data.pontos || [])
+    selecaoAtual.current = id
+    try {
+      const [r, h] = await Promise.all([listarPrecosProduto(id), historicoCustoProduto(id)])
+      if (selecaoAtual.current !== id) return
+      setPrecos(r.data)
+      setHistorico(h.data.pontos || [])
+    } catch (e) {
+      if (selecaoAtual.current === id) setErro(e.message)
+    }
   }
 
   useEffect(() => { carregar() }, [])
 
   const onCriarCanal = async (dados) => {
-    await criarCanal({
-      ...dados,
-      taxa_plataforma_pct: parseFloat(dados.taxa_plataforma_pct) || 0,
-      taxa_cartao_pct: parseFloat(dados.taxa_cartao_pct) || 0,
-      imposto_pct: parseFloat(dados.imposto_pct) || 0,
-    })
-    resetCanal()
-    setShowModalCanal(false)
-    carregar()
+    try {
+      await criarCanal({
+        ...dados,
+        taxa_plataforma_pct: parseFloat(dados.taxa_plataforma_pct) || 0,
+        taxa_cartao_pct: parseFloat(dados.taxa_cartao_pct) || 0,
+        imposto_pct: parseFloat(dados.imposto_pct) || 0,
+      })
+      resetCanal()
+      setShowModalCanal(false)
+      carregar()
+    } catch (e) {
+      setErro(e.message)
+      setShowModalCanal(false)
+    }
   }
 
   const onSalvarPreco = async (dados) => {
@@ -182,15 +202,21 @@ export default function Precificacao() {
       margem_pct: parseFloat(dados.margem_pct),
       preco_final: dados.preco_final ? parseFloat(dados.preco_final) : null,
     }
-    if (editPreco) {
-      await atualizarPrecoProduto(produtoSelecionado, editPreco.id, payload)
-    } else {
-      await criarPrecoProduto(produtoSelecionado, payload)
+    try {
+      if (editPreco) {
+        await atualizarPrecoProduto(produtoSelecionado, editPreco.id, payload)
+      } else {
+        await criarPrecoProduto(produtoSelecionado, payload)
+      }
+      setShowModalPreco(false)
+      setEditPreco(null)
+      resetPreco()
+      selecionarProduto(produtoSelecionado)
+    } catch (e) {
+      setErro(e.message)
+      setShowModalPreco(false)
+      setEditPreco(null)
     }
-    setShowModalPreco(false)
-    setEditPreco(null)
-    resetPreco()
-    selecionarProduto(produtoSelecionado)
   }
 
   const abrirEditar = (pp) => {
@@ -204,6 +230,12 @@ export default function Precificacao() {
   return (
     <Layout title="Precificação" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
+        {erro && (
+          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs text-rust flex-1">{erro}</p>
+            <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
+          </div>
+        )}
         {loading ? <LoadingSpinner /> : (
           <>
             {/* Canais */}
