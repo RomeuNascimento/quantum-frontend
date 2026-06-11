@@ -5,6 +5,7 @@ import { getMe } from '../api/auth'
 import { listarProdutos } from '../api/produtos'
 import { resumoCustosFixos } from '../api/custosFixos'
 import { relatorioMargem } from '../api/precificacao'
+import MargemBarChart from '../components/MargemBarChart'
 import useAuthStore from '../store/authStore'
 
 const atalhos = [
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [erroResumo, setErroResumo] = useState(false)
   const [erroProdutos, setErroProdutos] = useState(false)
   const [margemAlerta, setMargemAlerta] = useState([])
+  const [margens, setMargens] = useState([])
 
   useEffect(() => {
     getMe().then((r) => setUser(r.data)).catch(() => {})
@@ -33,6 +35,7 @@ export default function Dashboard() {
         p.canais.some((c) => c.margem_real_pct < 10)
       )
       setMargemAlerta(corroidos)
+      setMargens(r.data.produtos)
     }).catch(() => {})
   }, [])
 
@@ -87,6 +90,9 @@ export default function Dashboard() {
             </p>
           </Link>
         </div>
+
+        {/* Gráfico de margens */}
+        <MargemBarChart produtos={margens} />
 
         {/* Atalhos rápidos */}
         <div>

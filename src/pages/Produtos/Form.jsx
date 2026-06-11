@@ -5,7 +5,8 @@ import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
 import SimuladorPreco from '../../components/SimuladorPreco'
 import useVoltar from '../../hooks/useVoltar'
-import { criarProduto, detalharProduto, atualizarProduto } from '../../api/produtos'
+import CustoLineChart from '../../components/CustoLineChart'
+import { criarProduto, detalharProduto, atualizarProduto, historicoCustoProduto } from '../../api/produtos'
 import { listarReceitas } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
 import { listarEmbalagens } from '../../api/embalagens'
@@ -21,6 +22,7 @@ export default function ProdutoForm() {
   const [ingredientes, setIngredientes] = useState([])
   const [embalagens, setEmbalagens] = useState([])
   const [custoTotal, setCustoTotal] = useState(null)
+  const [historico, setHistorico] = useState([])
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
@@ -37,6 +39,7 @@ export default function ProdutoForm() {
       setEmbalagens(e.data)
     })
     if (isEdit) {
+      historicoCustoProduto(id).then((r) => setHistorico(r.data.pontos || r.data)).catch(() => {})
       detalharProduto(id).then((r) => {
         setCustoTotal(r.data.custo_total)
         reset({
@@ -170,6 +173,13 @@ export default function ProdutoForm() {
             </div>
           ))}
         </Section>
+
+        {isEdit && historico.length > 0 && (
+          <div className="card mt-4">
+            <p className="label mb-2">Evolução do custo</p>
+            <CustoLineChart pontos={historico} />
+          </div>
+        )}
 
         {isEdit && custoTotal != null && custoTotal > 0 && (
           <SimuladorPreco custo={custoTotal} />
