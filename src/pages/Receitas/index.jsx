@@ -30,7 +30,18 @@ export default function Receitas() {
   return (
     <Layout title="Receitas" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
-
+        <Link
+          to="/receitas/importar"
+          className="fixed bottom-[132px] right-4 z-30 bg-ink text-bone font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:opacity-80"
+        >
+          IA Import
+        </Link>
+        <Link
+          to="/receitas/novo"
+          className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
+        >
+          + Novo
+        </Link>
 
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
@@ -43,6 +54,7 @@ export default function Receitas() {
           <EmptyState
             title="Nenhuma receita"
             description="Cadastre suas receitas com ingredientes e mão de obra"
+            action={<Link to="/receitas/novo" className="btn-primary inline-block px-4 py-2 text-xs">+ Nova receita</Link>}
           />
         ) : (
           <div>

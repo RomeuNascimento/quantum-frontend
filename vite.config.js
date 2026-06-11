@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+      includeAssets: ['apple-touch-icon.png', 'brand/favicon.svg'],
       manifest: {
         name: 'Quantum — Gestão de Confeitaria',
         short_name: 'Quantum',
@@ -18,12 +18,12 @@ export default defineConfig({
         start_url: '/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
         ],
       },
       workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
+        // SEM skipWaiting/clientsClaim — anulariam o registerType 'prompt'
+        // (o SW novo assumiria sob a página antiga → mismatch de assets)
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           // Fontes Google — stylesheet (muda raramente)

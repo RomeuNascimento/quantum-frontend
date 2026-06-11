@@ -263,21 +263,21 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 
 > Revisão de código completa feita em 2026-06-11. Achados do backend: ver seção equivalente no CLAUDE.md do **quantum-backend**.
 
-### 🔴 Críticos (Fase 0 — corrigir antes de features novas)
+### 🔴 Críticos (Fase 0) — C1–C6 ✅ corrigidos em 2026-06-11; resta C7 (depende da decisão de unidades, ver M3 do backend)
 
-- [ ] **C1. Receitas perdeu os botões "+ Novo" e "IA Import"** — `src/pages/Receitas/index.jsx:32-34`: regressão — não existe NENHUM link na UI para `/receitas/novo` (só atalho do Dashboard) nem para `/receitas/importar` (rota órfã, inacessível). Restaurar FAB lime + FAB ink conforme padrões do design system.
-- [ ] **C2. Páginas órfãs** — `/custos-fixos` sem nenhum ponto de entrada (card "Custos/mês" do Dashboard é `<div>`, não link); `/embalagens` (lista) só alcançável indiretamente. Fix: card do Dashboard vira link + revisar atalhos.
-- [ ] **C3. Botão salvar da importação de receitas oculto** — `src/pages/Receitas/Importar.jsx:245`: `fixed bottom-0` sem `bottom-16 z-30` — coberto pela BottomNav (mesma armadilha já corrigida em `ImportarNota.jsx:263`).
-- [ ] **C4. PWA: ícones do manifest não existem** — `vite.config.js` declara `icons/icon-192.png`, `icons/icon-512.png`, `favicon.ico`, `apple-touch-icon.png` — nenhum existe em `public/` (só `brand/`). Instalação na home screen quebrada. Remover também `public/manifest.json` morto (tema roxo pré-design-system, servido em paralelo ao `manifest.webmanifest` do plugin).
-- [ ] **C5. PWA: prompt de update nunca aparece** — `vite.config.js`: `registerType: 'prompt'` é ANULADO por `workbox.skipWaiting: true` + `clientsClaim: true`; e não há nenhum `useRegisterSW`/`virtual:pwa-register` no src. Fix: remover skipWaiting/clientsClaim + implementar UI de prompt.
-- [ ] **C6. Importação cria ingredientes duplicados** — `Receitas/Importar.jsx:75-86` e `ImportarNota.jsx:85-115`: match calculado uma única vez; mesmo nome em duas receitas/itens com "criar novo" → ingrediente duplicado. Fix: cache por nome normalizado durante o loop de salvar.
+- [x] **C1. Receitas perdeu os botões "+ Novo" e "IA Import"** — `src/pages/Receitas/index.jsx:32-34`: regressão — não existe NENHUM link na UI para `/receitas/novo` (só atalho do Dashboard) nem para `/receitas/importar` (rota órfã, inacessível). Restaurar FAB lime + FAB ink conforme padrões do design system.
+- [x] **C2. Páginas órfãs** — `/custos-fixos` sem nenhum ponto de entrada (card "Custos/mês" do Dashboard é `<div>`, não link); `/embalagens` (lista) só alcançável indiretamente. Fix: card do Dashboard vira link + revisar atalhos.
+- [x] **C3. Botão salvar da importação de receitas oculto** — `src/pages/Receitas/Importar.jsx:245`: `fixed bottom-0` sem `bottom-16 z-30` — coberto pela BottomNav (mesma armadilha já corrigida em `ImportarNota.jsx:263`).
+- [x] **C4. PWA: ícones do manifest não existem** — `vite.config.js` declara `icons/icon-192.png`, `icons/icon-512.png`, `favicon.ico`, `apple-touch-icon.png` — nenhum existe em `public/` (só `brand/`). Instalação na home screen quebrada. Remover também `public/manifest.json` morto (tema roxo pré-design-system, servido em paralelo ao `manifest.webmanifest` do plugin).
+- [x] **C5. PWA: prompt de update nunca aparece** — `vite.config.js`: `registerType: 'prompt'` é ANULADO por `workbox.skipWaiting: true` + `clientsClaim: true`; e não há nenhum `useRegisterSW`/`virtual:pwa-register` no src. Fix: remover skipWaiting/clientsClaim + implementar UI de prompt.
+- [x] **C6. Importação cria ingredientes duplicados** — `Receitas/Importar.jsx:75-86` e `ImportarNota.jsx:85-115`: match calculado uma única vez; mesmo nome em duas receitas/itens com "criar novo" → ingrediente duplicado. Fix: cache por nome normalizado durante o loop de salvar.
 - [ ] **C7. Nota fiscal: sem conversão de unidade ao adicionar preço a ingrediente existente** — `ImportarNota.jsx:91-107`: preço registrado na unidade da nota (kg) num ingrediente cadastrado em g → custo até 1000× errado. Mínimo: avisar quando unidade divergir. (Ligado à decisão pendente M3 do backend.)
 
 ### 🟡 Médios (Fase 1)
 
 - [ ] **M1. Tratamento de erro sistêmico** — Precificação/CustosFixos: `carregar()` sem try/catch/finally → spinner infinito em falha; listas com `.finally()` sem `.catch()` → EmptyState enganoso em erro de rede; `selecionarProduto` sem catch e sem cancelamento (race ao trocar produto rápido). Mutações sem feedback de erro: `Embalagens handleDelete`, `CustosFixos onSubmit/handleDelete`, `Precificacao onCriarCanal/onSalvarPreco`, `onAddPreco` (Ingredientes/Embalagens Form).
 - [ ] **M2. Adotar TanStack Query** — resolve loading/error/refetch/race de uma vez, corta ~30% do código das listas. Recomendação nº 1 de arquitetura; pré-requisito para modo offline com fila de escrita.
-- [ ] **M3. Erros 422 do FastAPI viram "[object Object]"** — `src/api/client.js:29`: `detail` é array de objetos em erro de validação; normalizar antes de criar `Error`.
+- [x] **M3. Erros 422 do FastAPI viram "[object Object]"** — `src/api/client.js:29`: `detail` é array de objetos em erro de validação; normalizar antes de criar `Error`.
 - [ ] **M4. Validações numéricas fracas** — `rendimento_g` aceita 0/negativo (divisão por zero no custo proporcional); selects de Produtos sem `required` → `NaN` enviado; `min: 0.01` sem mensagem de erro.
 - [ ] **M5. Cache da API persiste após logout** — runtimeCaching `api-cache` (7 dias) não é limpo no `logout()`. Privacidade em aparelho compartilhado.
 - [ ] **M6. nginx sem `no-cache` para index.html** (risco de tela branca pós-deploy) e sem headers de segurança (X-Content-Type-Options, X-Frame-Options, Referrer-Policy).
@@ -299,8 +299,12 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 
 > Fases acordadas com o usuário. Fase 0 em execução na branch `claude/sharp-noether-6ml8uh` (frontend + backend).
 
-**Fase 0 — Estabilização** *(em andamento)*
-Corrigir os críticos da auditoria nos dois repos (IDOR, IA bloqueante/rate limit, fluxos quebrados de Receitas/Custos Fixos, PWA, duplicação na importação, validação numérica).
+**Fase 0 — Estabilização** *(2026-06-11 — quase concluída)*
+✅ Feito (branch `claude/sharp-noether-6ml8uh` nos dois repos, commits locais):
+- Backend: IDOR produtos/receitas (helper `app/routers/ownership.py`), IA não-bloqueante (`def` síncrono → threadpool) + limite 15MB + rate limit 10/10min, logging no exception handler, validação numérica em todos os schemas (senha min 8)
+- Frontend: FABs "+ Novo"/"IA Import" restaurados em Receitas (+ action no EmptyState), Dashboard com cards-link (Produtos, Custos/mês) + seção "Gerenciar" (Embalagens, Custos fixos), botão salvar de Receitas/Importar → `bottom-16 z-30`, ícones PWA gerados (`public/icons/` + `apple-touch-icon.png`, manifest.json morto removido), `skipWaiting/clientsClaim` removidos + componente `UpdatePrompt` (useRegisterSW) montado no App, dedup de ingredientes nos dois fluxos de importação (`criadosNoLote` por nome normalizado), client.js normaliza erros 422 (array → string legível)
+⚠️ Pendente da Fase 0: C7 (aviso de unidade divergente na nota fiscal) — aguarda decisão M3 do backend (kg/L vs g/ml)
+⚠️ ATENÇÃO: validação numérica nova no backend pode rejeitar com 422 payloads de importação com quantidade 0 (ex: IA não extraiu quantidade) — testar fluxo de importação após deploy
 
 **Fase 1 — Fundação para relatórios**
 1. Backend: `Decimal/Numeric` para dinheiro + índices + eager loading (M1/M2 backend)

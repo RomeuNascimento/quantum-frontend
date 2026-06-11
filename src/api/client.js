@@ -26,7 +26,19 @@ api.interceptors.response.use(
       // Sem window.location.href — o PrivateRoute detecta token: null
       // e faz <Navigate to="/login"> via React Router (sem reload de página).
     }
-    const msg = error.response?.data?.detail || 'Erro ao conectar com o servidor'
+    // Em erros 422 do FastAPI, detail é um array de objetos de validação —
+    // sem normalizar, a UI exibiria "[object Object]"
+    let msg = error.response?.data?.detail || 'Erro ao conectar com o servidor'
+    if (Array.isArray(msg)) {
+      msg = msg
+        .map((e) => {
+          const campo = (e.loc || []).filter((p) => p !== 'body').join('.')
+          return campo ? `${campo}: ${e.msg}` : e.msg
+        })
+        .join('; ')
+    } else if (typeof msg !== 'string') {
+      msg = JSON.stringify(msg)
+    }
     return Promise.reject(new Error(msg))
   },
 )

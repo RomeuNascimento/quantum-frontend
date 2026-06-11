@@ -69,17 +69,22 @@ export default function ImportarReceitas() {
   const salvar = async () => {
     setFase('salvando')
     const res = []
+    // Ingredientes criados neste lote, por nome normalizado — o `match` foi
+    // calculado uma única vez no processamento, então sem este cache o mesmo
+    // nome repetido em duas receitas criaria ingredientes duplicados
+    const criadosNoLote = new Map()
 
     for (const rec of selecionadas) {
       try {
         // Resolve ingredient IDs — create new ones if needed
         const ingsResolvidos = []
         for (const ing of rec.ingredientes) {
-          let ingId = ing.match?.id
+          const chave = normalizar(ing.nome)
+          let ingId = ing.match?.id || criadosNoLote.get(chave)
           if (!ingId) {
             const r = await criarIngrediente({ nome: ing.nome, unidade: 'g', fator_correcao: 1.0 })
             ingId = r.data.id
-            // Add to existentes so subsequent recipes can find it
+            criadosNoLote.set(chave, ingId)
             setExistentes((prev) => [...prev, r.data])
           }
           ingsResolvidos.push({ ingrediente_id: ingId, quantidade_g: parseFloat(ing.quantidade_g) || 0 })
@@ -242,7 +247,7 @@ export default function ImportarReceitas() {
           ))}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3">
+        <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
           <button onClick={salvar} disabled={selecionadas.length === 0} className="btn-primary w-full">
             Salvar {selecionadas.length} receita{selecionadas.length !== 1 ? 's' : ''}
           </button>

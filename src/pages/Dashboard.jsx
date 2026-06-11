@@ -37,16 +37,16 @@ export default function Dashboard() {
 
         {/* Cards resumo */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="card">
+          <Link to="/produtos" className="card active:bg-line/50">
             <p className="label">Produtos</p>
             <p className="qtm-num text-2xl font-bold text-ink">{produtos.length}</p>
-          </div>
-          <div className="card">
+          </Link>
+          <Link to="/custos-fixos" className="card active:bg-line/50">
             <p className="label">Custos/mês</p>
             <p className={`qtm-num text-2xl font-bold ${totalMensal > 0 ? 'text-rust' : 'text-ink'}`}>
               R$ {totalMensal.toFixed(2)}
             </p>
-          </div>
+          </Link>
         </div>
 
         {/* Atalhos rápidos */}
@@ -60,6 +60,29 @@ export default function Dashboard() {
                 className="border border-ink bg-bone flex items-center gap-2 px-3 py-3 active:bg-ink active:text-bone transition-colors"
               >
                 <span className="font-mono text-xs uppercase tracking-widest text-ink">+ {a.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Gerenciar */}
+        <div>
+          <p className="label mb-3">Gerenciar</p>
+          <div>
+            {[
+              { to: '/embalagens', label: 'Embalagens' },
+              { to: '/custos-fixos', label: 'Custos fixos' },
+            ].map((g) => (
+              <Link
+                key={g.to}
+                to={g.to}
+                className="flex items-center justify-between border-b border-line py-3 last:border-b-0"
+              >
+                <span className="text-sm font-medium text-ink">{g.label}</span>
+                <svg className="w-4 h-4 text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             ))}
           </div>

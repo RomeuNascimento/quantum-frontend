@@ -85,11 +85,17 @@ export default function ImportarNota() {
   const salvar = async () => {
     setFase('salvando')
     const res = []
+    // Evita criar ingrediente duplicado quando o mesmo nome aparece em
+    // mais de um item da nota com ação "criar novo"
+    const criadosNoLote = new Map()
     for (const item of selecionados) {
       try {
         let ingId
+        const chave = normalizar(item.nome)
         if (item.acao === 'adicionar_preco' && item.match) {
           ingId = item.match.id
+        } else if (criadosNoLote.has(chave)) {
+          ingId = criadosNoLote.get(chave)
         } else {
           const r = await criarIngrediente({
             nome: item.nome,
@@ -98,6 +104,7 @@ export default function ImportarNota() {
             fator_correcao: 1.0,
           })
           ingId = r.data.id
+          criadosNoLote.set(chave, ingId)
         }
         await adicionarPrecoIngrediente(ingId, {
           preco: parseFloat(item.preco_total),
