@@ -3,8 +3,8 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-11
-**Próxima sessão:** continuar a partir da Fase 2 (relatórios de margem)
+**Última sessão:** 2026-06-11 (tarde — branch `claude/keen-ptolemy-mmed2k`, continua a `claude/sharp-noether-6ml8uh`)
+**Próxima sessão:** Fase 2 item 3 (gráfico no detalhe do produto) ou Fase 1 restante (TanStack Query, M7 Dashboard)
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -380,9 +380,13 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 ### Onde continuar
 
 **Fase 2 — Features de relatório (prioridade):**
-1. **Página de relatório de margem** `/produtos/relatorio` — tabela com todos os produtos × canais mostrando custo, preço, margem real; dados já disponíveis via `listarPrecosProduto`
-2. **Extrair `CustoLineChart`** de `Precificacao/index.jsx` para `src/components/CustoLineChart.jsx` — reuso em relatório e página de produto
-3. **Gráfico de evolução de custos** em `Produtos/index.jsx` ou no detalhe do produto (endpoint `/produtos/{id}/historico-custo` já existe)
+1. [x] **Página de relatório de margem `/relatorio`** ✅ 2026-06-11 (branch `claude/keen-ptolemy-mmed2k`) — `src/pages/Relatorio/index.jsx`: resumo saudável/atenção/revisar + card por produto com margem real por canal (badge), preço praticado, lucro unitário; seção "Sem precificação" com atalho. Consome `GET /precificacao/relatorio-margem` (novo no backend). Entrada: link "Relatório de margem" na seção Gerenciar do Dashboard.
+2. [x] **`CustoLineChart` e `MargemBadge` extraídos** ✅ 2026-06-11 — `src/components/CustoLineChart.jsx` + `src/components/MargemBadge.jsx`; `Precificacao/index.jsx` importa dos components.
+3. [ ] **Gráfico de evolução de custos** no detalhe do produto (endpoint `/produtos/{id}/historico-custo` já existe; componente já extraído)
+
+**Fix botões voltar (2026-06-11, mesma branch):**
+- Telas "Salvando..." de `Receitas/Importar.jsx` e `Ingredientes/ImportarNota.jsx` tinham `onBack={() => {}}` — seta de voltar visível que não fazia nada. Removida durante o salvamento.
+- Auditoria completa de `onBack`: todas as demais páginas usam função explícita com rota destino (nenhum `navigate(-1)` em uso).
 
 **Fase 1 restante:**
 - M2: TanStack Query — instalar `@tanstack/react-query`; substituir padrão useState/useEffect/carregar por `useQuery`; começa pelas listas simples (ingredientes, embalagens)
