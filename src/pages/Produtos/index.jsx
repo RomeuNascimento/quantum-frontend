@@ -63,7 +63,7 @@ export default function Produtos() {
       {/* FAB fixo acima da bottom nav */}
       <Link
         to="/produtos/novo"
-        className="fixed bottom-[88px] right-4 z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
+        className="fixed bottom-[88px] right-4 sm:right-[max(1rem,calc(50%-17rem))] z-30 bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-4 py-3 border border-ink/20 active:bg-lime-dim"
       >
         + Novo
       </Link>

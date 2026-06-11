@@ -16,6 +16,7 @@ import ImportarReceitas from './pages/Receitas/Importar'
 import ImportarNota from './pages/Ingredientes/ImportarNota'
 import Produtos from './pages/Produtos/index'
 import ProdutoForm from './pages/Produtos/Form'
+import ProdutoFicha from './pages/Produtos/Ficha'
 import Precificacao from './pages/Precificacao/index'
 import Relatorio from './pages/Relatorio/index'
 import CustosFixos from './pages/CustosFixos/index'
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/produtos" element={<PrivateRoute><Produtos /></PrivateRoute>} />
         <Route path="/produtos/novo" element={<PrivateRoute><ProdutoForm /></PrivateRoute>} />
         <Route path="/produtos/:id" element={<PrivateRoute><ProdutoForm /></PrivateRoute>} />
+        <Route path="/produtos/:id/ficha" element={<PrivateRoute><ProdutoFicha /></PrivateRoute>} />
 
         <Route path="/planejamento" element={<PrivateRoute><Planejamento /></PrivateRoute>} />
         <Route path="/precificacao" element={<PrivateRoute><Precificacao /></PrivateRoute>} />

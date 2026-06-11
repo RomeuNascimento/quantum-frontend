@@ -96,6 +96,17 @@ export default function ProdutoForm() {
   return (
     <Layout title={isEdit ? 'Editar produto' : 'Novo produto'} onBack={() => navigate('/produtos')}>
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24">
+        {isEdit && (
+          <button type="button" onClick={() => navigate(`/produtos/${id}/ficha`)}
+            className="w-full flex items-center justify-between bg-ink text-bone border border-ink px-4 py-3 mb-4 active:opacity-80">
+            <span className="font-mono text-xs uppercase tracking-widest">Ficha técnica (PDF)</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+
         <FormField label="Nome do produto" error={errors.nome?.message}>
           <input className="input" placeholder="Ex: Bolo de chocolate 1kg"
             {...register('nome', { required: 'Obrigatório' })} />
@@ -168,7 +179,7 @@ export default function ProdutoForm() {
         <button
           type="button"
           onClick={handleSubmit(onSubmit)}
-          className="btn-primary w-full"
+          className="btn-primary w-full max-w-xl mx-auto block"
           disabled={loading}
         >
           {loading ? 'Salvando...' : 'Salvar produto'}

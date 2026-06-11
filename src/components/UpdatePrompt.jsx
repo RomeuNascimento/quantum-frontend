@@ -9,7 +9,7 @@ export default function UpdatePrompt() {
   if (!needRefresh) return null
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-40 bg-ink border border-lime px-4 py-3 flex items-center gap-3">
+    <div className="fixed bottom-20 left-4 right-4 z-40 bg-ink border border-lime px-4 py-3 flex items-center gap-3 max-w-xl mx-auto">
       <p className="font-mono text-xs text-bone flex-1">
         Nova versão disponível
       </p>

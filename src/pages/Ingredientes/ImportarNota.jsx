@@ -165,7 +165,7 @@ export default function ImportarNota() {
           />
 
           {arquivo && (
-            <button onClick={processarArquivo} className="btn-primary w-full">
+            <button onClick={processarArquivo} className="btn-primary w-full max-w-xl mx-auto block">
               Processar com IA
             </button>
           )}
@@ -289,7 +289,7 @@ export default function ImportarNota() {
 
         {/* Botão fixo */}
         <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
-          <button onClick={salvar} disabled={selecionados.length === 0} className="btn-primary w-full">
+          <button onClick={salvar} disabled={selecionados.length === 0} className="btn-primary w-full max-w-xl mx-auto block">
             Salvar {selecionados.length} item{selecionados.length !== 1 ? 'ns' : ''}
           </button>
         </div>
@@ -327,7 +327,7 @@ export default function ImportarNota() {
             ))}
           </div>
         )}
-        <button onClick={() => navigate('/ingredientes')} className="btn-primary w-full">
+        <button onClick={() => navigate('/ingredientes')} className="btn-primary w-full max-w-xl mx-auto block">
           Ver ingredientes
         </button>
         <button onClick={() => { setFase('upload'); setArquivo(null); setItens([]); setResultados([]) }}

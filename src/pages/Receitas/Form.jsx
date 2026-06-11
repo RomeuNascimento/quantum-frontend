@@ -158,7 +158,7 @@ export default function ReceitaForm() {
         <button
           type="button"
           onClick={handleSubmit(onSubmit)}
-          className="btn-primary w-full"
+          className="btn-primary w-full max-w-xl mx-auto block"
           disabled={loading}
         >
           {loading ? 'Salvando...' : 'Salvar receita'}

@@ -84,7 +84,7 @@ export default function Dashboard() {
         {/* Atalhos rápidos */}
         <div>
           <p className="label mb-3">Cadastrar</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {atalhos.map((a) => (
               <Link
                 key={a.to}

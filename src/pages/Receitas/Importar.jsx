@@ -144,7 +144,7 @@ export default function ImportarReceitas() {
           />
 
           {arquivo && (
-            <button onClick={processarArquivo} className="btn-primary w-full">
+            <button onClick={processarArquivo} className="btn-primary w-full max-w-xl mx-auto block">
               Processar com IA
             </button>
           )}
@@ -248,7 +248,7 @@ export default function ImportarReceitas() {
         </div>
 
         <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
-          <button onClick={salvar} disabled={selecionadas.length === 0} className="btn-primary w-full">
+          <button onClick={salvar} disabled={selecionadas.length === 0} className="btn-primary w-full max-w-xl mx-auto block">
             Salvar {selecionadas.length} receita{selecionadas.length !== 1 ? 's' : ''}
           </button>
         </div>
@@ -286,7 +286,7 @@ export default function ImportarReceitas() {
             ))}
           </div>
         )}
-        <button onClick={() => navigate('/receitas')} className="btn-primary w-full">
+        <button onClick={() => navigate('/receitas')} className="btn-primary w-full max-w-xl mx-auto block">
           Ver receitas
         </button>
         <button onClick={() => { setFase('upload'); setArquivo(null); setReceitas([]); setResultados([]) }}
