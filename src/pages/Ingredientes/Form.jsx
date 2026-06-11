@@ -94,8 +94,8 @@ export default function IngredienteForm() {
 
           <FormField label="Fator de correção" error={errors.fator_correcao?.message}>
             <input className="input" type="number" step="0.01" placeholder="1.0"
-              {...register('fator_correcao', { required: 'Obrigatório', min: 0.01 })} />
-            <p className="font-mono text-xs text-mute mt-1">Percentual aproveitável. Ex: 0.85 para 85% de aproveitamento</p>
+              {...register('fator_correcao', { required: 'Obrigatório', min: { value: 0, message: 'Não pode ser negativo' } })} />
+            <p className="font-mono text-xs text-mute mt-1">Percentual aproveitável. Ex: 0.85 para 85% de aproveitamento. 0 = sem correção</p>
           </FormField>
 
           {!isEdit && (
