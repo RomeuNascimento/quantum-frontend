@@ -4,6 +4,7 @@
 
 **Criado em:** 2026-05-20
 **Última sessão:** 2026-06-11
+**Próxima sessão:** continuar a partir da Fase 2 (relatórios de margem)
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -344,3 +345,52 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 - [ ] Adicionar relatório de margem por produto/canal
 - [ ] Implementar modo offline (PWA cache — service worker já configurado no vite.config.js)
 - [ ] Habilitar autoDeploy no EasyPanel (atualmente false)
+
+---
+
+## Continuação — Fase 2 (próxima sessão)
+
+> Branch de trabalho: `claude/sharp-noether-6ml8uh` (mesma dos dois repos)
+
+### O que foi entregue na sessão de 2026-06-11 (Fase 0 + parte da Fase 1)
+
+**Frontend (6 commits, branch pushed):**
+- `src/pages/Receitas/index.jsx` — FABs "+ Novo" (lime) e "IA Import" (ink) restaurados; action no EmptyState; `.catch` em carregar
+- `src/pages/Dashboard.jsx` — cards Produtos/Custos → `<Link>`; seção "Gerenciar" com links a /embalagens e /custos-fixos
+- `src/pages/Receitas/Importar.jsx` — botão salvar `fixed bottom-16 z-30`; `criadosNoLote` Map evita duplicação de ingredientes
+- `src/pages/Ingredientes/ImportarNota.jsx` — `criadosNoLote` Map; conversão de unidade g↔kg/ml↔L ao salvar; indicador "→ unidade" / "⚠" na revisão
+- `src/api/client.js` — normaliza erros 422 (array de objetos → string legível)
+- `src/components/UpdatePrompt.jsx` — prompt de atualização PWA com `useRegisterSW`
+- `public/icons/` — `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` gerados (PWA instalável)
+- `public/manifest.json` — removido (era manifest morto pré-design-system)
+- `vite.config.js` — `skipWaiting`/`clientsClaim` removidos; ícones corrigidos
+- `src/App.jsx` — `<UpdatePrompt />` montado
+- `src/pages/Precificacao/index.jsx` — try/catch/finally; race guard `selecaoAtual` ref; banners de erro
+- `src/pages/CustosFixos/index.jsx` — try/catch/finally; banners de erro; onBack
+- `src/pages/Embalagens/index.jsx` — try/catch em handleDelete; banner erroDelete
+- `src/pages/Ingredientes/Form.jsx`, `Embalagens/Form.jsx` — try/catch em onAddPreco
+- `src/store/authStore.js` — logout limpa `caches.delete('api-cache')`
+- `nginx.conf` — no-cache para index.html/sw.js/manifest; headers de segurança
+
+**⚠️ Ações pendentes antes do próximo deploy (responsabilidade do usuário):**
+1. Backend: `alembic upgrade head` em produção (migration 004 ainda não aplicada)
+2. Backend: Auditar ingredientes com unidade `kg` ou `L` no banco de produção
+3. Testar fluxo completo de importação de nota fiscal após deploy do backend
+
+### Onde continuar
+
+**Fase 2 — Features de relatório (prioridade):**
+1. **Página de relatório de margem** `/produtos/relatorio` — tabela com todos os produtos × canais mostrando custo, preço, margem real; dados já disponíveis via `listarPrecosProduto`
+2. **Extrair `CustoLineChart`** de `Precificacao/index.jsx` para `src/components/CustoLineChart.jsx` — reuso em relatório e página de produto
+3. **Gráfico de evolução de custos** em `Produtos/index.jsx` ou no detalhe do produto (endpoint `/produtos/{id}/historico-custo` já existe)
+
+**Fase 1 restante:**
+- M2: TanStack Query — instalar `@tanstack/react-query`; substituir padrão useState/useEffect/carregar por `useQuery`; começa pelas listas simples (ingredientes, embalagens)
+- M7: Dashboard — formatação `Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'})` consistente; saudação sem gênero hardcoded; erro de rede ≠ "R$ 0.00"
+
+**Fase 3 (depois):**
+- Alerta de margem corroída no Dashboard ("3 produtos precisam de reajuste")
+- Rateio de custos fixos por produto (hora de produção ou % faturamento)
+- Simulador "e se" — sliders de margem/taxa no detalhe do produto
+- Ficha técnica exportável (PDF)
+- Modo offline com fila de escrita
