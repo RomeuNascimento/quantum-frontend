@@ -50,12 +50,22 @@ export default function ProdutoForm() {
     setLoading(true)
     try {
       const toFloat = (v) => parseFloat(v) || 0
+      // Linhas sem entidade selecionada são descartadas — sem isso o select
+      // vazio vira NaN no payload e o backend rejeita o produto inteiro
       const payload = {
         nome: dados.nome,
-        preparacoes: dados.preparacoes.map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
-        ingredientes: dados.ingredientes.map((m) => ({ ingrediente_id: parseInt(m.ingrediente_id), quantidade_g: toFloat(m.quantidade_g) })),
-        embalagens: dados.embalagens.map((m) => ({ embalagem_id: parseInt(m.embalagem_id), quantidade: toFloat(m.quantidade) })),
-        mo_montagem: dados.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: toFloat(m.tempo_min) })),
+        preparacoes: dados.preparacoes
+          .filter((m) => m.receita_id)
+          .map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
+        ingredientes: dados.ingredientes
+          .filter((m) => m.ingrediente_id)
+          .map((m) => ({ ingrediente_id: parseInt(m.ingrediente_id), quantidade_g: toFloat(m.quantidade_g) })),
+        embalagens: dados.embalagens
+          .filter((m) => m.embalagem_id)
+          .map((m) => ({ embalagem_id: parseInt(m.embalagem_id), quantidade: toFloat(m.quantidade) })),
+        mo_montagem: dados.mo_montagem
+          .filter((m) => m.descricao)
+          .map((m) => ({ descricao: m.descricao, tempo_min: toFloat(m.tempo_min) })),
       }
       if (isEdit) await atualizarProduto(id, payload)
       else await criarProduto(payload)

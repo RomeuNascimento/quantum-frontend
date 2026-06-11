@@ -87,7 +87,10 @@ export default function ReceitaForm() {
 
         <FormField label="Rendimento (g)" error={errors.rendimento_g?.message}>
           <input className="input" type="number" step="0.1"
-            {...register('rendimento_g', { required: 'Obrigatório' })} />
+            {...register('rendimento_g', {
+              required: 'Obrigatório',
+              validate: (v) => parseFloat(v) > 0 || 'Deve ser maior que zero',
+            })} />
         </FormField>
 
         {/* Ingredientes */}
