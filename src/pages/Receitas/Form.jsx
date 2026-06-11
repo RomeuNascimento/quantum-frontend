@@ -76,6 +76,17 @@ export default function ReceitaForm() {
   return (
     <Layout title={isEdit ? 'Editar receita' : 'Nova receita'} onBack={() => navigate('/receitas')}>
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24 space-y-4">
+        {isEdit && (
+          <button type="button" onClick={() => navigate(`/receitas/${id}/ficha`)}
+            className="w-full flex items-center justify-between bg-ink text-bone border border-ink px-4 py-3 active:opacity-80">
+            <span className="font-mono text-xs uppercase tracking-widest">Ficha técnica (PDF)</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+
         <FormField label="Nome da receita" error={errors.nome?.message}>
           <input className="input" {...register('nome', { required: 'Obrigatório' })} />
         </FormField>

@@ -11,6 +11,7 @@ import Embalagens from './pages/Embalagens/index'
 import EmbalagemForm from './pages/Embalagens/Form'
 import Receitas from './pages/Receitas/index'
 import ReceitaForm from './pages/Receitas/Form'
+import ReceitaFicha from './pages/Receitas/Ficha'
 import ImportarReceitas from './pages/Receitas/Importar'
 import ImportarNota from './pages/Ingredientes/ImportarNota'
 import Produtos from './pages/Produtos/index'
@@ -60,6 +61,7 @@ export default function App() {
         <Route path="/receitas/importar" element={<PrivateRoute><ImportarReceitas /></PrivateRoute>} />
         <Route path="/receitas/novo" element={<PrivateRoute><ReceitaForm /></PrivateRoute>} />
         <Route path="/receitas/:id" element={<PrivateRoute><ReceitaForm /></PrivateRoute>} />
+        <Route path="/receitas/:id/ficha" element={<PrivateRoute><ReceitaFicha /></PrivateRoute>} />
 
         <Route path="/produtos" element={<PrivateRoute><Produtos /></PrivateRoute>} />
         <Route path="/produtos/novo" element={<PrivateRoute><ProdutoForm /></PrivateRoute>} />

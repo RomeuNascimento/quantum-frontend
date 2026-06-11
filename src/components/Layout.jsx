@@ -6,7 +6,7 @@ export default function Layout({ title, children, onBack }) {
 
   return (
     <div className="min-h-screen bg-bone">
-      <header className="sticky top-0 z-10 bg-bone border-b border-line px-4 py-3 flex items-center gap-3">
+      <header className="sticky top-0 z-10 bg-bone border-b border-line px-4 py-3 flex items-center gap-3 print:hidden">
         {onBack && (
           <button onClick={typeof onBack === 'function' ? onBack : () => navigate(-1)} className="p-1 -ml-1">
             <svg className="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -17,7 +17,7 @@ export default function Layout({ title, children, onBack }) {
         )}
         <h1 className="text-lg font-sans font-semibold text-ink flex-1">{title}</h1>
       </header>
-      <main className="pb-24">{children}</main>
+      <main className="pb-24 print:pb-0">{children}</main>
       <BottomNav />
     </div>
   )
