@@ -321,7 +321,9 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 1. [x] **Alerta de margem corroída** ✅ 2026-06-11 — Dashboard consome `relatorioMargem()`; banner rust clicável "N produtos precisam de reajuste" (algum canal com margem real < 10%) → `/relatorio`
 2. [ ] **Rateio de custos fixos por produto** — ⏸️ ADIADO por decisão do usuário em 2026-06-11 (opções apresentadas: por hora de produção / % sobre custo / valor por unidade — escolheu "deixar para depois")
 3. [x] **Simulador "e se"** ✅ 2026-06-11 — `src/components/SimuladorPreco.jsx`: sliders de margem (0–70%) e taxas (0–40%) com preço de venda e lucro em tempo real; montado em `Produtos/Form.jsx` (edição, quando custo_total > 0)
-4. [x] **Ficha técnica exportável (PDF)** ✅ 2026-06-11 — **da receita**: `/receitas/:id/ficha` (`Receitas/Ficha.jsx`) — ingredientes, etapas numeradas, totais, botão Imprimir/Salvar PDF via `window.print()`; `Layout`/`BottomNav` com `print:hidden`. Entrada: botão no form de edição da receita. *Ficha do produto ainda não feita.*
+4. [x] **Ficha técnica exportável (PDF)** ✅ 2026-06-11 — receita: `/receitas/:id/ficha` (`Receitas/Ficha.jsx`); produto: `/produtos/:id/ficha` (`Produtos/Ficha.jsx`) — componentes, custos e totais, botão Imprimir/Salvar PDF via `window.print()`; `Layout`/`BottomNav` com `print:hidden`. Entrada: botão "Ficha técnica (PDF)" nos forms de edição.
+
+**Layout desktop (2026-06-11):** conteúdo contido em coluna `max-w-xl mx-auto` — `Layout` (header+main), `BottomNav`, barras fixas de salvar (`max-w-xl mx-auto block` no botão), `UpdatePrompt`; FABs com `sm:right-[max(1rem,calc(50%-17rem))]` para alinhar à coluna; atalhos do Dashboard `sm:grid-cols-4`. Mobile inalterado (max-w só age ≥576px).
 5. [ ] **Modo offline com fila de escrita** — só depois do TanStack Query
 
 ---
