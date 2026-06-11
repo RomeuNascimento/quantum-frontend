@@ -4,6 +4,7 @@ import Layout from '../components/Layout'
 import { getMe } from '../api/auth'
 import { listarProdutos } from '../api/produtos'
 import { resumoCustosFixos } from '../api/custosFixos'
+import { relatorioMargem } from '../api/precificacao'
 import useAuthStore from '../store/authStore'
 
 const atalhos = [
@@ -17,11 +18,18 @@ export default function Dashboard() {
   const { user, setUser } = useAuthStore()
   const [produtos, setProdutos] = useState([])
   const [resumo, setResumo] = useState(null)
+  const [margemAlerta, setMargemAlerta] = useState([])
 
   useEffect(() => {
     getMe().then((r) => setUser(r.data)).catch(() => {})
     listarProdutos().then((r) => setProdutos(r.data)).catch(() => {})
     resumoCustosFixos().then((r) => setResumo(r.data)).catch(() => {})
+    relatorioMargem().then((r) => {
+      const corroidos = r.data.produtos.filter((p) =>
+        p.canais.some((c) => c.margem_real_pct < 10)
+      )
+      setMargemAlerta(corroidos)
+    }).catch(() => {})
   }, [])
 
   const totalMensal = resumo?.total_mensal ?? 0
@@ -34,6 +42,30 @@ export default function Dashboard() {
           <p className="font-mono text-[11px] uppercase tracking-widest text-mute">Bem-vinda</p>
           <h2 className="text-xl font-bold text-ink font-sans">{user?.nome || '...'}</h2>
         </div>
+
+        {/* Alerta de margem corroída */}
+        {margemAlerta.length > 0 && (
+          <Link to="/relatorio" className="flex items-center gap-3 bg-rust text-bone border border-rust px-4 py-3 active:opacity-80">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+              <p className="font-mono text-xs font-bold uppercase tracking-widest">
+                {margemAlerta.length === 1
+                  ? '1 produto precisa de reajuste'
+                  : `${margemAlerta.length} produtos precisam de reajuste`}
+              </p>
+              <p className="font-mono text-[10px] text-bone/80 truncate">
+                Margem abaixo de 10%: {margemAlerta.map((p) => p.produto_nome).join(', ')}
+              </p>
+            </div>
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        )}
 
         {/* Cards resumo */}
         <div className="grid grid-cols-2 gap-3">

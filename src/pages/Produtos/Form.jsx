@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
+import SimuladorPreco from '../../components/SimuladorPreco'
 import { criarProduto, detalharProduto, atualizarProduto } from '../../api/produtos'
 import { listarReceitas } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
@@ -17,6 +18,7 @@ export default function ProdutoForm() {
   const [receitas, setReceitas] = useState([])
   const [ingredientes, setIngredientes] = useState([])
   const [embalagens, setEmbalagens] = useState([])
+  const [custoTotal, setCustoTotal] = useState(null)
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
@@ -34,6 +36,7 @@ export default function ProdutoForm() {
     })
     if (isEdit) {
       detalharProduto(id).then((r) => {
+        setCustoTotal(r.data.custo_total)
         reset({
           nome: r.data.nome,
           preparacoes: r.data.preparacoes.map((m) => ({ receita_id: m.receita_id, quantidade_g: m.quantidade })),
@@ -154,6 +157,10 @@ export default function ProdutoForm() {
             </div>
           ))}
         </Section>
+
+        {isEdit && custoTotal != null && custoTotal > 0 && (
+          <SimuladorPreco custo={custoTotal} />
+        )}
 
         {erro && <p className="font-mono text-sm text-rust mt-4">{erro}</p>}
       </form>
