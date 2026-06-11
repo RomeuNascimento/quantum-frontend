@@ -106,9 +106,18 @@ export default function ImportarNota() {
           ingId = r.data.id
           criadosNoLote.set(chave, ingId)
         }
+        // quantidade_embalagem é interpretada na unidade do INGREDIENTE —
+        // converte g↔kg / ml↔L quando a nota veio em unidade diferente
+        const destino = item.acao === 'adicionar_preco' && item.match ? item.match.unidade : item.unidade
+        const fconv = (u) => (u === 'kg' || u === 'L' ? 1000 : 1)
+        const grupo = (u) => (u === 'g' || u === 'kg' ? 'massa' : u === 'ml' || u === 'L' ? 'volume' : 'unid')
+        let quantidade = parseFloat(item.quantidade)
+        if (grupo(item.unidade) === grupo(destino) && item.unidade !== destino) {
+          quantidade = (quantidade * fconv(item.unidade)) / fconv(destino)
+        }
         await adicionarPrecoIngrediente(ingId, {
           preco: parseFloat(item.preco_total),
-          quantidade_embalagem: parseFloat(item.quantidade),
+          quantidade_embalagem: quantidade,
           data_compra: dataCompra + 'T12:00:00',
           origem: 'nota_fiscal_ia',
         })
@@ -255,6 +264,18 @@ export default function ImportarNota() {
                           className="font-mono text-[10px] underline text-mute ml-auto flex-shrink-0">
                           {item.acao === 'adicionar_preco' ? 'Adicionar preço ao existente' : 'Criar novo'}
                         </button>
+                        {item.acao === 'adicionar_preco' && item.match.unidade !== item.unidade && (
+                          ['g', 'kg'].includes(item.unidade) === ['g', 'kg'].includes(item.match.unidade) &&
+                          ['ml', 'L'].includes(item.unidade) === ['ml', 'L'].includes(item.match.unidade) ? (
+                            <span className="font-mono text-[10px] text-mute flex-shrink-0">
+                              → {item.match.unidade}
+                            </span>
+                          ) : (
+                            <span className="font-mono text-[10px] text-rust flex-shrink-0">
+                              ⚠ {item.unidade}≠{item.match.unidade}
+                            </span>
+                          )
+                        )}
                       </div>
                     ) : (
                       <span className="font-mono text-[10px] text-mute uppercase tracking-widest">Novo ingrediente</span>
