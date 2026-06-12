@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import useVoltar from '../../hooks/useVoltar'
 import { useForm } from 'react-hook-form'
 import Layout from '../../components/Layout'
@@ -13,9 +14,9 @@ export default function IngredienteForm() {
   const isEdit = !!id
   const navigate = useNavigate()
   const voltar = useVoltar('/ingredientes')
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
-  const [historico, setHistorico] = useState([])
   const [showPreco, setShowPreco] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
@@ -23,14 +24,23 @@ export default function IngredienteForm() {
   })
   const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco, formState: { errors: errPreco } } = useForm()
 
+  const detalheQ = useQuery({
+    queryKey: ['ingrediente', id],
+    enabled: isEdit,
+    queryFn: () => detalharIngrediente(id).then((r) => r.data),
+  })
+  const historico = detalheQ.data?.historico_precos ?? []
+
+  // Preenche o form só na primeira chegada dos dados — refetches posteriores
+  // (ex: após registrar preço) não podem sobrescrever edições do usuário
+  const formPreenchido = useRef(false)
+  useEffect(() => { formPreenchido.current = false }, [id])
   useEffect(() => {
-    if (isEdit) {
-      detalharIngrediente(id).then((r) => {
-        reset(r.data)
-        setHistorico(r.data.historico_precos || [])
-      })
+    if (detalheQ.data && !formPreenchido.current) {
+      reset(detalheQ.data)
+      formPreenchido.current = true
     }
-  }, [id])
+  }, [detalheQ.data, reset])
 
   const onSubmit = async (dados) => {
     setErro('')
@@ -49,6 +59,8 @@ export default function IngredienteForm() {
         }
         await criarIngrediente(payload)
       }
+      queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
+      if (isEdit) queryClient.invalidateQueries({ queryKey: ['ingrediente', id] })
       voltar()
     } catch (e) {
       setErro(e.message)
@@ -68,7 +80,11 @@ export default function IngredienteForm() {
       })
       resetPreco()
       setShowPreco(false)
-      detalharIngrediente(id).then((r) => setHistorico(r.data.historico_precos || []))
+      // Preço novo muda custo do ingrediente e tudo que deriva dele
+      queryClient.invalidateQueries({ queryKey: ['ingrediente', id] })
+      queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
+      queryClient.invalidateQueries({ queryKey: ['precos-produto'] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
     } catch (e) {
       setErro(e.message)
       setShowPreco(false)

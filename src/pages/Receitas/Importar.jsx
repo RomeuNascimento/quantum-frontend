@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import { processarReceitas } from '../../api/ia'
 import { listarIngredientes, criarIngrediente } from '../../api/ingredientes'
@@ -11,6 +12,7 @@ function normalizar(nome) {
 
 export default function ImportarReceitas() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const inputRef = useRef()
 
   const [fase, setFase] = useState('upload')
@@ -106,6 +108,9 @@ export default function ImportarReceitas() {
       }
     }
 
+    // Receitas e ingredientes novos — invalida caches do TanStack Query
+    queryClient.invalidateQueries({ queryKey: ['receitas'] })
+    queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
     setResultados(res)
     setFase('concluido')
   }

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import useVoltar from '../../hooks/useVoltar'
 import Layout from '../../components/Layout'
@@ -13,22 +14,31 @@ export default function EmbalagemForm() {
   const isEdit = !!id
   const navigate = useNavigate()
   const voltar = useVoltar('/embalagens')
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
-  const [historico, setHistorico] = useState([])
   const [showPreco, setShowPreco] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
   const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco } = useForm()
 
+  const detalheQ = useQuery({
+    queryKey: ['embalagem', id],
+    enabled: isEdit,
+    queryFn: () => detalharEmbalagem(id).then((r) => r.data),
+  })
+  const historico = detalheQ.data?.historico_precos ?? []
+
+  // Preenche o form só na primeira chegada dos dados — refetches posteriores
+  // não podem sobrescrever edições do usuário
+  const formPreenchido = useRef(false)
+  useEffect(() => { formPreenchido.current = false }, [id])
   useEffect(() => {
-    if (isEdit) {
-      detalharEmbalagem(id).then((r) => {
-        reset(r.data)
-        setHistorico(r.data.historico_precos || [])
-      })
+    if (detalheQ.data && !formPreenchido.current) {
+      reset(detalheQ.data)
+      formPreenchido.current = true
     }
-  }, [id])
+  }, [detalheQ.data, reset])
 
   const onSubmit = async (dados) => {
     setErro('')
@@ -47,6 +57,8 @@ export default function EmbalagemForm() {
         }
         await criarEmbalagem(payload)
       }
+      queryClient.invalidateQueries({ queryKey: ['embalagens'] })
+      if (isEdit) queryClient.invalidateQueries({ queryKey: ['embalagem', id] })
       voltar()
     } catch (e) {
       setErro(e.message)
@@ -66,7 +78,11 @@ export default function EmbalagemForm() {
       })
       resetPreco()
       setShowPreco(false)
-      detalharEmbalagem(id).then((r) => setHistorico(r.data.historico_precos || []))
+      // Preço novo muda custo da embalagem e tudo que deriva dele
+      queryClient.invalidateQueries({ queryKey: ['embalagem', id] })
+      queryClient.invalidateQueries({ queryKey: ['embalagens'] })
+      queryClient.invalidateQueries({ queryKey: ['precos-produto'] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
     } catch (e) {
       setErro(e.message)
       setShowPreco(false)

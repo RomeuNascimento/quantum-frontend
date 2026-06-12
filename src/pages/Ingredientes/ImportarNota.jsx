@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import { processarNotaFiscal } from '../../api/ia'
 import { listarIngredientes, criarIngrediente, adicionarPrecoIngrediente } from '../../api/ingredientes'
@@ -13,6 +14,7 @@ function normalizar(nome) {
 
 export default function ImportarNota() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const inputRef = useRef()
 
   const [fase, setFase] = useState('upload') // upload | processando | revisao | salvando | concluido
@@ -126,6 +128,11 @@ export default function ImportarNota() {
         res.push({ nome: item.nome, ok: false, msg: e.message })
       }
     }
+    // Ingredientes e preços novos — invalida caches do TanStack Query
+    queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
+    queryClient.invalidateQueries({ queryKey: ['ingrediente'] })
+    queryClient.invalidateQueries({ queryKey: ['precos-produto'] })
+    queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
     setResultados(res)
     setFase('concluido')
   }

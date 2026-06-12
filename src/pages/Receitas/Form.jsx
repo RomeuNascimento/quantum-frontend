@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm, useFieldArray } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
@@ -12,9 +13,9 @@ export default function ReceitaForm() {
   const isEdit = !!id
   const navigate = useNavigate()
   const voltar = useVoltar('/receitas')
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
-  const [ingredientes, setIngredientes] = useState([])
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: { ingredientes: [], etapas_mo: [] },
@@ -22,27 +23,41 @@ export default function ReceitaForm() {
   const { fields: ingFields, append: appendIng, remove: removeIng } = useFieldArray({ control, name: 'ingredientes' })
   const { fields: moFields, append: appendMo, remove: removeMo } = useFieldArray({ control, name: 'etapas_mo' })
 
+  const { data: ingredientes = [] } = useQuery({
+    queryKey: ['ingredientes'],
+    queryFn: () => listarIngredientes().then((r) => r.data),
+  })
+
+  const detalheQ = useQuery({
+    queryKey: ['receita', id],
+    enabled: isEdit,
+    queryFn: () => detalharReceita(id).then((r) => r.data),
+  })
+
+  // Preenche o form só na primeira chegada dos dados — refetch posterior
+  // não pode sobrescrever edições do usuário
+  const formPreenchido = useRef(false)
+  useEffect(() => { formPreenchido.current = false }, [id])
   useEffect(() => {
-    listarIngredientes().then((r) => setIngredientes(r.data))
-    if (isEdit) {
-      detalharReceita(id).then((r) => {
-        reset({
-          nome: r.data.nome,
-          tipo: r.data.tipo,
-          rendimento_g: r.data.rendimento_g,
-          ingredientes: r.data.ingredientes.map((i) => ({
-            ingrediente_id: i.ingrediente_id,
-            quantidade_g: i.quantidade_g,
-          })),
-          etapas_mo: r.data.etapas_mo.map((e) => ({
-            descricao: e.descricao,
-            tempo_min: e.tempo_min,
-            colaborador_id: e.colaborador_id ?? null,
-          })),
-        })
+    const d = detalheQ.data
+    if (d && !formPreenchido.current) {
+      reset({
+        nome: d.nome,
+        tipo: d.tipo,
+        rendimento_g: d.rendimento_g,
+        ingredientes: d.ingredientes.map((i) => ({
+          ingrediente_id: i.ingrediente_id,
+          quantidade_g: i.quantidade_g,
+        })),
+        etapas_mo: d.etapas_mo.map((e) => ({
+          descricao: e.descricao,
+          tempo_min: e.tempo_min,
+          colaborador_id: e.colaborador_id ?? null,
+        })),
       })
+      formPreenchido.current = true
     }
-  }, [id])
+  }, [detalheQ.data, reset])
 
   const onSubmit = async (dados) => {
     setErro('')
@@ -66,6 +81,13 @@ export default function ReceitaForm() {
         await atualizarReceita(id, payload)
       } else {
         await criarReceita(payload)
+      }
+      queryClient.invalidateQueries({ queryKey: ['receitas'] })
+      if (isEdit) {
+        queryClient.invalidateQueries({ queryKey: ['receita', id] })
+        // Receita alterada muda custo dos produtos que a usam
+        queryClient.invalidateQueries({ queryKey: ['precos-produto'] })
+        queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
       }
       voltar()
     } catch (e) {

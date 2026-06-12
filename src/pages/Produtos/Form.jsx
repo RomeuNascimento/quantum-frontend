@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm, useFieldArray } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
@@ -16,13 +17,9 @@ export default function ProdutoForm() {
   const isEdit = !!id
   const navigate = useNavigate()
   const voltar = useVoltar('/produtos')
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
-  const [receitas, setReceitas] = useState([])
-  const [ingredientes, setIngredientes] = useState([])
-  const [embalagens, setEmbalagens] = useState([])
-  const [custoTotal, setCustoTotal] = useState(null)
-  const [historico, setHistorico] = useState([])
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
@@ -32,26 +29,47 @@ export default function ProdutoForm() {
   const { fields: embFields, append: appendEmb, remove: removeEmb } = useFieldArray({ control, name: 'embalagens' })
   const { fields: moFields, append: appendMo, remove: removeMo } = useFieldArray({ control, name: 'mo_montagem' })
 
+  const { data: receitas = [] } = useQuery({
+    queryKey: ['receitas'],
+    queryFn: () => listarReceitas().then((r) => r.data),
+  })
+  const { data: ingredientes = [] } = useQuery({
+    queryKey: ['ingredientes'],
+    queryFn: () => listarIngredientes().then((r) => r.data),
+  })
+  const { data: embalagens = [] } = useQuery({
+    queryKey: ['embalagens'],
+    queryFn: () => listarEmbalagens().then((r) => r.data),
+  })
+  const { data: historico = [] } = useQuery({
+    queryKey: ['historico-custo-produto', id],
+    enabled: isEdit,
+    queryFn: () => historicoCustoProduto(id).then((r) => r.data.pontos || []),
+  })
+  const detalheQ = useQuery({
+    queryKey: ['produto', id],
+    enabled: isEdit,
+    queryFn: () => detalharProduto(id).then((r) => r.data),
+  })
+  const custoTotal = detalheQ.data?.custo_total ?? null
+
+  // Preenche o form só na primeira chegada dos dados — refetch posterior
+  // não pode sobrescrever edições do usuário
+  const formPreenchido = useRef(false)
+  useEffect(() => { formPreenchido.current = false }, [id])
   useEffect(() => {
-    Promise.all([listarReceitas(), listarIngredientes(), listarEmbalagens()]).then(([r, i, e]) => {
-      setReceitas(r.data)
-      setIngredientes(i.data)
-      setEmbalagens(e.data)
-    })
-    if (isEdit) {
-      historicoCustoProduto(id).then((r) => setHistorico(r.data.pontos || [])).catch(() => {})
-      detalharProduto(id).then((r) => {
-        setCustoTotal(r.data.custo_total)
-        reset({
-          nome: r.data.nome,
-          preparacoes: r.data.preparacoes.map((m) => ({ receita_id: m.receita_id, quantidade_g: m.quantidade })),
-          ingredientes: r.data.ingredientes_avulsos.map((m) => ({ ingrediente_id: m.ingrediente_id, quantidade_g: m.quantidade })),
-          embalagens: r.data.embalagens.map((m) => ({ embalagem_id: m.embalagem_id, quantidade: m.quantidade })),
-          mo_montagem: r.data.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: m.tempo_min })),
-        })
+    const d = detalheQ.data
+    if (d && !formPreenchido.current) {
+      reset({
+        nome: d.nome,
+        preparacoes: d.preparacoes.map((m) => ({ receita_id: m.receita_id, quantidade_g: m.quantidade })),
+        ingredientes: d.ingredientes_avulsos.map((m) => ({ ingrediente_id: m.ingrediente_id, quantidade_g: m.quantidade })),
+        embalagens: d.embalagens.map((m) => ({ embalagem_id: m.embalagem_id, quantidade: m.quantidade })),
+        mo_montagem: d.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: m.tempo_min })),
       })
+      formPreenchido.current = true
     }
-  }, [id])
+  }, [detalheQ.data, reset])
 
   const onSubmit = async (dados) => {
     setErro('')
@@ -77,6 +95,13 @@ export default function ProdutoForm() {
       }
       if (isEdit) await atualizarProduto(id, payload)
       else await criarProduto(payload)
+      queryClient.invalidateQueries({ queryKey: ['produtos'] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
+      if (isEdit) {
+        queryClient.invalidateQueries({ queryKey: ['produto', id] })
+        queryClient.invalidateQueries({ queryKey: ['historico-custo-produto', id] })
+        queryClient.invalidateQueries({ queryKey: ['precos-produto', Number(id)] })
+      }
       voltar()
     } catch (e) {
       setErro(e.message)
