@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import useAuthStore from './store/authStore'
 import ErrorBoundary from './components/ErrorBoundary'
+import PaywallGate from './components/PaywallGate'
 import OfflineBanner from './components/OfflineBanner'
 import UpdatePrompt from './components/UpdatePrompt'
 import Login from './pages/Login'
@@ -32,7 +33,8 @@ function ScrollToTop() {
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((s) => s.token)
-  return token ? children : <Navigate to="/login" replace />
+  if (!token) return <Navigate to="/login" replace />
+  return <PaywallGate>{children}</PaywallGate>
 }
 
 function PublicRoute({ children }) {

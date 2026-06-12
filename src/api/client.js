@@ -18,6 +18,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (error) => {
+    if (error.response?.status === 402) {
+      window.location.href = '/assinatura'
+      return Promise.reject(new Error('Assinatura necessária'))
+    }
     if (error.response?.status === 401) {
       const { token, logout } = useAuthStore.getState()
       // Só faz logout se havia uma sessão ativa.
