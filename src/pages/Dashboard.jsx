@@ -151,7 +151,8 @@ export default function Dashboard() {
                 to={a.to}
                 className="border border-ink bg-bone flex items-center gap-2 px-3 py-3 active:bg-ink active:text-bone transition-colors"
               >
-                <span className="font-mono text-[11px] uppercase tracking-widest text-ink whitespace-nowrap">+ {a.label}</span>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink shrink-0">+</span>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink truncate">{a.label}</span>
               </Link>
             ))}
           </div>
@@ -163,7 +164,6 @@ export default function Dashboard() {
           <div>
             {[
               { to: '/relatorio', label: 'Relatório de margem' },
-              { to: '/embalagens', label: 'Embalagens' },
               { to: '/custos-fixos', label: 'Custos fixos' },
             ].map((g) => (
               <Link
