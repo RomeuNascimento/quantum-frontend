@@ -3,8 +3,8 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-11 (tarde — branch `claude/keen-ptolemy-mmed2k`, continua a `claude/sharp-noether-6ml8uh`)
-**Próxima sessão:** Fase 2 item 3 (gráfico no detalhe do produto) ou Fase 1 restante (TanStack Query, M7 Dashboard)
+**Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — M2: TanStack Query adotado)
+**Próxima sessão:** Fase 3 restante (modo offline com fila de escrita — pré-requisito M2 ✅) ou itens menores (Modal acessível, ErrorBoundary)
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -88,7 +88,7 @@
 
 - **Framework:** React 18 + Vite
 - **Roteamento:** React Router v6
-- **Estado:** Zustand
+- **Estado:** Zustand (auth) + TanStack Query v5 (server state — `src/queryClient.js`)
 - **HTTP:** Axios
 - **Estilo:** TailwindCSS (mobile-first, 375px base) — paleta Quantum v1.0
 - **Fontes:** Space Grotesk (UI) + JetBrains Mono (números) via Google Fonts
@@ -277,7 +277,7 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 ### 🟡 Médios (Fase 1)
 
 - [x] **M1. Tratamento de erro sistêmico** ✅ 2026-06-11 — try/catch/finally + banner em Precificação (com guarda de race no selecionarProduto) e CustosFixos; .catch nas 4 listas; onAddPreco dos forms — Precificação/CustosFixos: `carregar()` sem try/catch/finally → spinner infinito em falha; listas com `.finally()` sem `.catch()` → EmptyState enganoso em erro de rede; `selecionarProduto` sem catch e sem cancelamento (race ao trocar produto rápido). Mutações sem feedback de erro: `Embalagens handleDelete`, `CustosFixos onSubmit/handleDelete`, `Precificacao onCriarCanal/onSalvarPreco`, `onAddPreco` (Ingredientes/Embalagens Form).
-- [ ] **M2. Adotar TanStack Query** — resolve loading/error/refetch/race de uma vez, corta ~30% do código das listas. Recomendação nº 1 de arquitetura; pré-requisito para modo offline com fila de escrita.
+- [x] **M2. Adotar TanStack Query** ✅ 2026-06-12 (branch `claude/practical-cray-vksesn`) — `@tanstack/react-query` v5; `src/queryClient.js` (staleTime 30s, retry 1) + Provider em `main.jsx` + `queryClient.clear()` no logout. Migrados: 5 listas (useQuery + useMutation nas deleções), Relatorio, Dashboard (4 useQuery, estados '…'/'—' preservados), Precificação (query parametrizada `['precos-produto', id]` eliminou o race guard `selecaoAtual`), forms (detalhe via useQuery + guard `formPreenchido` para o reset; submissões continuam try/catch + invalidate). Fluxos de importação IA NÃO migrados (máquina de estados intacta; só invalidateQueries ao final do salvar). — resolve loading/error/refetch/race de uma vez, corta ~30% do código das listas. Recomendação nº 1 de arquitetura; pré-requisito para modo offline com fila de escrita.
 - [x] **M3. Erros 422 do FastAPI viram "[object Object]"** — `src/api/client.js:29`: `detail` é array de objetos em erro de validação; normalizar antes de criar `Error`.
 - [x] **M4. Validações numéricas fracas** ✅ 2026-06-11 — rendimento_g valida > 0; Produtos/Form filtra linhas com select vazio (sem NaN no payload) — `rendimento_g` aceita 0/negativo (divisão por zero no custo proporcional); selects de Produtos sem `required` → `NaN` enviado; `min: 0.01` sem mensagem de erro.
 - [x] **M5. Cache da API persiste após logout** ✅ 2026-06-11 — logout() deleta `api-cache` do Cache Storage — runtimeCaching `api-cache` (7 dias) não é limpo no `logout()`. Privacidade em aparelho compartilhado.
@@ -391,8 +391,31 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 - Auditoria completa de `onBack`: todas as demais páginas usam função explícita com rota destino (nenhum `navigate(-1)` em uso).
 
 **Fase 1 restante:**
-- M2: TanStack Query — instalar `@tanstack/react-query`; substituir padrão useState/useEffect/carregar por `useQuery`; começa pelas listas simples (ingredientes, embalagens)
-- M7: Dashboard — formatação `Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'})` consistente; saudação sem gênero hardcoded; erro de rede ≠ "R$ 0.00"
+- [x] M2: TanStack Query ✅ 2026-06-12 (branch `claude/practical-cray-vksesn`) — ver detalhes na seção a seguir e no item M2 da auditoria
+- [x] M7: Dashboard ✅ 2026-06-11
+
+### M2 TanStack Query — o que foi feito (2026-06-12, branch `claude/practical-cray-vksesn`)
+
+**Infra:**
+- `src/queryClient.js` — QueryClient exportado como módulo (staleTime 30s, retry 1); `main.jsx` monta o `QueryClientProvider`; `authStore.logout()` chama `queryClient.clear()` (além do `caches.delete('api-cache')` já existente)
+
+**Convenção de queryKeys (manter ao criar telas novas):**
+- Listas: `['ingredientes']`, `['embalagens']`, `['receitas']`, `['produtos']`, `['canais']`, `['custos-fixos']`, `['custos-fixos-resumo']`, `['relatorio-margem']`, `['me']`
+- Detalhes: `['ingrediente', id]`, `['embalagem', id]`, `['receita', id]`, `['produto', id]`, `['historico-custo-produto', id]`
+- Precificação: `['precos-produto', produtoId]` (**id numérico** — `Number()` no onChange do select; precos + histórico num único queryFn)
+
+**Páginas migradas:**
+- 5 listas (Ingredientes, Embalagens, Receitas, Produtos, CustosFixos) + Relatorio: `useQuery` + `useMutation` nas deleções com `invalidateQueries`; banners rust preservados (erro de fetch sincronizado p/ o state do banner via `useEffect` — continua dismissável); EmptyState não aparece mais em erro de rede (guard `isError`)
+- Dashboard: 4 `useQuery` independentes (chaves compartilhadas com as listas → cache aproveitado entre telas); estados '…' (carregando) e '—' (erro) mantidos; `margemAlerta` via `useMemo`
+- Precificação: seleção de produto virou query parametrizada — **ref `selecaoAtual` (race guard manual) removida**; mutations de canal/preço invalidam `['canais']` / `['precos-produto', id]` / `['relatorio-margem']`
+- Forms (4): fetch do detalhe via `useQuery`; **guard `formPreenchido` (ref)** — `reset()` do react-hook-form roda só na primeira chegada dos dados, refetch posterior (ex: após registrar preço, ou refetchOnWindowFocus) não sobrescreve edições do usuário; registrar preço invalida detalhe + lista + `['precos-produto']` + `['relatorio-margem']`; submissões mantidas como try/catch (não viraram useMutation — bom senso, lógica funcionava) com invalidate antes do `voltar()`
+
+**O que ficou de fora (decisão, não pendência):**
+- Fluxos de importação IA (`ImportarNota.jsx`, `Receitas/Importar.jsx`) — máquina de estados upload→processando→revisão→salvando→concluído intacta; apenas `invalidateQueries` ao final do `salvar()`
+- Planejamento, Fichas (Receitas/Produtos) e Login — fetches pontuais read-only, sem dor; migrar oportunisticamente
+- Submissões de formulário continuam imperativas (try/catch/finally)
+
+**⚠️ Testar manualmente após deploy:** fluxo completo de precificação (trocar produto rápido no select), edição de form com refetch em background (registrar preço e conferir que o nome editado não some), logout → login com outra conta (dados antigos não podem vazar), importação IA → voltar à lista (itens novos aparecem)
 
 **Fase 3 (depois):**
 - Alerta de margem corroída no Dashboard ("3 produtos precisam de reajuste")
