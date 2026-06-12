@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '../components/Layout'
 import { getMe } from '../api/auth'
 import { listarProdutos } from '../api/produtos'
@@ -18,27 +19,39 @@ const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' 
 
 export default function Dashboard() {
   const { user, setUser, logout } = useAuthStore()
-  const [produtos, setProdutos] = useState(null)   // null = carregando/erro
-  const [resumo, setResumo] = useState(null)
-  const [erroResumo, setErroResumo] = useState(false)
-  const [erroProdutos, setErroProdutos] = useState(false)
-  const [margemAlerta, setMargemAlerta] = useState([])
-  const [margens, setMargens] = useState([])
 
+  const meQ = useQuery({
+    queryKey: ['me'],
+    queryFn: () => getMe().then((r) => r.data),
+  })
+  const produtosQ = useQuery({
+    queryKey: ['produtos'],
+    queryFn: () => listarProdutos().then((r) => r.data),
+  })
+  const resumoQ = useQuery({
+    queryKey: ['custos-fixos-resumo'],
+    queryFn: () => resumoCustosFixos().then((r) => r.data),
+  })
+  const margemQ = useQuery({
+    queryKey: ['relatorio-margem'],
+    queryFn: () => relatorioMargem().then((r) => r.data.produtos),
+  })
+
+  // Mantém o user persistido no Zustand atualizado (saudação offline)
   useEffect(() => {
-    getMe().then((r) => setUser(r.data)).catch(() => {})
-    listarProdutos().then((r) => setProdutos(r.data)).catch(() => setErroProdutos(true))
-    resumoCustosFixos().then((r) => setResumo(r.data)).catch(() => setErroResumo(true))
-    relatorioMargem().then((r) => {
-      const corroidos = r.data.produtos.filter((p) =>
-        p.canais.some((c) => c.margem_real_pct < 10)
-      )
-      setMargemAlerta(corroidos)
-      setMargens(r.data.produtos)
-    }).catch(() => {})
-  }, [])
+    if (meQ.data) setUser(meQ.data)
+  }, [meQ.data, setUser])
 
-  const totalMensal = resumo?.total_mensal ?? null
+  const produtos = produtosQ.data ?? null   // null = carregando/erro
+  const erroProdutos = produtosQ.isError
+  const erroResumo = resumoQ.isError
+  const margens = margemQ.data ?? []
+  const margemAlerta = useMemo(
+    () => margens.filter((p) => p.canais.some((c) => c.margem_real_pct < 10)),
+    [margens],
+  )
+
+  const totalMensal = resumoQ.data?.total_mensal ?? null
   const listaProdutos = produtos ?? []
 
   return (
