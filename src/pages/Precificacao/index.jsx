@@ -8,7 +8,7 @@ import FormField from '../../components/FormField'
 import CustoLineChart from '../../components/CustoLineChart'
 import MargemBadge from '../../components/MargemBadge'
 import { listarProdutos, historicoCustoProduto } from '../../api/produtos'
-import { listarCanais, criarCanal } from '../../api/precificacao'
+import { listarCanais, criarCanal, atualizarCanal, deletarCanal } from '../../api/precificacao'
 import { listarPrecosProduto, criarPrecoProduto, atualizarPrecoProduto } from '../../api/precificacao'
 import { useForm } from 'react-hook-form'
 
@@ -52,11 +52,12 @@ export default function Precificacao() {
   const queryClient = useQueryClient()
   const [produtoSelecionado, setProdutoSelecionado] = useState(null)
   const [showModalCanal, setShowModalCanal] = useState(false)
+  const [editCanal, setEditCanal] = useState(null)
   const [showModalPreco, setShowModalPreco] = useState(false)
   const [editPreco, setEditPreco] = useState(null)
   const [erro, setErro] = useState('')
 
-  const { register: regCanal, handleSubmit: submitCanal, reset: resetCanal } = useForm()
+  const { register: regCanal, handleSubmit: submitCanal, reset: resetCanal, setValue: setCanalValue } = useForm()
   const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco, setValue } = useForm()
 
   const produtosQ = useQuery({
@@ -104,23 +105,56 @@ export default function Precificacao() {
     if (e) setErro(e.message)
   }, [produtosQ.error, canaisQ.error, precosQ.error])
 
-  const criarCanalM = useMutation({
-    mutationFn: (dados) =>
-      criarCanal({
-        ...dados,
-        taxa_plataforma_pct: parseFloat(dados.taxa_plataforma_pct) || 0,
-        taxa_cartao_pct: parseFloat(dados.taxa_cartao_pct) || 0,
-        imposto_pct: parseFloat(dados.imposto_pct) || 0,
-      }),
+  const salvarCanalM = useMutation({
+    mutationFn: ({ canalId, payload }) =>
+      canalId ? atualizarCanal(canalId, payload) : criarCanal(payload),
     onSuccess: () => {
       resetCanal()
       queryClient.invalidateQueries({ queryKey: ['canais'] })
+      // taxas mudaram → preços sugeridos e relatório precisam recalcular
+      queryClient.invalidateQueries({ queryKey: ['precos-produto', produtoSelecionado] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
     },
     onError: (e) => setErro(e.message),
-    onSettled: () => setShowModalCanal(false),
+    onSettled: () => { setShowModalCanal(false); setEditCanal(null) },
   })
 
-  const onCriarCanal = (dados) => criarCanalM.mutate(dados)
+  const onSalvarCanal = (dados) =>
+    salvarCanalM.mutate({
+      canalId: editCanal?.id,
+      payload: {
+        nome: dados.nome,
+        taxa_plataforma_pct: parseFloat(dados.taxa_plataforma_pct) || 0,
+        taxa_cartao_pct: parseFloat(dados.taxa_cartao_pct) || 0,
+        imposto_pct: parseFloat(dados.imposto_pct) || 0,
+      },
+    })
+
+  const deletarCanalM = useMutation({
+    mutationFn: (canalId) => deletarCanal(canalId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['canais'] })
+      queryClient.invalidateQueries({ queryKey: ['precos-produto', produtoSelecionado] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
+    },
+    onError: (e) => setErro(e.message),
+    onSettled: () => { setShowModalCanal(false); setEditCanal(null) },
+  })
+
+  const abrirNovoCanal = () => {
+    setEditCanal(null)
+    resetCanal({ nome: '', taxa_plataforma_pct: '', taxa_cartao_pct: '', imposto_pct: '' })
+    setShowModalCanal(true)
+  }
+
+  const abrirEditarCanal = (c) => {
+    setEditCanal(c)
+    setCanalValue('nome', c.nome)
+    setCanalValue('taxa_plataforma_pct', c.taxa_plataforma_pct)
+    setCanalValue('taxa_cartao_pct', c.taxa_cartao_pct)
+    setCanalValue('imposto_pct', c.imposto_pct)
+    setShowModalCanal(true)
+  }
 
   const salvarPrecoM = useMutation({
     mutationFn: ({ precoId, payload }) =>
@@ -172,7 +206,7 @@ export default function Precificacao() {
             <div className="flex items-center justify-between mb-3">
               <p className="label">Canais de venda</p>
               <button
-                onClick={() => setShowModalCanal(true)}
+                onClick={abrirNovoCanal}
                 className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
               >
                 + Canal
@@ -180,12 +214,14 @@ export default function Precificacao() {
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
               {canais.map((c) => (
-                <div key={c.id} className="flex-shrink-0 card px-3 py-2 min-w-[140px]">
+                <button key={c.id} onClick={() => abrirEditarCanal(c)}
+                  className="flex-shrink-0 card text-left px-3 py-2 min-w-[140px] active:bg-line/40">
                   <p className="font-sans font-semibold text-ink text-sm">{c.nome}</p>
                   <p className="font-mono text-xs text-mute">Plataforma: {c.taxa_plataforma_pct}%</p>
                   <p className="font-mono text-xs text-mute">Cartão: {c.taxa_cartao_pct}%</p>
                   <p className="font-mono text-xs text-mute">Imposto: {c.imposto_pct}%</p>
-                </div>
+                  <p className="font-mono text-[9px] text-mute uppercase tracking-widest mt-1">Toque p/ editar</p>
+                </button>
               ))}
             </div>
 
@@ -255,14 +291,25 @@ export default function Precificacao() {
         )}
       </div>
 
-      {/* Modal canal */}
-      <Modal isOpen={showModalCanal} onClose={() => setShowModalCanal(false)} title="Novo canal">
-        <form onSubmit={submitCanal(onCriarCanal)} className="space-y-3">
+      {/* Modal canal — cria ou edita */}
+      <Modal isOpen={showModalCanal} onClose={() => { setShowModalCanal(false); setEditCanal(null) }}
+        title={editCanal ? 'Editar canal' : 'Novo canal'}>
+        <form onSubmit={submitCanal(onSalvarCanal)} className="space-y-3">
           <FormField label="Nome"><input className="input" {...regCanal('nome', { required: true })} /></FormField>
           <FormField label="Taxa plataforma (%)"><input className="input" type="number" step="0.01" {...regCanal('taxa_plataforma_pct')} /></FormField>
           <FormField label="Taxa cartão (%)"><input className="input" type="number" step="0.01" {...regCanal('taxa_cartao_pct')} /></FormField>
           <FormField label="Imposto (%)"><input className="input" type="number" step="0.01" {...regCanal('imposto_pct')} /></FormField>
-          <button type="submit" className="btn-primary">Criar canal</button>
+          <button type="submit" className="btn-primary" disabled={salvarCanalM.isPending}>
+            {editCanal ? 'Salvar alterações' : 'Criar canal'}
+          </button>
+          {editCanal && (
+            <button type="button"
+              onClick={() => { if (confirm(`Remover o canal "${editCanal.nome}"?`)) deletarCanalM.mutate(editCanal.id) }}
+              className="w-full font-mono text-xs uppercase tracking-widest text-rust border border-rust py-2"
+              disabled={deletarCanalM.isPending}>
+              Excluir canal
+            </button>
+          )}
         </form>
       </Modal>
 
