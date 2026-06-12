@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import Modal from '../../components/Modal'
@@ -48,92 +49,105 @@ function PrecoDecomposicao({ pp }) {
 
 export default function Precificacao() {
   const navigate = useNavigate()
-  const [produtos, setProdutos] = useState([])
-  const [canais, setCanais] = useState([])
+  const queryClient = useQueryClient()
   const [produtoSelecionado, setProdutoSelecionado] = useState(null)
-  const [precos, setPrecos] = useState([])
-  const [historico, setHistorico] = useState([])
-  const [loading, setLoading] = useState(true)
   const [showModalCanal, setShowModalCanal] = useState(false)
   const [showModalPreco, setShowModalPreco] = useState(false)
   const [editPreco, setEditPreco] = useState(null)
   const [erro, setErro] = useState('')
-  // Guarda contra race: ao trocar de produto rápido, só a resposta da
-  // seleção mais recente pode escrever no estado
-  const selecaoAtual = useRef(null)
 
   const { register: regCanal, handleSubmit: submitCanal, reset: resetCanal } = useForm()
   const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco, setValue } = useForm()
 
-  const carregar = async () => {
-    try {
-      const [p, c] = await Promise.all([listarProdutos(), listarCanais()])
-      setProdutos(p.data)
-      setCanais(c.data)
-      if (p.data.length > 0 && !produtoSelecionado) {
-        selecionarProduto(p.data[0].id)
-      }
-    } catch (e) {
-      setErro(e.message)
-    } finally {
-      setLoading(false)
+  const produtosQ = useQuery({
+    queryKey: ['produtos'],
+    queryFn: () => listarProdutos().then((r) => r.data),
+  })
+  const canaisQ = useQuery({
+    queryKey: ['canais'],
+    queryFn: () => listarCanais().then((r) => r.data),
+  })
+
+  // A seleção de produto é uma query parametrizada — a chave
+  // ['precos-produto', id] elimina o race manual: trocar de produto troca
+  // a chave e a resposta antiga nunca escreve sobre a nova
+  const precosQ = useQuery({
+    queryKey: ['precos-produto', produtoSelecionado],
+    enabled: produtoSelecionado != null,
+    queryFn: async () => {
+      const [r, h] = await Promise.all([
+        listarPrecosProduto(produtoSelecionado),
+        historicoCustoProduto(produtoSelecionado),
+      ])
+      return { precos: r.data, historico: h.data.pontos || [] }
+    },
+  })
+
+  const produtos = produtosQ.data ?? []
+  const canais = canaisQ.data ?? []
+  const precos = precosQ.data?.precos ?? []
+  const historico = precosQ.data?.historico ?? []
+  const loading = produtosQ.isLoading || canaisQ.isLoading
+
+  const selecionarProduto = (id) => setProdutoSelecionado(Number(id))
+
+  // Seleciona o primeiro produto assim que a lista chega
+  useEffect(() => {
+    if (produtos.length > 0 && produtoSelecionado == null) {
+      setProdutoSelecionado(produtos[0].id)
     }
-  }
+  }, [produtos, produtoSelecionado])
 
-  const selecionarProduto = async (id) => {
-    setProdutoSelecionado(id)
-    selecaoAtual.current = id
-    try {
-      const [r, h] = await Promise.all([listarPrecosProduto(id), historicoCustoProduto(id)])
-      if (selecaoAtual.current !== id) return
-      setPrecos(r.data)
-      setHistorico(h.data.pontos || [])
-    } catch (e) {
-      if (selecaoAtual.current === id) setErro(e.message)
-    }
-  }
+  // Erros de carregamento usam o mesmo banner (dismissável) das mutações
+  useEffect(() => {
+    const e = produtosQ.error || canaisQ.error || precosQ.error
+    if (e) setErro(e.message)
+  }, [produtosQ.error, canaisQ.error, precosQ.error])
 
-  useEffect(() => { carregar() }, [])
-
-  const onCriarCanal = async (dados) => {
-    try {
-      await criarCanal({
+  const criarCanalM = useMutation({
+    mutationFn: (dados) =>
+      criarCanal({
         ...dados,
         taxa_plataforma_pct: parseFloat(dados.taxa_plataforma_pct) || 0,
         taxa_cartao_pct: parseFloat(dados.taxa_cartao_pct) || 0,
         imposto_pct: parseFloat(dados.imposto_pct) || 0,
-      })
+      }),
+    onSuccess: () => {
       resetCanal()
-      setShowModalCanal(false)
-      carregar()
-    } catch (e) {
-      setErro(e.message)
-      setShowModalCanal(false)
-    }
-  }
+      queryClient.invalidateQueries({ queryKey: ['canais'] })
+    },
+    onError: (e) => setErro(e.message),
+    onSettled: () => setShowModalCanal(false),
+  })
 
-  const onSalvarPreco = async (dados) => {
-    const payload = {
-      canal_id: parseInt(dados.canal_id),
-      margem_pct: parseFloat(dados.margem_pct),
-      preco_final: dados.preco_final ? parseFloat(dados.preco_final) : null,
-    }
-    try {
-      if (editPreco) {
-        await atualizarPrecoProduto(produtoSelecionado, editPreco.id, payload)
-      } else {
-        await criarPrecoProduto(produtoSelecionado, payload)
-      }
-      setShowModalPreco(false)
-      setEditPreco(null)
+  const onCriarCanal = (dados) => criarCanalM.mutate(dados)
+
+  const salvarPrecoM = useMutation({
+    mutationFn: ({ precoId, payload }) =>
+      precoId
+        ? atualizarPrecoProduto(produtoSelecionado, precoId, payload)
+        : criarPrecoProduto(produtoSelecionado, payload),
+    onSuccess: () => {
       resetPreco()
-      selecionarProduto(produtoSelecionado)
-    } catch (e) {
-      setErro(e.message)
+      queryClient.invalidateQueries({ queryKey: ['precos-produto', produtoSelecionado] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
+    },
+    onError: (e) => setErro(e.message),
+    onSettled: () => {
       setShowModalPreco(false)
       setEditPreco(null)
-    }
-  }
+    },
+  })
+
+  const onSalvarPreco = (dados) =>
+    salvarPrecoM.mutate({
+      precoId: editPreco?.id,
+      payload: {
+        canal_id: parseInt(dados.canal_id),
+        margem_pct: parseFloat(dados.margem_pct),
+        preco_final: dados.preco_final ? parseFloat(dados.preco_final) : null,
+      },
+    })
 
   const abrirEditar = (pp) => {
     setEditPreco(pp)
