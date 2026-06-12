@@ -10,7 +10,6 @@ import useAuthStore from '../store/authStore'
 
 const atalhos = [
   { to: '/ingredientes/novo', label: 'Ingrediente' },
-  { to: '/embalagens/novo', label: 'Embalagem' },
   { to: '/receitas/novo', label: 'Receita' },
   { to: '/produtos/novo', label: 'Produto' },
 ]
@@ -109,14 +108,14 @@ export default function Dashboard() {
         {/* Atalhos rápidos */}
         <div>
           <p className="label mb-3">Cadastrar</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {atalhos.map((a) => (
               <Link
                 key={a.to}
                 to={a.to}
                 className="border border-ink bg-bone flex items-center gap-2 px-3 py-3 active:bg-ink active:text-bone transition-colors"
               >
-                <span className="font-mono text-xs uppercase tracking-widest text-ink">+ {a.label}</span>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink whitespace-nowrap">+ {a.label}</span>
               </Link>
             ))}
           </div>
