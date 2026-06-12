@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
@@ -9,27 +10,27 @@ const formatCusto = (v) => (v != null ? `R$ ${v.toFixed(4)}` : '—')
 
 export default function Ingredientes() {
   const navigate = useNavigate()
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
 
-  const carregar = () =>
-    listarIngredientes()
-      .then((r) => setItems(r.data))
-      .catch((e) => setErroDelete(e.message))
-      .finally(() => setLoading(false))
+  const { data: items = [], isLoading, isError, error } = useQuery({
+    queryKey: ['ingredientes'],
+    queryFn: () => listarIngredientes().then((r) => r.data),
+  })
 
-  useEffect(() => { carregar() }, [])
+  // Erro de carregamento usa o mesmo banner (dismissável) das deleções
+  useEffect(() => { if (error) setErroDelete(error.message) }, [error])
 
-  const handleDelete = async (id, nome) => {
+  const remover = useMutation({
+    mutationFn: deletarIngrediente,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ingredientes'] }),
+    onError: (e) => setErroDelete(e.message),
+  })
+
+  const handleDelete = (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
     setErroDelete('')
-    try {
-      await deletarIngrediente(id)
-      carregar()
-    } catch (e) {
-      setErroDelete(e.message)
-    }
+    remover.mutate(id)
   }
 
   return (
@@ -74,9 +75,9 @@ export default function Ingredientes() {
           </div>
         )}
 
-        {loading ? (
+        {isLoading ? (
           <LoadingSpinner />
-        ) : items.length === 0 ? (
+        ) : isError ? null : items.length === 0 ? (
           <EmptyState
             title="Nenhum ingrediente"
             description="Cadastre seus ingredientes para calcular custos"

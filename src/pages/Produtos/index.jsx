@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
@@ -7,24 +8,29 @@ import { listarProdutos, deletarProduto } from '../../api/produtos'
 
 export default function Produtos() {
   const navigate = useNavigate()
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
 
-  const carregar = () =>
-    listarProdutos().then((r) => setItems(r.data)).catch((e) => setErroDelete(e.message)).finally(() => setLoading(false))
+  const { data: items = [], isLoading, isError, error } = useQuery({
+    queryKey: ['produtos'],
+    queryFn: () => listarProdutos().then((r) => r.data),
+  })
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { if (error) setErroDelete(error.message) }, [error])
 
-  const handleDelete = async (id, nome) => {
+  const remover = useMutation({
+    mutationFn: deletarProduto,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['produtos'] })
+      queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
+    },
+    onError: (e) => setErroDelete(e.message),
+  })
+
+  const handleDelete = (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
     setErroDelete('')
-    try {
-      await deletarProduto(id)
-      carregar()
-    } catch (e) {
-      setErroDelete(e.message)
-    }
+    remover.mutate(id)
   }
 
   return (
@@ -37,7 +43,7 @@ export default function Produtos() {
           </div>
         )}
 
-        {loading ? <LoadingSpinner /> : items.length === 0 ? (
+        {isLoading ? <LoadingSpinner /> : isError ? null : items.length === 0 ? (
           <EmptyState title="Nenhum produto" description="Monte seus produtos combinando receitas e ingredientes"
             action={<Link to="/produtos/novo" className="btn-primary w-auto px-6">Cadastrar</Link>} />
         ) : (

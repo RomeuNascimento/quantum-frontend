@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
@@ -7,24 +8,26 @@ import { listarReceitas, deletarReceita } from '../../api/receitas'
 
 export default function Receitas() {
   const navigate = useNavigate()
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
 
-  const carregar = () =>
-    listarReceitas().then((r) => setItems(r.data)).catch((e) => setErroDelete(e.message)).finally(() => setLoading(false))
+  const { data: items = [], isLoading, isError, error } = useQuery({
+    queryKey: ['receitas'],
+    queryFn: () => listarReceitas().then((r) => r.data),
+  })
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { if (error) setErroDelete(error.message) }, [error])
 
-  const handleDelete = async (id, nome) => {
+  const remover = useMutation({
+    mutationFn: deletarReceita,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['receitas'] }),
+    onError: (e) => setErroDelete(e.message),
+  })
+
+  const handleDelete = (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
     setErroDelete('')
-    try {
-      await deletarReceita(id)
-      carregar()
-    } catch (e) {
-      setErroDelete(e.message)
-    }
+    remover.mutate(id)
   }
 
   return (
@@ -50,7 +53,7 @@ export default function Receitas() {
           </div>
         )}
 
-        {loading ? <LoadingSpinner /> : items.length === 0 ? (
+        {isLoading ? <LoadingSpinner /> : isError ? null : items.length === 0 ? (
           <EmptyState
             title="Nenhuma receita"
             description="Cadastre suas receitas com ingredientes e mão de obra"

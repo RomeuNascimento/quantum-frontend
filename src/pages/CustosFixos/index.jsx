@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import Modal from '../../components/Modal'
 import FormField from '../../components/FormField'
@@ -11,28 +12,34 @@ const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
 
 export default function CustosFixos() {
   const navigate = useNavigate()
-  const [items, setItems] = useState([])
-  const [resumo, setResumo] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [erro, setErro] = useState('')
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm()
 
-  const carregar = async () => {
-    try {
-      const [c, r] = await Promise.all([listarCustosFixos(), resumoCustosFixos()])
-      setItems(c.data)
-      setResumo(r.data)
-    } catch (e) {
-      setErro(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const itensQ = useQuery({
+    queryKey: ['custos-fixos'],
+    queryFn: () => listarCustosFixos().then((r) => r.data),
+  })
+  const resumoQ = useQuery({
+    queryKey: ['custos-fixos-resumo'],
+    queryFn: () => resumoCustosFixos().then((r) => r.data),
+  })
+  const items = itensQ.data ?? []
+  const resumo = resumoQ.data ?? null
+  const loading = itensQ.isLoading || resumoQ.isLoading
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    const e = itensQ.error || resumoQ.error
+    if (e) setErro(e.message)
+  }, [itensQ.error, resumoQ.error])
+
+  const invalidar = () => {
+    queryClient.invalidateQueries({ queryKey: ['custos-fixos'] })
+    queryClient.invalidateQueries({ queryKey: ['custos-fixos-resumo'] })
+  }
 
   const abrirNovo = () => {
     setEditItem(null)
@@ -48,30 +55,29 @@ export default function CustosFixos() {
     setShowModal(true)
   }
 
-  const onSubmit = async (dados) => {
-    const payload = { ...dados, valor: parseFloat(dados.valor) }
-    try {
-      if (editItem) await atualizarCustoFixo(editItem.id, payload)
-      else await criarCustoFixo(payload)
+  const salvar = useMutation({
+    mutationFn: ({ id, payload }) => (id ? atualizarCustoFixo(id, payload) : criarCustoFixo(payload)),
+    onSuccess: invalidar,
+    onError: (e) => setErro(e.message),
+    onSettled: () => {
       setShowModal(false)
       setEditItem(null)
-      carregar()
-    } catch (e) {
-      setErro(e.message)
-      setShowModal(false)
-      setEditItem(null)
-    }
-  }
+    },
+  })
 
-  const handleDelete = async (id, nome) => {
+  const onSubmit = (dados) =>
+    salvar.mutate({ id: editItem?.id, payload: { ...dados, valor: parseFloat(dados.valor) } })
+
+  const remover = useMutation({
+    mutationFn: deletarCustoFixo,
+    onSuccess: invalidar,
+    onError: (e) => setErro(e.message),
+  })
+
+  const handleDelete = (id, nome) => {
     if (!confirm(`Remover "${nome}"?`)) return
     setErro('')
-    try {
-      await deletarCustoFixo(id)
-      carregar()
-    } catch (e) {
-      setErro(e.message)
-    }
+    remover.mutate(id)
   }
 
   return (
@@ -106,7 +112,7 @@ export default function CustosFixos() {
           </button>
         </div>
 
-        {loading ? <LoadingSpinner /> : (
+        {loading ? <LoadingSpinner /> : itensQ.isError ? null : (
           <div>
             {items.map((cf) => (
               <div key={cf.id} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">

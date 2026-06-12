@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
@@ -37,16 +38,14 @@ function ResumoMargens({ produtos }) {
 
 export default function Relatorio() {
   const navigate = useNavigate()
-  const [produtos, setProdutos] = useState([])
-  const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState('')
 
-  useEffect(() => {
-    relatorioMargem()
-      .then((r) => setProdutos(r.data.produtos))
-      .catch((e) => setErro(e.message))
-      .finally(() => setLoading(false))
-  }, [])
+  const { data: produtos = [], isLoading: loading, isError, error } = useQuery({
+    queryKey: ['relatorio-margem'],
+    queryFn: () => relatorioMargem().then((r) => r.data.produtos),
+  })
+
+  useEffect(() => { if (error) setErro(error.message) }, [error])
 
   const semPrecificacao = produtos.filter((p) => p.canais.length === 0)
   const comPrecificacao = produtos.filter((p) => p.canais.length > 0)
@@ -60,7 +59,7 @@ export default function Relatorio() {
             <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}
-        {loading ? <LoadingSpinner /> : produtos.length === 0 ? (
+        {loading ? <LoadingSpinner /> : isError ? null : produtos.length === 0 ? (
           <EmptyState
             title="Nenhum produto cadastrado"
             description="Cadastre produtos e precifique-os para ver o relatório de margem."
