@@ -43,7 +43,9 @@ export default function ImportarNota() {
       setItens(
         (data.itens || []).map((item, idx) => {
           const nome = item.nome ?? item.nome_original ?? ''
-          const match = matchIngrediente(nome)
+          // Vínculo com o catálogo: sugestão da IA tem prioridade; senão, match por nome
+          const sugerido = existentes.find((e) => e.id === item.ingrediente_id_sugerido) || null
+          const match = sugerido || matchIngrediente(nome)
           // peso_embalagem_g = peso de UMA embalagem → é o que vai em quantidade_embalagem
           // preco_unitario = preço de UMA embalagem → é o que vai em preco
           const temPeso = item.peso_embalagem_g != null && item.peso_embalagem_g > 0
@@ -56,8 +58,8 @@ export default function ImportarNota() {
             quantidade: temPeso ? item.peso_embalagem_g : (item.quantidade ?? 1),
             unidade: temPeso ? 'g' : (item.unidade ?? 'unid'),
             preco_total: item.preco_unitario ?? item.preco_total ?? 0,
-            match,
-            acao: match ? 'adicionar_preco' : 'criar_novo',
+            vinculoId: match ? match.id : '', // '' = criar novo
+            sugeridoPelaIA: Boolean(sugerido),
           }
         })
       )
@@ -73,15 +75,17 @@ export default function ImportarNota() {
       prev.map((it) => {
         if (it._id !== idx) return it
         const atualizado = { ...it, [campo]: valor }
-        if (campo === 'nome') {
+        if (campo === 'vinculoId') atualizado.sugeridoPelaIA = false
+        // Editar o nome só re-deriva o vínculo se o usuário não escolheu um explicitamente
+        if (campo === 'nome' && it.vinculoId === '') {
           const m = matchIngrediente(valor)
-          atualizado.match = m
-          atualizado.acao = m ? 'adicionar_preco' : 'criar_novo'
+          atualizado.vinculoId = m ? m.id : ''
         }
         return atualizado
       })
     )
 
+  const ingredientePorId = (id) => existentes.find((e) => e.id === id) || null
   const selecionados = itens.filter((i) => i.selecionado)
 
   const salvar = async () => {
@@ -94,8 +98,9 @@ export default function ImportarNota() {
       try {
         let ingId
         const chave = normalizar(item.nome)
-        if (item.acao === 'adicionar_preco' && item.match) {
-          ingId = item.match.id
+        const vinculo = item.vinculoId !== '' ? ingredientePorId(item.vinculoId) : null
+        if (vinculo) {
+          ingId = vinculo.id
         } else if (criadosNoLote.has(chave)) {
           ingId = criadosNoLote.get(chave)
         } else {
@@ -110,7 +115,7 @@ export default function ImportarNota() {
         }
         // quantidade_embalagem é interpretada na unidade do INGREDIENTE —
         // converte g↔kg / ml↔L quando a nota veio em unidade diferente
-        const destino = item.acao === 'adicionar_preco' && item.match ? item.match.unidade : item.unidade
+        const destino = vinculo ? vinculo.unidade : item.unidade
         const fconv = (u) => (u === 'kg' || u === 'L' ? 1000 : 1)
         const grupo = (u) => (u === 'g' || u === 'kg' ? 'massa' : u === 'ml' || u === 'L' ? 'volume' : 'unid')
         let quantidade = parseFloat(item.quantidade)
@@ -256,39 +261,47 @@ export default function ImportarNota() {
                   </div>
                 </div>
 
-                {/* Match info */}
-                {item.selecionado && (
-                  <div className="ml-7 mt-2">
-                    {item.match ? (
+                {/* Vínculo com o catálogo */}
+                {item.selecionado && (() => {
+                  const vinculo = item.vinculoId !== '' ? ingredientePorId(item.vinculoId) : null
+                  return (
+                    <div className="ml-7 mt-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] bg-lime text-ink px-2 py-0.5 uppercase tracking-widest">
-                          Coincide
-                        </span>
-                        <span className="font-mono text-[10px] text-mute truncate">{item.match.nome}</span>
-                        <button
-                          type="button"
-                          onClick={() => atualizarItem(item._id, 'acao', item.acao === 'adicionar_preco' ? 'criar_novo' : 'adicionar_preco')}
-                          className="font-mono text-[10px] underline text-mute ml-auto flex-shrink-0">
-                          {item.acao === 'adicionar_preco' ? 'Adicionar preço ao existente' : 'Criar novo'}
-                        </button>
-                        {item.acao === 'adicionar_preco' && item.match.unidade !== item.unidade && (
-                          ['g', 'kg'].includes(item.unidade) === ['g', 'kg'].includes(item.match.unidade) &&
-                          ['ml', 'L'].includes(item.unidade) === ['ml', 'L'].includes(item.match.unidade) ? (
+                        <span className="label mb-0 flex-shrink-0">Vincular a:</span>
+                        <select
+                          className="input flex-1 text-sm"
+                          value={item.vinculoId}
+                          onChange={(e) => atualizarItem(item._id, 'vinculoId', e.target.value === '' ? '' : Number(e.target.value))}>
+                          <option value="">➕ Criar novo ingrediente</option>
+                          {existentes.map((e) => (
+                            <option key={e.id} value={e.id}>
+                              {e.nome}{e.marca ? ` · ${e.marca}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {item.sugeridoPelaIA && vinculo && (
+                          <span className="font-mono text-[10px] bg-lime text-ink px-2 py-0.5 uppercase tracking-widest flex-shrink-0">
+                            Sugerido pela IA
+                          </span>
+                        )}
+                        {vinculo && vinculo.unidade !== item.unidade && (
+                          ['g', 'kg'].includes(item.unidade) === ['g', 'kg'].includes(vinculo.unidade) &&
+                          ['ml', 'L'].includes(item.unidade) === ['ml', 'L'].includes(vinculo.unidade) ? (
                             <span className="font-mono text-[10px] text-mute flex-shrink-0">
-                              → {item.match.unidade}
+                              → {vinculo.unidade}
                             </span>
                           ) : (
                             <span className="font-mono text-[10px] text-rust flex-shrink-0">
-                              ⚠ {item.unidade}≠{item.match.unidade}
+                              ⚠ {item.unidade}≠{vinculo.unidade}
                             </span>
                           )
                         )}
                       </div>
-                    ) : (
-                      <span className="font-mono text-[10px] text-mute uppercase tracking-widest">Novo ingrediente</span>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )
+                })()}
               </div>
             ))}
           </div>

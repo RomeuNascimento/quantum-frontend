@@ -78,6 +78,11 @@
   - Lista: exibe `Nome · Marca` quando marca preenchida
   - Importação nota: campo marca editável na revisão; IA retorna nome genérico + marca separados
   - Matching de ingredientes usa só `nome` (normalizado) — marca não interfere no match
+- [x] **Vínculo nota fiscal ↔ catálogo de ingredientes** (2026-06-12, branch `claude/practical-cray-vksesn`)
+  - `ImportarNota.jsx`: toggle binário "adicionar ao existente/criar novo" substituído por select "Vincular a:" por item, listando todos os ingredientes existentes + "➕ Criar novo"
+  - Pré-seleção: `ingrediente_id_sugerido` da IA (backend agora envia o catálogo no prompt) > match por nome normalizado > criar novo; badge lime "Sugerido pela IA"
+  - Conversão de unidade g↔kg/ml↔L e dedupe `criadosNoLote` preservados; indicador "→ unidade"/"⚠" agora segue o vínculo selecionado
+  - Editar o nome só re-deriva o vínculo se estiver em "criar novo" (não sobrescreve escolha explícita do usuário)
 - [x] **Importar nota fiscal virou card de ação** (2026-05-21)
   - Substituiu o pequeno FAB "IA Nota" do canto por um card `bg-ink` full-width no topo da lista
   - Card exibe ícone + título "Importar nota fiscal" + subtítulo explicativo + seta
