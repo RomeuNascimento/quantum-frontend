@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { queryClient } from '../queryClient'
 
 const useAuthStore = create(
   persist(
@@ -24,6 +25,8 @@ const useAuthStore = create(
         if (typeof caches !== 'undefined') {
           caches.delete('api-cache').catch(() => {})
         }
+        // Cache em memória do TanStack Query — mesmo motivo (privacidade)
+        queryClient.clear()
       },
     }),
     {
