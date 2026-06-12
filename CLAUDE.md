@@ -4,7 +4,7 @@
 
 **Criado em:** 2026-05-20
 **Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — M2: TanStack Query adotado)
-**Próxima sessão:** Fase 3 restante (modo offline com fila de escrita — pré-requisito M2 ✅) ou itens menores (Modal acessível, ErrorBoundary)
+**Próxima sessão:** Fase 3 restante — modo offline com fila de escrita (pré-requisito M2 ✅; decidir UX de conflito/fila com o usuário antes) ou rateio de custos fixos (adiado por decisão do usuário)
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
 ---
@@ -294,7 +294,10 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 - Números sem `.qtm-num` em Ingredientes/Receitas/Precificacao/Embalagens (usam `font-mono` sem `tabular-nums`); `rounded-full` no dot de status em `Receitas/Importar.jsx:212`; 3 padrões diferentes de botão "novo" entre listas.
 - `window.confirm()` nativo nas deleções (usar o `Modal` do design system); `Modal.jsx` sem Escape/focus trap/aria.
 - `Produtos/Form.jsx:70-81`: componente `Section` definido dentro do render — mover para fora.
-- Sem ErrorBoundary (exceção de render → tela branca); Dockerfile com `npm install` em vez de `npm ci`; sem testes.
+- [x] ErrorBoundary ✅ 2026-06-12 — `src/components/ErrorBoundary.jsx` envolve o App; tela de erro no design system com "Voltar ao início"
+- [x] `npm ci` no Dockerfile ✅ 2026-06-12
+- [x] Formatação pt-BR padronizada ✅ 2026-06-12 — `src/utils/format.js` (`brl` 2 casas, `brl4` p/ custos unitários); 6 `const brl` locais substituídos pelo import + Ingredientes/Embalagens (listas e forms), CustoLineChart e Dashboard migrados
+- Sem testes no frontend (backend ganhou `tests/test_smoke.py` em 2026-06-12).
 
 ### ✅ Pontos fortes confirmados na revisão
 Código enxuto e consistente, camada de API organizada, fluxos de importação IA com boa máquina de estados, auth resolvido (loop 401 de fato corrigido), `Planejamento/index.jsx` é o melhor arquivo do projeto (useMemo + pt-BR + inputMode — usar como modelo). `CustoLineChart` SVG em Precificação é o embrião dos gráficos — extrair para `src/components/`.

@@ -1,6 +1,6 @@
 const MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 const fmtDate = (iso) => { const [,m,d] = iso.split('-'); return `${parseInt(d)}/${MONTHS[parseInt(m)-1]}` }
-const brlShort = (v) => `R$${Number(v).toFixed(2)}`
+const brlShort = (v) => `R$${Number(v).toFixed(2).replace('.', ',')}`
 
 export default function CustoLineChart({ pontos }) {
   if (!pontos || pontos.length === 0) return null

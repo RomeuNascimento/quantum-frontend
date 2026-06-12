@@ -8,7 +8,7 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 import { listarCustosFixos, criarCustoFixo, atualizarCustoFixo, deletarCustoFixo, resumoCustosFixos } from '../../api/custosFixos'
 import { useForm } from 'react-hook-form'
 
-const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+import { brl } from '../../utils/format'
 
 export default function CustosFixos() {
   const navigate = useNavigate()

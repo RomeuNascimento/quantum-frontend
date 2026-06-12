@@ -4,7 +4,7 @@ import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { detalharProduto } from '../../api/produtos'
 
-const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+import { brl } from '../../utils/format'
 
 function Tabela({ titulo, colunas, linhas }) {
   if (linhas.length === 0) return null

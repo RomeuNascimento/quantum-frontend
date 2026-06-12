@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
 import { criarIngrediente, detalharIngrediente, atualizarIngrediente, adicionarPrecoIngrediente } from '../../api/ingredientes'
+import { brl, brl4 } from '../../utils/format'
 
 const unidades = ['g', 'ml', 'unid', 'kg', 'L']
 
@@ -165,11 +166,11 @@ export default function IngredienteForm() {
               {historico.map((p) => (
                 <div key={p.id} className="flex justify-between border-b border-line py-3 last:border-b-0">
                   <div>
-                    <p className="qtm-num text-sm text-ink">R$ {p.preco.toFixed(2)} / {p.quantidade_embalagem} un</p>
+                    <p className="qtm-num text-sm text-ink">{brl(p.preco)} / {p.quantidade_embalagem} un</p>
                     <p className="font-mono text-xs text-mute">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="qtm-num text-sm font-bold text-ink">R$ {p.custo_unitario?.toFixed(4)}/un</p>
+                    <p className="qtm-num text-sm font-bold text-ink">{brl4(p.custo_unitario)}/un</p>
                     <p className="font-mono text-xs text-mute">{p.origem}</p>
                   </div>
                 </div>

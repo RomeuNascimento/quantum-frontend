@@ -5,6 +5,7 @@ import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
 import { listarEmbalagens, deletarEmbalagem } from '../../api/embalagens'
+import { brl4 } from '../../utils/format'
 
 export default function Embalagens() {
   const navigate = useNavigate()
@@ -59,7 +60,7 @@ export default function Embalagens() {
                 <Link to={`/embalagens/${e.id}`} className="flex-1 min-w-0">
                   <p className="font-medium text-ink truncate">{e.nome}</p>
                   <p className="font-mono text-xs text-mute mt-0.5">
-                    {e.unidade} · {e.custo_unitario_atual != null ? `R$ ${e.custo_unitario_atual.toFixed(4)}/un` : 'sem preço'}
+                    {e.unidade} · {e.custo_unitario_atual != null ? `${brl4(e.custo_unitario_atual)}/un` : 'sem preço'}
                   </p>
                 </Link>
                 <button onClick={() => handleDelete(e.id, e.nome)} className="p-2 text-mute active:text-rust">

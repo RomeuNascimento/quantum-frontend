@@ -8,6 +8,7 @@ import { resumoCustosFixos } from '../api/custosFixos'
 import { relatorioMargem } from '../api/precificacao'
 import MargemBarChart from '../components/MargemBarChart'
 import useAuthStore from '../store/authStore'
+import { brl } from '../utils/format'
 
 const atalhos = [
   { to: '/ingredientes/novo', label: 'Ingrediente' },
@@ -15,7 +16,6 @@ const atalhos = [
   { to: '/produtos/novo', label: 'Produto' },
 ]
 
-const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export default function Dashboard() {
   const { user, setUser, logout } = useAuthStore()
@@ -110,7 +110,7 @@ export default function Dashboard() {
           <Link to="/custos-fixos" className="card active:bg-line/50">
             <p className="label">Custos/mês</p>
             <p className={`qtm-num text-2xl font-bold ${totalMensal > 0 ? 'text-rust' : 'text-ink'}`}>
-              {erroResumo ? '—' : totalMensal === null ? '…' : brl.format(totalMensal)}
+              {erroResumo ? '—' : totalMensal === null ? '…' : brl(totalMensal)}
             </p>
           </Link>
         </div>

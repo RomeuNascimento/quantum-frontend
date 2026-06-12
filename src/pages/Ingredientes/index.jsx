@@ -5,8 +5,9 @@ import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
 import { listarIngredientes, deletarIngrediente } from '../../api/ingredientes'
+import { brl4 } from '../../utils/format'
 
-const formatCusto = (v) => (v != null ? `R$ ${v.toFixed(4)}` : '—')
+const formatCusto = (v) => (v != null ? brl4(v) : '—')
 
 export default function Ingredientes() {
   const navigate = useNavigate()

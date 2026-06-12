@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+import { brl } from '../utils/format'
 
 // Simulador "e se": preço derivado em tempo real da fórmula de precificação
 // preco = custo / (1 − margem − taxas)

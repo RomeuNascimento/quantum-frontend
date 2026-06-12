@@ -7,7 +7,7 @@ import EmptyState from '../../components/EmptyState'
 import MargemBadge from '../../components/MargemBadge'
 import { relatorioMargem } from '../../api/precificacao'
 
-const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+import { brl } from '../../utils/format'
 
 function ResumoMargens({ produtos }) {
   let saudavel = 0, atencao = 0, revisar = 0

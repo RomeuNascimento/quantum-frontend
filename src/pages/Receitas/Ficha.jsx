@@ -4,7 +4,7 @@ import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { detalharReceita } from '../../api/receitas'
 
-const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+import { brl } from '../../utils/format'
 
 export default function ReceitaFicha() {
   const { id } = useParams()

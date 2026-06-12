@@ -12,7 +12,7 @@ import { listarCanais, criarCanal } from '../../api/precificacao'
 import { listarPrecosProduto, criarPrecoProduto, atualizarPrecoProduto } from '../../api/precificacao'
 import { useForm } from 'react-hook-form'
 
-const brl = (v) => `R$ ${Number(v || 0).toFixed(2)}`
+import { brl } from '../../utils/format'
 const pctStr = (v) => `${Math.max(0, v).toFixed(0)}%`
 
 function PrecoDecomposicao({ pp }) {
