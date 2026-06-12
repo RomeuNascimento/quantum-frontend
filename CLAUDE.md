@@ -3,9 +3,9 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — M2: TanStack Query + billing/paywall Stripe)
+**Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — billing/paywall + editar canais + deep-link cadastro + LANDING PAGE publicada; DEPLOY em produção)
 **Próxima sessão:** Fase 3 restante — modo offline com fila de escrita (pré-requisito M2 ✅; decidir UX de conflito/fila com o usuário antes) ou rateio de custos fixos (adiado por decisão do usuário)
-**Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
+**Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
 
 ---
 
@@ -85,6 +85,13 @@
   - **`src/components/PaywallGate.jsx`**: envolve todo PrivateRoute; query `['billing-status']` (staleTime 60s) → redirect a `/assinatura` se vencida; `/dashboard` e `/assinatura` isentos
   - `client.js`: HTTP 402 do backend (paywall server-side) → `window.location.href = '/assinatura'`
   - Backend correspondente: ver CLAUDE.md do quantum-backend (setup Stripe executado, migration 006 pendente em produção)
+- [x] **Editar e excluir canais de venda** (2026-06-12, branch `claude/practical-cray-vksesn`)
+  - `Precificacao/index.jsx`: cards de canal (iFood etc.) viraram `<button>` clicáveis → abrem o modal pré-preenchido; o mesmo form cria ou edita (`atualizarCanal` = `PUT /canais/{id}`, que já existia no backend). Botão "Excluir canal" (soft delete) no modo edição
+  - Ao salvar/excluir um canal, invalida `['canais']`, `['precos-produto', id]` e `['relatorio-margem']` — taxas alteradas recalculam os preços sugeridos na hora (preço nunca é fixo no banco)
+  - **Antes:** os canais eram só `<div>` não-clicáveis; o iFood pré-cadastrado ficava com taxas fixas, impossível ajustar pela UI
+- [x] **Deep-link de cadastro `?modo=cadastro`** (2026-06-12, branch `claude/practical-cray-vksesn`)
+  - `Login.jsx`: lê `useSearchParams()` — `?modo=cadastro` abre direto na aba "Criar conta". Os CTAs da landing page apontam para `https://quantumcalc.com.br/login?modo=cadastro`
+  - (Caminho "assinar agora" — registrar → checkout direto via `?next=checkout` — foi conversado mas NÃO implementado; trial não bloqueia pagar, então fica como melhoria futura opcional)
 - [x] **Vínculo nota fiscal ↔ catálogo de ingredientes** (2026-06-12, branch `claude/practical-cray-vksesn`)
   - `ImportarNota.jsx`: toggle binário "adicionar ao existente/criar novo" substituído por select "Vincular a:" por item, listando todos os ingredientes existentes + "➕ Criar novo"
   - Pré-seleção: `ingrediente_id_sugerido` da IA (backend agora envia o catálogo no prompt) > match por nome normalizado > criar novo; badge lime "Sugerido pela IA"
@@ -270,6 +277,70 @@ Mensagem genérica do `client.js` quando `error.response` é undefined (sem resp
 
 > **Atenção:** o serviço se chama `frontend` (não `quantum-frontend`) no EasyPanel.
 > Se recriar do zero, usar build.type=dockerfile. nixpacks serviria os fontes em vez do dist/.
+
+---
+
+## Landing Page (marketing) — serviço `lp`
+
+> Publicada em 2026-06-12. **NÃO faz parte deste repositório** — é um HTML estático
+> separado, servido por um serviço WordPress reaproveitado no EasyPanel.
+
+### Onde está
+- **Serviço EasyPanel:** `lp` (tipo WordPress — PHP + nginx + `lp-db`), no projeto `quantum`
+- **Domínio:** `lp.quantumcalc.com.br` (o app/sistema fica em `quantumcalc.com.br` — raiz)
+- **Origem do HTML:** gerado no "Claude design" (Quantum Landing). É um mini-site: `index.html` + `styles.css` + `tokens.css` + `app.js` + `image-slot.js` + pastas `quantum-brand/`, `screenshots/`, `uploads/` (imagens). **Não é arquivo único** — precisa subir tudo.
+- **Arquivos no servidor:** ficam em `/code` (volume persistente do container `lp`)
+
+### Como a landing é servida (a gambiarra que faz funcionar)
+O serviço é WordPress; queríamos servir HTML estático. Dois fatos atrapalham:
+1. O nginx do EasyPanel tem `index index.php index.html;` (php na frente) e é
+   **regenerado a cada restart** — editar a config pelo módulo NGINX do EasyPanel
+   **NÃO persiste** (volta ao padrão no próximo deploy/restart). Não adianta mexer lá.
+2. Com `index.php` presente, a raiz `/` sempre cai no WordPress (que ainda faz
+   redirect 301 http→https).
+
+**Solução aplicada (robusta, sobrevive a restart):** renomeamos o front controller
+do WordPress — `mv index.php index.php.desativado` em `/code`. Sem `index.php`, o
+nginx serve `index.html` naturalmente na raiz. O `/wp-admin` continua funcionando
+(usa outro index.php próprio). É um arquivo no volume persistente, então não é
+desfeito por restart.
+
+### Como ATUALIZAR a landing (receita)
+1. Baixar a nova versão do Claude design como `.zip`
+2. Arrastar o zip pra dentro da **IDE** do serviço `lp` (pasta `/code`)
+3. No terminal embutido da IDE (`Terminal → New Terminal`, container `root@...:/code#`):
+   ```bash
+   unzip -o "nome-do-zip.zip"        # -o sobrescreve sem perguntar
+   cp "Quantum Landing.html" index.html   # PASSO QUE PUBLICA — fácil esquecer
+   ```
+   O arquivo no zip se chama `Quantum Landing.html`; o servidor entrega `index.html`.
+   Sem o `cp`, atualiza os assets mas a página continua a versão antiga.
+4. Testar furando cache: aba anônima + `lp.quantumcalc.com.br/?x=N` (muda o N a cada vez).
+   ⚠️ O navegador cacheia o redirect 301 de forma permanente — sempre testar com `?x=N`.
+5. **Não** precisa mexer em nginx nem refazer o `mv index.php` — isso já está resolvido.
+
+### Cache
+- O WordPress tinha **LiteSpeed Cache** ativo — foi **desativado** (página estática não precisa).
+  Se reativar e a landing "congelar" numa versão velha, purgar/desativar o LiteSpeed.
+
+### Diagnóstico (se a raiz não mostrar a landing)
+```bash
+curl -s http://localhost/ | grep -i "<title>"   # do terminal do lp
+```
+Deve retornar `<title>Quantum · Controle o lucro de cada receita</title>`. Se vier
+vazio ou 301, o `index.php` voltou (refazer o `mv`) ou é cache do navegador (`?x=N`).
+
+### CTAs da landing → app
+Os botões devem apontar para `https://quantumcalc.com.br/login?modo=cadastro`
+(abre direto a aba "Criar conta" → trial de 7 dias → /assinatura). ⚠️ **PENDENTE
+conferir:** não foi verificado se os botões do HTML atual já apontam pra lá.
+
+### Futuro (decisão adiada)
+Hoje: landing em `lp.` e app na raiz. Se algum dia quiser a landing na raiz
+(`quantumcalc.com.br`) e o app em `app.quantumcalc.com.br`, é a "Fase 2" — exige
+mover domínio do app + ajustar CORS (`ALLOW_ORIGINS`), `FRONTEND_URL` e as URLs do
+Stripe, e cuidar de redirect pra quem já usa o app (há contas ativas em produção).
+Não fazer no susto.
 
 ---
 
