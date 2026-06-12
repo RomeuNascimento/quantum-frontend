@@ -22,6 +22,7 @@ import Precificacao from './pages/Precificacao/index'
 import Relatorio from './pages/Relatorio/index'
 import CustosFixos from './pages/CustosFixos/index'
 import Planejamento from './pages/Planejamento/index'
+import Assinatura from './pages/Assinatura/index'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -75,6 +76,7 @@ export default function App() {
         <Route path="/precificacao" element={<PrivateRoute><Precificacao /></PrivateRoute>} />
         <Route path="/relatorio" element={<PrivateRoute><Relatorio /></PrivateRoute>} />
         <Route path="/custos-fixos" element={<PrivateRoute><CustosFixos /></PrivateRoute>} />
+        <Route path="/assinatura" element={<PrivateRoute><Assinatura /></PrivateRoute>} />
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

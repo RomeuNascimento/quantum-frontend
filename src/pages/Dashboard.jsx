@@ -6,6 +6,7 @@ import { getMe } from '../api/auth'
 import { listarProdutos } from '../api/produtos'
 import { resumoCustosFixos } from '../api/custosFixos'
 import { relatorioMargem } from '../api/precificacao'
+import { billingStatus } from '../api/billing'
 import MargemBarChart from '../components/MargemBarChart'
 import useAuthStore from '../store/authStore'
 import { brl } from '../utils/format'
@@ -35,6 +36,10 @@ export default function Dashboard() {
   const margemQ = useQuery({
     queryKey: ['relatorio-margem'],
     queryFn: () => relatorioMargem().then((r) => r.data.produtos),
+  })
+  const billingQ = useQuery({
+    queryKey: ['billing-status'],
+    queryFn: () => billingStatus().then((r) => r.data),
   })
 
   // Mantém o user persistido no Zustand atualizado (saudação offline)
@@ -74,6 +79,24 @@ export default function Dashboard() {
             Sair
           </button>
         </div>
+
+        {/* Assinatura vencida / trial */}
+        {billingQ.data?.status === 'vencida' && (
+          <Link to="/assinatura" className="flex items-center justify-between bg-ink text-bone border border-ink px-4 py-3 active:opacity-80">
+            <p className="font-mono text-xs font-bold uppercase tracking-widest">
+              Teste encerrado — assine para continuar
+            </p>
+            <span className="font-mono text-xs text-lime flex-shrink-0">R$ 147/ano →</span>
+          </Link>
+        )}
+        {billingQ.data?.status === 'trial' && (
+          <Link to="/assinatura" className="flex items-center justify-between border border-line px-4 py-2 active:bg-line/50">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-mute">
+              Período de teste até {new Date(billingQ.data.trial_fim).toLocaleDateString('pt-BR')}
+            </p>
+            <span className="font-mono text-[10px] text-mute flex-shrink-0">Assinar →</span>
+          </Link>
+        )}
 
         {/* Alerta de margem corroída */}
         {margemAlerta.length > 0 && (
