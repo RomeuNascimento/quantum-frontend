@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { login, register as registerUser } from '../api/auth'
 import useAuthStore from '../store/authStore'
 
 export default function Login() {
-  const [modo, setModo] = useState('login') // 'login' | 'registro'
+  // ?modo=cadastro abre direto no formulário de criar conta (CTAs da landing page)
+  const [searchParams] = useSearchParams()
+  const [modo, setModo] = useState(
+    searchParams.get('modo') === 'cadastro' ? 'registro' : 'login'
+  ) // 'login' | 'registro'
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
