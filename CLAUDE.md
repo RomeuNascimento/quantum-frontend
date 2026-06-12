@@ -3,7 +3,7 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — M2: TanStack Query adotado)
+**Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — M2: TanStack Query + billing/paywall Stripe)
 **Próxima sessão:** Fase 3 restante — modo offline com fila de escrita (pré-requisito M2 ✅; decidir UX de conflito/fila com o usuário antes) ou rateio de custos fixos (adiado por decisão do usuário)
 **Status:** PRODUÇÃO — frontend rodando em https://quantumcalc.com.br
 
@@ -78,6 +78,13 @@
   - Lista: exibe `Nome · Marca` quando marca preenchida
   - Importação nota: campo marca editável na revisão; IA retorna nome genérico + marca separados
   - Matching de ingredientes usa só `nome` (normalizado) — marca não interfere no match
+- [x] **Billing — assinatura anual Stripe (R$ 147/ano)** (2026-06-12, branch `claude/practical-cray-vksesn`)
+  - `src/pages/Assinatura/index.jsx` (rota `/assinatura`): status trial/ativa/vencida, botão checkout (redirect ao Stripe), botão "Gerenciar assinatura" (portal); polling de 3s após voltar do checkout com `?sucesso=1` (webhook leva segundos)
+  - `src/api/billing.js`: `billingStatus`, `criarCheckout`, `abrirPortal`
+  - Dashboard: banner ink "Teste encerrado — assine" (vencida) e linha discreta com data fim do trial
+  - **`src/components/PaywallGate.jsx`**: envolve todo PrivateRoute; query `['billing-status']` (staleTime 60s) → redirect a `/assinatura` se vencida; `/dashboard` e `/assinatura` isentos
+  - `client.js`: HTTP 402 do backend (paywall server-side) → `window.location.href = '/assinatura'`
+  - Backend correspondente: ver CLAUDE.md do quantum-backend (setup Stripe executado, migration 006 pendente em produção)
 - [x] **Vínculo nota fiscal ↔ catálogo de ingredientes** (2026-06-12, branch `claude/practical-cray-vksesn`)
   - `ImportarNota.jsx`: toggle binário "adicionar ao existente/criar novo" substituído por select "Vincular a:" por item, listando todos os ingredientes existentes + "➕ Criar novo"
   - Pré-seleção: `ingrediente_id_sugerido` da IA (backend agora envia o catálogo no prompt) > match por nome normalizado > criar novo; badge lime "Sugerido pela IA"
@@ -132,6 +139,7 @@ VITE_API_URL=https://api.quantumcalc.com.br
 /produtos/:id
 /precificacao → canais + seletor de produto
 /custos-fixos → lista
+/assinatura → status do plano + checkout/portal Stripe (isenta do PaywallGate)
 ```
 
 ---
