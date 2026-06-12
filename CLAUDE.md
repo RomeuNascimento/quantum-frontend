@@ -343,7 +343,7 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
   - `Receitas/Form.jsx`: `tipo: dados.tipo || null` — campo vazio envia null ao invés de string vazia
   - `Receitas/Form.jsx` + `Produtos/Form.jsx`: botão salvar movido para `fixed bottom-16 z-30` (padrão do design system)
 - [ ] Adicionar página de Embalagens na bottom nav (atualmente acessível só pelo Dashboard)
-- [ ] Adicionar gráficos de evolução de custos
+- [x] Adicionar gráficos de evolução de custos (Precificação 2026-06-11; detalhe do produto ✅ 2026-06-12)
 - [ ] Adicionar relatório de margem por produto/canal
 - [ ] Implementar modo offline (PWA cache — service worker já configurado no vite.config.js)
 - [ ] Habilitar autoDeploy no EasyPanel (atualmente false)
@@ -384,7 +384,7 @@ Código enxuto e consistente, camada de API organizada, fluxos de importação I
 **Fase 2 — Features de relatório (prioridade):**
 1. [x] **Página de relatório de margem `/relatorio`** ✅ 2026-06-11 (branch `claude/keen-ptolemy-mmed2k`) — `src/pages/Relatorio/index.jsx`: resumo saudável/atenção/revisar + card por produto com margem real por canal (badge), preço praticado, lucro unitário; seção "Sem precificação" com atalho. Consome `GET /precificacao/relatorio-margem` (novo no backend). Entrada: link "Relatório de margem" na seção Gerenciar do Dashboard.
 2. [x] **`CustoLineChart` e `MargemBadge` extraídos** ✅ 2026-06-11 — `src/components/CustoLineChart.jsx` + `src/components/MargemBadge.jsx`; `Precificacao/index.jsx` importa dos components.
-3. [ ] **Gráfico de evolução de custos** no detalhe do produto (endpoint `/produtos/{id}/historico-custo` já existe; componente já extraído)
+3. [x] **Gráfico de evolução de custos** no detalhe do produto ✅ 2026-06-12 (branch `claude/practical-cray-vksesn`) — `Produtos/Form.jsx` (modo edição): seção "Evolução do custo" em card com `CustoLineChart`, dados de `historicoCustoProduto(id)` (`r.data.pontos`). Renderiza só com ≥2 pontos; erro/carregamento silenciosos (seção omitida).
 
 **Fix botões voltar (2026-06-11, mesma branch):**
 - Telas "Salvando..." de `Receitas/Importar.jsx` e `Ingredientes/ImportarNota.jsx` tinham `onBack={() => {}}` — seta de voltar visível que não fazia nada. Removida durante o salvamento.

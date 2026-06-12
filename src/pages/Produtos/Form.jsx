@@ -39,7 +39,7 @@ export default function ProdutoForm() {
       setEmbalagens(e.data)
     })
     if (isEdit) {
-      historicoCustoProduto(id).then((r) => setHistorico(r.data.pontos || r.data)).catch(() => {})
+      historicoCustoProduto(id).then((r) => setHistorico(r.data.pontos || [])).catch(() => {})
       detalharProduto(id).then((r) => {
         setCustoTotal(r.data.custo_total)
         reset({
@@ -174,7 +174,7 @@ export default function ProdutoForm() {
           ))}
         </Section>
 
-        {isEdit && historico.length > 0 && (
+        {isEdit && historico.length >= 2 && (
           <div className="card mt-4">
             <p className="label mb-2">Evolução do custo</p>
             <CustoLineChart pontos={historico} />
