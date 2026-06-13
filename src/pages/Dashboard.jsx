@@ -165,6 +165,7 @@ export default function Dashboard() {
           <div>
             {[
               { to: '/orcamento', label: 'Criar orçamento (WhatsApp)' },
+              { to: '/lista-compras', label: 'Lista de compras' },
               { to: '/relatorio', label: 'Relatório de margem' },
               { to: '/ponto-equilibrio', label: 'Ponto de equilíbrio' },
               { to: '/embalagens', label: 'Embalagens' },

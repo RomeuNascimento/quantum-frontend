@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import CompartilharWhatsApp from '../../components/CompartilharWhatsApp'
 import { detalharReceita } from '../../api/receitas'
 
 import { brl } from '../../utils/format'
@@ -34,6 +35,21 @@ export default function ReceitaFicha() {
   }
 
   const tempoTotal = receita.etapas_mo.reduce((s, e) => s + e.tempo_min, 0)
+
+  const textoFicha = [
+    `*Ficha técnica — ${receita.nome}*`,
+    `Rendimento: ${receita.rendimento_g}g${receita.tipo ? ` · ${receita.tipo}` : ''}`,
+    '',
+    '*Ingredientes:*',
+    ...receita.ingredientes.map((i) => `• ${i.ingrediente_nome}: ${i.quantidade_g}g`),
+    ...(receita.etapas_mo.length > 0 ? [
+      '',
+      '*Modo de preparo:*',
+      ...receita.etapas_mo.map((e, idx) => `${idx + 1}. ${e.descricao}${e.tempo_min ? ` (${e.tempo_min} min)` : ''}`),
+    ] : []),
+    '',
+    `Custo total: ${brl(receita.custo_total)}`,
+  ].join('\n')
 
   return (
     <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
@@ -109,8 +125,9 @@ export default function ReceitaFicha() {
           </div>
         </div>
 
-        {/* Botão imprimir/PDF — some na impressão */}
-        <button onClick={() => window.print()} className="btn-primary w-full mb-8 print:hidden">
+        {/* Ações — somem na impressão */}
+        <CompartilharWhatsApp texto={textoFicha} label="Enviar ficha por WhatsApp" className="mb-3" />
+        <button onClick={() => window.print()} className="btn-ghost w-full mb-8 print:hidden">
           Imprimir / Salvar PDF
         </button>
       </div>

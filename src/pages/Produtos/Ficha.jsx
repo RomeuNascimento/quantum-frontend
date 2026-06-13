@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import CompartilharWhatsApp from '../../components/CompartilharWhatsApp'
 import { detalharProduto } from '../../api/produtos'
 
 import { brl } from '../../utils/format'
@@ -59,6 +60,18 @@ export default function ProdutoFicha() {
       </Layout>
     )
   }
+
+  const linhaTabela = (titulo, itens, fmtQtd) =>
+    itens.length ? [`*${titulo}:*`, ...itens.map((x) => `• ${x.nome}: ${fmtQtd(x)}`), ''] : []
+
+  const textoFicha = [
+    `*Ficha técnica — ${produto.nome}*`,
+    '',
+    ...linhaTabela('Preparações', produto.preparacoes, (p) => `${p.quantidade}g`),
+    ...linhaTabela('Ingredientes', produto.ingredientes_avulsos, (i) => `${i.quantidade}g`),
+    ...linhaTabela('Embalagens', produto.embalagens, (e) => `${e.quantidade}`),
+    `Custo total: ${brl(produto.custo_total)}`,
+  ].join('\n')
 
   return (
     <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
@@ -121,7 +134,8 @@ export default function ProdutoFicha() {
           </div>
         </div>
 
-        <button onClick={() => window.print()} className="btn-primary w-full mb-8 print:hidden">
+        <CompartilharWhatsApp texto={textoFicha} label="Enviar ficha por WhatsApp" className="mb-3" />
+        <button onClick={() => window.print()} className="btn-ghost w-full mb-8 print:hidden">
           Imprimir / Salvar PDF
         </button>
       </div>

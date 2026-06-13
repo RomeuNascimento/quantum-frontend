@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import CompartilharWhatsApp from '../../components/CompartilharWhatsApp'
 import { listarReceitas, detalharReceita } from '../../api/receitas'
 import { brl } from '../../utils/format'
 
@@ -87,6 +88,17 @@ export default function Planejamento() {
     modo === 'porcoes' && numPorcoes && pesoPorcao
       ? (parseInt(numPorcoes) || 0) * (parseFloat(pesoPorcao) || 0)
       : 0
+
+  const textoProducao = resultado && detalhe ? [
+    `*Produção — ${detalhe.nome}*`,
+    `${fmtPeso(resultado.targetG)}${modo === 'porcoes' && numPorcoes && pesoPorcao ? ` · ${numPorcoes} porções de ${pesoPorcao}g` : ''}`,
+    '',
+    '*Ingredientes:*',
+    ...resultado.ingredientes.map((i) => `• ${i.nome}: ${fmtQtd(i.quantidade)} ${i.unidade}`),
+    '',
+    `Custo total: ${brl(resultado.custo_total)}`,
+    ...(resultado.custo_porcao !== null ? [`Por porção: ${brl(resultado.custo_porcao)}`] : []),
+  ].join('\n') : ''
 
   return (
     <Layout title="Produção" onBack={() => navigate('/dashboard')}>
@@ -281,6 +293,8 @@ export default function Planejamento() {
                     )}
                   </div>
                 </div>
+
+                <CompartilharWhatsApp texto={textoProducao} label="Enviar produção por WhatsApp" />
 
               </div>
             )}

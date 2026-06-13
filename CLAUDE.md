@@ -9,6 +9,32 @@
 
 ---
 
+## Sessão 2026-06-13 (parte 6) — Lista de compras + compartilhar por WhatsApp
+
+> Branch `claude/keen-goldberg-m8aqqx`.
+
+**Componente `CompartilharWhatsApp.jsx`:** botões "Enviar por WhatsApp" (`wa.me/?text=`,
+sem número — usuário escolhe contato) + "Copiar" (clipboard). `print:hidden`. Reusado em
+4 telas. Padrão extraído do Orçamento.
+
+**Lista de compras (`/lista-compras`, novo):** `src/pages/ListaCompras/index.jsx`, link em
+Dashboard > Gerenciar.
+- Adiciona linhas (receita + "quantas vezes a receita"); `useQueries(['receita', id])` busca
+  os detalhes; agrega ingredientes somando `quantidade_g × mult` por (nome+unidade).
+- Lista com **checkbox** (toque pra marcar comprado — line-through, estado local).
+- `fmtMedida`: g→kg / ml→L quando ≥ 1000. Botão "Enviar lista por WhatsApp".
+- Baseada em **receitas** (receita→ingredientes direto). Produtos como fonte = melhoria futura.
+
+**Compartilhar por WhatsApp adicionado em:**
+- **Produção** (`Planejamento`): envia ingredientes escalados + custo total/porção.
+- **Ficha técnica da receita** (`Receitas/Ficha`): ingredientes + modo de preparo + custo.
+- **Ficha técnica do produto** (`Produtos/Ficha`): preparações/ingredientes/embalagens + custo.
+- Nas fichas, o "Imprimir/PDF" virou `btn-ghost` (secundário); o WhatsApp é o primário.
+
+⚠️ Build ✅; **DEPLOY do frontend pendente**.
+
+---
+
 ## Sessão 2026-06-13 (parte 5) — Precificação repensada + gráfico + label
 
 > Branch `claude/keen-goldberg-m8aqqx`.
