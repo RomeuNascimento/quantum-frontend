@@ -60,6 +60,7 @@ export default function Login() {
               <input
                 className="input"
                 placeholder="Sua confeitaria"
+                autoComplete="name"
                 {...register('nome', { required: 'Nome obrigatório' })}
               />
               {errors.nome && <p className="text-xs font-mono text-rust mt-1">{errors.nome.message}</p>}
@@ -72,6 +73,7 @@ export default function Login() {
               className="input"
               type="email"
               placeholder="seu@email.com"
+              autoComplete="email"
               {...register('email', { required: 'E-mail obrigatório' })}
             />
             {errors.email && <p className="text-xs font-mono text-rust mt-1">{errors.email.message}</p>}
@@ -83,7 +85,8 @@ export default function Login() {
               className="input"
               type="password"
               placeholder="••••••••"
-              {...register('senha', { required: 'Senha obrigatória', minLength: { value: 6, message: 'Mínimo 6 caracteres' } })}
+              autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
+              {...register('senha', { required: 'Senha obrigatória', minLength: { value: 8, message: 'Mínimo 8 caracteres' } })}
             />
             {errors.senha && <p className="text-xs font-mono text-rust mt-1">{errors.senha.message}</p>}
           </div>

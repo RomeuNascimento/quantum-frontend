@@ -4,14 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
+import LoadError from '../../components/LoadError'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import { listarProdutos, deletarProduto } from '../../api/produtos'
 
 export default function Produtos() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
+  const [confirmar, setConfirmar] = useState(null) // { id, nome }
 
-  const { data: items = [], isLoading, isError, error } = useQuery({
+  const { data: items = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['produtos'],
     queryFn: () => listarProdutos().then((r) => r.data),
   })
@@ -27,10 +30,12 @@ export default function Produtos() {
     onError: (e) => setErroDelete(e.message),
   })
 
-  const handleDelete = (id, nome) => {
-    if (!confirm(`Remover "${nome}"?`)) return
+  const handleDelete = (id, nome) => setConfirmar({ id, nome })
+
+  const confirmarDelete = () => {
     setErroDelete('')
-    remover.mutate(id)
+    remover.mutate(confirmar.id)
+    setConfirmar(null)
   }
 
   return (
@@ -43,7 +48,9 @@ export default function Produtos() {
           </div>
         )}
 
-        {isLoading ? <LoadingSpinner /> : isError ? null : items.length === 0 ? (
+        {isLoading ? <LoadingSpinner /> : isError ? (
+          <LoadError onRetry={() => { setErroDelete(''); refetch() }} />
+        ) : items.length === 0 ? (
           <EmptyState title="Nenhum produto" description="Monte seus produtos combinando receitas e ingredientes"
             action={<Link to="/produtos/novo" className="btn-primary w-auto px-6">Cadastrar</Link>} />
         ) : (
@@ -73,6 +80,14 @@ export default function Produtos() {
       >
         + Novo
       </Link>
+
+      <ConfirmDialog
+        isOpen={confirmar != null}
+        onClose={() => setConfirmar(null)}
+        onConfirm={confirmarDelete}
+        title="Remover produto"
+        message={`Remover "${confirmar?.nome}"? Esta ação não pode ser desfeita.`}
+      />
     </Layout>
   )
 }

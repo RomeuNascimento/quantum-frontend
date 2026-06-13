@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import Modal from '../../components/Modal'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import FormField from '../../components/FormField'
 import CustoLineChart from '../../components/CustoLineChart'
 import MargemBadge from '../../components/MargemBadge'
@@ -53,6 +54,7 @@ export default function Precificacao() {
   const [produtoSelecionado, setProdutoSelecionado] = useState(null)
   const [showModalCanal, setShowModalCanal] = useState(false)
   const [editCanal, setEditCanal] = useState(null)
+  const [confirmCanal, setConfirmCanal] = useState(null) // canal a excluir
   const [showModalPreco, setShowModalPreco] = useState(false)
   const [editPreco, setEditPreco] = useState(null)
   const [erro, setErro] = useState('')
@@ -304,7 +306,7 @@ export default function Precificacao() {
           </button>
           {editCanal && (
             <button type="button"
-              onClick={() => { if (confirm(`Remover o canal "${editCanal.nome}"?`)) deletarCanalM.mutate(editCanal.id) }}
+              onClick={() => { setConfirmCanal(editCanal); setShowModalCanal(false) }}
               className="w-full font-mono text-xs uppercase tracking-widest text-rust border border-rust py-2"
               disabled={deletarCanalM.isPending}>
               Excluir canal
@@ -335,6 +337,16 @@ export default function Precificacao() {
           <button type="submit" className="btn-primary">Salvar</button>
         </form>
       </Modal>
+
+      {/* Confirmação de exclusão de canal — substitui o confirm() nativo */}
+      <ConfirmDialog
+        isOpen={confirmCanal != null}
+        onClose={() => setConfirmCanal(null)}
+        onConfirm={() => { deletarCanalM.mutate(confirmCanal.id); setConfirmCanal(null) }}
+        title="Excluir canal"
+        message={`Remover o canal "${confirmCanal?.nome}"? Os preços cadastrados nele deixam de aparecer.`}
+        confirmLabel="Excluir"
+      />
     </Layout>
   )
 }

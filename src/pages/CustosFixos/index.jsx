@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import Modal from '../../components/Modal'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import FormField from '../../components/FormField'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import LoadError from '../../components/LoadError'
 import { listarCustosFixos, criarCustoFixo, atualizarCustoFixo, deletarCustoFixo, resumoCustosFixos } from '../../api/custosFixos'
 import { useForm } from 'react-hook-form'
 
@@ -15,6 +17,7 @@ export default function CustosFixos() {
   const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState(null)
+  const [confirmar, setConfirmar] = useState(null) // { id, nome }
   const [erro, setErro] = useState('')
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm()
@@ -74,10 +77,12 @@ export default function CustosFixos() {
     onError: (e) => setErro(e.message),
   })
 
-  const handleDelete = (id, nome) => {
-    if (!confirm(`Remover "${nome}"?`)) return
+  const handleDelete = (id, nome) => setConfirmar({ id, nome })
+
+  const confirmarDelete = () => {
     setErro('')
-    remover.mutate(id)
+    remover.mutate(confirmar.id)
+    setConfirmar(null)
   }
 
   return (
@@ -112,7 +117,9 @@ export default function CustosFixos() {
           </button>
         </div>
 
-        {loading ? <LoadingSpinner /> : itensQ.isError ? null : (
+        {loading ? <LoadingSpinner /> : itensQ.isError ? (
+          <LoadError onRetry={() => { setErro(''); itensQ.refetch(); resumoQ.refetch() }} />
+        ) : (
           <div>
             {items.map((cf) => (
               <div key={cf.id} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
@@ -160,6 +167,14 @@ export default function CustosFixos() {
           <button type="submit" className="btn-primary">Salvar</button>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmar != null}
+        onClose={() => setConfirmar(null)}
+        onConfirm={confirmarDelete}
+        title="Remover custo fixo"
+        message={`Remover "${confirmar?.nome}"? Esta ação não pode ser desfeita.`}
+      />
     </Layout>
   )
 }

@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
+import LoadError from '../../components/LoadError'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import { listarEmbalagens, deletarEmbalagem } from '../../api/embalagens'
 import { brl4 } from '../../utils/format'
 
@@ -11,8 +13,9 @@ export default function Embalagens() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
+  const [confirmar, setConfirmar] = useState(null) // { id, nome }
 
-  const { data: items = [], isLoading, isError, error } = useQuery({
+  const { data: items = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['embalagens'],
     queryFn: () => listarEmbalagens().then((r) => r.data),
   })
@@ -25,10 +28,12 @@ export default function Embalagens() {
     onError: (e) => setErroDelete(e.message),
   })
 
-  const handleDelete = (id, nome) => {
-    if (!confirm(`Remover "${nome}"?`)) return
+  const handleDelete = (id, nome) => setConfirmar({ id, nome })
+
+  const confirmarDelete = () => {
     setErroDelete('')
-    remover.mutate(id)
+    remover.mutate(confirmar.id)
+    setConfirmar(null)
   }
 
   return (
@@ -50,7 +55,9 @@ export default function Embalagens() {
           </svg>
           Nova Embalagem
         </Link>
-        {isLoading ? <LoadingSpinner /> : isError ? null : items.length === 0 ? (
+        {isLoading ? <LoadingSpinner /> : isError ? (
+          <LoadError onRetry={() => { setErroDelete(''); refetch() }} />
+        ) : items.length === 0 ? (
           <EmptyState title="Nenhuma embalagem" description="Cadastre suas embalagens"
             action={<Link to="/embalagens/novo" className="btn-primary w-auto px-6">Cadastrar</Link>} />
         ) : (
@@ -74,6 +81,14 @@ export default function Embalagens() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmar != null}
+        onClose={() => setConfirmar(null)}
+        onConfirm={confirmarDelete}
+        title="Remover embalagem"
+        message={`Remover "${confirmar?.nome}"? Esta ação não pode ser desfeita.`}
+      />
     </Layout>
   )
 }
