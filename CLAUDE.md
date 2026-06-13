@@ -3,9 +3,51 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-13 (branch `claude/inspiring-fermat-9xdxns` — auditoria UI/UX design-chief implementada e mergeada; rascunhos legais LGPD do legal-chief; ⚠️ CONFERIR se o deploy do frontend foi disparado)
-**Próxima sessão:** páginas `/termos` e `/privacidade` (após revisão dos rascunhos por advogado) · rateio de custos fixos ou modo offline · testes Playwright (scripts da sessão 13/06 são meio caminho)
+**Última sessão:** 2026-06-13 (branch `claude/inspiring-fermat-9xdxns` — auditoria UI/UX implementada · docs legais LGPD · embalagens na nota fiscal + conversão · análise competitiva · orçamento WhatsApp · plano mensal; ⚠️ DEPLOY do frontend pendente de conferir/disparar)
+**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · rateio de custos fixos (#2 da pesquisa) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-06-13 (parte 2) — Embalagens, pesquisa competitiva, orçamento WhatsApp, plano mensal
+
+**Embalagens (revisão do processo — PR #3 dos dois repos):**
+- ImportarNota: select "Destino" (🥣 Ingrediente / 📦 Embalagem) por item, pré-classificado
+  pela IA (campo `tipo` novo no backend); vínculo lista o catálogo do destino; salvar
+  cria/vincula embalagem + preço. Antes TODO item da nota virava ingrediente
+- Embalagem nova é sempre `unid` (select de unidade removido do form — cálculo preço/qtd
+  não converte peso; legadas exibem unidade read-only)
+- Botões "Converter em embalagem"/"Converter em ingrediente" nos forms (backend copia
+  histórico de preços, original fica `ativo=False`)
+
+**Análise competitiva (squad aios-analyst):** `docs/pesquisa/analise-competitiva-2026-06-13.md`
+- Diferenciais únicos do Quantum: importação de nota por FOTO via IA (ninguém tem) e
+  precificação por canal com taxas reais. Comunicar como features-herói
+- Sequência recomendada: plano mensal ✅ → orçamento WhatsApp ✅ → rateio de custos
+  fixos → alertas proativos → CRM → pedidos/encomendas
+- Riscos de usabilidade: curva de cadastro antes do 1º preço, vocabulário técnico,
+  trial 7d curto (concorrentes 14–30d), PWA sem vitrine da Play Store
+
+**Orçamento por WhatsApp (PR #5) — `/orcamento`, link no Dashboard > Gerenciar:**
+- Itens com preço pré-preenchido do 1º canal precificado (relatorio-margem), editável;
+  cliente + WhatsApp opcional; preview; wa.me + copiar + imprimir/PDF. Sem persistência
+  (CRM/pedidos ficam para depois)
+
+**Plano mensal (PR #5 + backend PR #4):**
+- Assinatura consome `GET /billing/planos` (valores reais do Stripe) — botões anual
+  (primary) + mensal (ghost, só aparece se backend tiver `STRIPE_PRICE_ID_MENSAL`)
+- ⚠️ ATIVAÇÃO PENDENTE (usuário): rodar `setup_stripe.py` (cria preço R$ 19,90/mês),
+  configurar `STRIPE_PRICE_ID_MENSAL` no EasyPanel, deploy
+
+**📱 DECISÃO PENDENTE — App Android (conversado em 13/06, decidir depois):**
+- Recomendação: **TWA via PWABuilder/Bubblewrap** (~1-2 dias) — PWA já cumpre os
+  requisitos; falta: conta Play Console (US$ 25), `assetlinks.json` em
+  `/.well-known/`, pacote .aab, ficha da loja (privacidade já rascunhada em docs/legal)
+- ⚠️ Play Store exige Google Play Billing (15%) para assinatura vendida NO app —
+  solução padrão: app não vende (esconder checkout quando rodando como TWA;
+  usuário assina pelo site)
+- Capacitor (~1-2 sem) só quando formos fazer alertas push; React Native descartado
+- Ganho: vitrine da Play Store (descoberta + social proof — risco apontado na pesquisa)
 
 ---
 
