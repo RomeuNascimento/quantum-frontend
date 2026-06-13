@@ -5,10 +5,9 @@ import { useForm } from 'react-hook-form'
 import useVoltar from '../../hooks/useVoltar'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
-import { criarEmbalagem, detalharEmbalagem, atualizarEmbalagem, adicionarPrecoEmbalagem } from '../../api/embalagens'
+import ConfirmDialog from '../../components/ConfirmDialog'
+import { criarEmbalagem, detalharEmbalagem, atualizarEmbalagem, adicionarPrecoEmbalagem, converterEmIngrediente } from '../../api/embalagens'
 import { brl, brl4 } from '../../utils/format'
-
-const unidades = ['g', 'ml', 'unid', 'kg', 'L']
 
 export default function EmbalagemForm() {
   const { id } = useParams()
@@ -19,6 +18,7 @@ export default function EmbalagemForm() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [showPreco, setShowPreco] = useState(false)
+  const [confirmConverter, setConfirmConverter] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
   const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco } = useForm()
@@ -48,7 +48,9 @@ export default function EmbalagemForm() {
       if (isEdit) {
         await atualizarEmbalagem(id, dados)
       } else {
-        const payload = { ...dados }
+        // Embalagens novas são sempre por unidade (caixa, saco...) — o cálculo
+        // de custo (preço/qtd) não converte peso, então g/kg seria armadilha
+        const payload = { ...dados, unidade: 'unid' }
         if (dados.preco && dados.quantidade_embalagem) {
           payload.preco_inicial = {
             preco: parseFloat(dados.preco),
@@ -97,12 +99,12 @@ export default function EmbalagemForm() {
           <FormField label="Nome" error={errors.nome?.message}>
             <input className="input" placeholder="Ex: Caixa kraft 15cm" {...register('nome', { required: 'Obrigatório' })} />
           </FormField>
-          <FormField label="Unidade" error={errors.unidade?.message}>
-            <select className="input" {...register('unidade', { required: 'Obrigatório' })}>
-              <option value="">Selecione</option>
-              {unidades.map((u) => <option key={u} value={u}>{u}</option>)}
-            </select>
-          </FormField>
+          {/* Embalagem nova é sempre 'unid'; em edição a unidade legada só é exibida */}
+          {isEdit && detalheQ.data?.unidade && detalheQ.data.unidade !== 'unid' && (
+            <FormField label="Unidade (legado)">
+              <p className="qtm-num text-sm text-mute py-2">{detalheQ.data.unidade}</p>
+            </FormField>
+          )}
           {!isEdit && (
             <>
               <p className="label pt-2">Preço de compra (opcional)</p>
@@ -155,9 +157,38 @@ export default function EmbalagemForm() {
                 </div>
               ))}
             </div>
+
+            {/* Reclassificação: cadastrou como embalagem mas é insumo de receita */}
+            <button
+              type="button"
+              onClick={() => setConfirmConverter(true)}
+              className="btn-ghost mt-6 text-xs py-2"
+            >
+              Converter em ingrediente
+            </button>
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmConverter}
+        onClose={() => setConfirmConverter(false)}
+        onConfirm={async () => {
+          setConfirmConverter(false)
+          setErro('')
+          try {
+            await converterEmIngrediente(id)
+            queryClient.invalidateQueries({ queryKey: ['embalagens'] })
+            queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
+            navigate('/ingredientes')
+          } catch (e) {
+            setErro(e.message)
+          }
+        }}
+        title="Converter em ingrediente"
+        message={`"${detalheQ.data?.nome}" vira um ingrediente com o histórico de preços copiado. Produtos que já usam esta embalagem continuam calculando normalmente.`}
+        confirmLabel="Converter"
+      />
     </Layout>
   )
 }

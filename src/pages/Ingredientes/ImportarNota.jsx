@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import { processarNotaFiscal } from '../../api/ia'
 import { listarIngredientes, criarIngrediente, adicionarPrecoIngrediente } from '../../api/ingredientes'
+import { listarEmbalagens, criarEmbalagem, adicionarPrecoEmbalagem } from '../../api/embalagens'
 
 const UNIDADES = ['g', 'kg', 'ml', 'L', 'unid']
 const hoje = () => new Date().toISOString().split('T')[0]
@@ -22,15 +23,25 @@ export default function ImportarNota() {
   const [dataCompra, setDataCompra] = useState(hoje())
   const [itens, setItens] = useState([])
   const [existentes, setExistentes] = useState([])
+  const [existentesEmb, setExistentesEmb] = useState([])
   const [erro, setErro] = useState('')
   const [resultados, setResultados] = useState([])
 
   useEffect(() => {
     listarIngredientes().then((r) => setExistentes(r.data))
+    listarEmbalagens().then((r) => setExistentesEmb(r.data)).catch(() => {})
   }, [])
 
   const matchIngrediente = (nome) =>
     existentes.find((e) => normalizar(e.nome) === normalizar(nome)) || null
+
+  const matchEmbalagem = (nome) =>
+    existentesEmb.find((e) => normalizar(e.nome) === normalizar(nome)) || null
+
+  // Catálogo e match conforme o destino escolhido para o item
+  const catalogoDoTipo = (tipo) => (tipo === 'embalagem' ? existentesEmb : existentes)
+  const matchDoTipo = (tipo, nome) =>
+    tipo === 'embalagem' ? matchEmbalagem(nome) : matchIngrediente(nome)
 
   const processarArquivo = async () => {
     if (!arquivo) return
@@ -43,9 +54,14 @@ export default function ImportarNota() {
       setItens(
         (data.itens || []).map((item, idx) => {
           const nome = item.nome ?? item.nome_original ?? ''
-          // Vínculo com o catálogo: sugestão da IA tem prioridade; senão, match por nome
-          const sugerido = existentes.find((e) => e.id === item.ingrediente_id_sugerido) || null
-          const match = sugerido || matchIngrediente(nome)
+          // Destino classificado pela IA: caixa/saco/forma → embalagem; comestível → ingrediente
+          const tipo = item.tipo === 'embalagem' ? 'embalagem' : 'ingrediente'
+          // Vínculo com o catálogo: sugestão da IA tem prioridade (só ingredientes);
+          // senão, match por nome no catálogo do destino
+          const sugerido = tipo === 'ingrediente'
+            ? existentes.find((e) => e.id === item.ingrediente_id_sugerido) || null
+            : null
+          const match = sugerido || matchDoTipo(tipo, nome)
           // peso_embalagem_g = peso de UMA embalagem → é o que vai em quantidade_embalagem
           // preco_unitario = preço de UMA embalagem → é o que vai em preco
           const temPeso = item.peso_embalagem_g != null && item.peso_embalagem_g > 0
@@ -55,6 +71,7 @@ export default function ImportarNota() {
             nome,
             nome_original: item.nome_original ?? '',
             marca: item.marca ?? '',
+            tipo,
             quantidade: temPeso ? item.peso_embalagem_g : (item.quantidade ?? 1),
             unidade: temPeso ? 'g' : (item.unidade ?? 'unid'),
             preco_total: item.preco_unitario ?? item.preco_total ?? 0,
@@ -76,9 +93,15 @@ export default function ImportarNota() {
         if (it._id !== idx) return it
         const atualizado = { ...it, [campo]: valor }
         if (campo === 'vinculoId') atualizado.sugeridoPelaIA = false
+        // Trocar o destino re-deriva o vínculo no catálogo do novo tipo
+        if (campo === 'tipo') {
+          const m = matchDoTipo(valor, it.nome)
+          atualizado.vinculoId = m ? m.id : ''
+          atualizado.sugeridoPelaIA = false
+        }
         // Editar o nome só re-deriva o vínculo se o usuário não escolheu um explicitamente
         if (campo === 'nome' && it.vinculoId === '') {
-          const m = matchIngrediente(valor)
+          const m = matchDoTipo(it.tipo, valor)
           atualizado.vinculoId = m ? m.id : ''
         }
         return atualizado
@@ -86,18 +109,44 @@ export default function ImportarNota() {
     )
 
   const ingredientePorId = (id) => existentes.find((e) => e.id === id) || null
+  const embalagemPorId = (id) => existentesEmb.find((e) => e.id === id) || null
   const selecionados = itens.filter((i) => i.selecionado)
 
   const salvar = async () => {
     setFase('salvando')
     const res = []
-    // Evita criar ingrediente duplicado quando o mesmo nome aparece em
-    // mais de um item da nota com ação "criar novo"
+    // Evita criar registro duplicado quando o mesmo nome aparece em mais de
+    // um item da nota com ação "criar novo" — um cache por destino
     const criadosNoLote = new Map()
+    const criadosNoLoteEmb = new Map()
     for (const item of selecionados) {
       try {
-        let ingId
         const chave = normalizar(item.nome)
+
+        if (item.tipo === 'embalagem') {
+          // Destino: embalagem — sem conversão de unidade (embalagem nova é 'unid')
+          let embId
+          const vinculo = item.vinculoId !== '' ? embalagemPorId(item.vinculoId) : null
+          if (vinculo) {
+            embId = vinculo.id
+          } else if (criadosNoLoteEmb.has(chave)) {
+            embId = criadosNoLoteEmb.get(chave)
+          } else {
+            const r = await criarEmbalagem({ nome: item.nome, unidade: 'unid' })
+            embId = r.data.id
+            criadosNoLoteEmb.set(chave, embId)
+          }
+          await adicionarPrecoEmbalagem(embId, {
+            preco: parseFloat(item.preco_total),
+            quantidade_embalagem: parseFloat(item.quantidade) || 1,
+            data_compra: dataCompra + 'T12:00:00',
+            origem: 'nota_fiscal_ia',
+          })
+          res.push({ nome: `${item.nome} (embalagem)`, ok: true })
+          continue
+        }
+
+        let ingId
         const vinculo = item.vinculoId !== '' ? ingredientePorId(item.vinculoId) : null
         if (vinculo) {
           ingId = vinculo.id
@@ -133,9 +182,11 @@ export default function ImportarNota() {
         res.push({ nome: item.nome, ok: false, msg: e.message })
       }
     }
-    // Ingredientes e preços novos — invalida caches do TanStack Query
+    // Ingredientes/embalagens e preços novos — invalida caches do TanStack Query
     queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
     queryClient.invalidateQueries({ queryKey: ['ingrediente'] })
+    queryClient.invalidateQueries({ queryKey: ['embalagens'] })
+    queryClient.invalidateQueries({ queryKey: ['embalagem'] })
     queryClient.invalidateQueries({ queryKey: ['precos-produto'] })
     queryClient.invalidateQueries({ queryKey: ['relatorio-margem'] })
     setResultados(res)
@@ -267,20 +318,34 @@ export default function ImportarNota() {
                   </div>
                 </div>
 
-                {/* Vínculo com o catálogo */}
+                {/* Destino + vínculo com o catálogo */}
                 {item.selecionado && (() => {
-                  const vinculo = item.vinculoId !== '' ? ingredientePorId(item.vinculoId) : null
+                  const ehEmb = item.tipo === 'embalagem'
+                  const vinculo = item.vinculoId !== ''
+                    ? (ehEmb ? embalagemPorId(item.vinculoId) : ingredientePorId(item.vinculoId))
+                    : null
                   return (
                     <div className="ml-7 mt-2">
                       <div className="flex items-center gap-2">
+                        <span className="label mb-0 flex-shrink-0">Destino:</span>
+                        <select
+                          className="input flex-1 text-sm"
+                          aria-label="Destino do item"
+                          value={item.tipo}
+                          onChange={(e) => atualizarItem(item._id, 'tipo', e.target.value)}>
+                          <option value="ingrediente">🥣 Ingrediente</option>
+                          <option value="embalagem">📦 Embalagem</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1.5">
                         <span className="label mb-0 flex-shrink-0">Vincular a:</span>
                         <select
                           className="input flex-1 text-sm"
-                          aria-label="Vincular a ingrediente existente"
+                          aria-label={ehEmb ? 'Vincular a embalagem existente' : 'Vincular a ingrediente existente'}
                           value={item.vinculoId}
                           onChange={(e) => atualizarItem(item._id, 'vinculoId', e.target.value === '' ? '' : Number(e.target.value))}>
-                          <option value="">➕ Criar novo ingrediente</option>
-                          {existentes.map((e) => (
+                          <option value="">{ehEmb ? '➕ Criar nova embalagem' : '➕ Criar novo ingrediente'}</option>
+                          {catalogoDoTipo(item.tipo).map((e) => (
                             <option key={e.id} value={e.id}>
                               {e.nome}{e.marca ? ` · ${e.marca}` : ''}
                             </option>
@@ -293,7 +358,7 @@ export default function ImportarNota() {
                             Sugerido pela IA
                           </span>
                         )}
-                        {vinculo && vinculo.unidade !== item.unidade && (
+                        {!ehEmb && vinculo && vinculo.unidade !== item.unidade && (
                           ['g', 'kg'].includes(item.unidade) === ['g', 'kg'].includes(vinculo.unidade) &&
                           ['ml', 'L'].includes(item.unidade) === ['ml', 'L'].includes(vinculo.unidade) ? (
                             <span className="font-mono text-[10px] text-mute flex-shrink-0">

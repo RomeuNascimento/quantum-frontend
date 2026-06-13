@@ -5,7 +5,8 @@ import useVoltar from '../../hooks/useVoltar'
 import { useForm } from 'react-hook-form'
 import Layout from '../../components/Layout'
 import FormField from '../../components/FormField'
-import { criarIngrediente, detalharIngrediente, atualizarIngrediente, adicionarPrecoIngrediente } from '../../api/ingredientes'
+import ConfirmDialog from '../../components/ConfirmDialog'
+import { criarIngrediente, detalharIngrediente, atualizarIngrediente, adicionarPrecoIngrediente, converterEmEmbalagem } from '../../api/ingredientes'
 import { brl, brl4 } from '../../utils/format'
 
 const unidades = ['g', 'ml', 'unid', 'kg', 'L']
@@ -19,6 +20,7 @@ export default function IngredienteForm() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [showPreco, setShowPreco] = useState(false)
+  const [confirmConverter, setConfirmConverter] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: { fator_correcao: 1 },
@@ -176,9 +178,38 @@ export default function IngredienteForm() {
                 </div>
               ))}
             </div>
+
+            {/* Reclassificação: cadastrou como ingrediente mas é embalagem (caixa, saco...) */}
+            <button
+              type="button"
+              onClick={() => setConfirmConverter(true)}
+              className="btn-ghost mt-6 text-xs py-2"
+            >
+              Converter em embalagem
+            </button>
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmConverter}
+        onClose={() => setConfirmConverter(false)}
+        onConfirm={async () => {
+          setConfirmConverter(false)
+          setErro('')
+          try {
+            await converterEmEmbalagem(id)
+            queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
+            queryClient.invalidateQueries({ queryKey: ['embalagens'] })
+            navigate('/embalagens')
+          } catch (e) {
+            setErro(e.message)
+          }
+        }}
+        title="Converter em embalagem"
+        message={`"${detalheQ.data?.nome}" vira uma embalagem com o histórico de preços copiado. Receitas que já usam este ingrediente continuam calculando normalmente.`}
+        confirmLabel="Converter"
+      />
     </Layout>
   )
 }
