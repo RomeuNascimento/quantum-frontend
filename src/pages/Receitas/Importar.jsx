@@ -122,7 +122,7 @@ export default function ImportarReceitas() {
         <div className="px-4 pt-6 space-y-6">
           {erro && (
             <div className="bg-rust/10 border border-rust px-3 py-2">
-              <p className="font-mono text-xs text-rust">{erro}</p>
+              <p className="font-sans text-sm text-rust">{erro}</p>
             </div>
           )}
 
@@ -184,16 +184,20 @@ export default function ImportarReceitas() {
               <div className="flex items-start gap-3 p-3">
                 <input type="checkbox" checked={rec.selecionada}
                   onChange={(e) => atualizarReceita(rec._id, 'selecionada', e.target.checked)}
+                  aria-label={`Incluir ${rec.nome || 'receita'}`}
                   className="mt-1 flex-shrink-0 w-4 h-4 accent-lime" />
                 <div className="flex-1 min-w-0">
                   <input className="input w-full text-sm font-medium" value={rec.nome}
+                    aria-label="Nome da receita"
                     onChange={(e) => atualizarReceita(rec._id, 'nome', e.target.value)} />
                   <div className="flex gap-2 mt-2">
                     <input className="input flex-1 text-xs" placeholder="Tipo / Categoria (opcional)"
+                      aria-label="Tipo ou categoria"
                       value={rec.tipo}
                       onChange={(e) => atualizarReceita(rec._id, 'tipo', e.target.value)} />
                     <div className="relative w-28">
                       <input type="number" step="1" className="input w-full text-xs pr-1"
+                        aria-label="Rendimento em gramas"
                         value={rec.rendimento_g}
                         onChange={(e) => atualizarReceita(rec._id, 'rendimento_g', e.target.value)} />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute">g</span>
@@ -201,6 +205,7 @@ export default function ImportarReceitas() {
                   </div>
                 </div>
                 <button onClick={() => toggleExpand(rec._id)}
+                  aria-label={expandidos[rec._id] ? 'Recolher detalhes' : 'Ver detalhes'}
                   className="p-1 text-mute flex-shrink-0">
                   <svg className={`w-4 h-4 transition-transform ${expandidos[rec._id] ? 'rotate-180' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -219,7 +224,7 @@ export default function ImportarReceitas() {
                     <div className="space-y-1">
                       {rec.ingredientes.map((ing, ii) => (
                         <div key={ii} className="flex items-center gap-2">
-                          <span className={`w-2 h-2 flex-shrink-0 rounded-full ${ing.match ? 'bg-lime' : 'bg-rust'}`} />
+                          <span className={`w-2 h-2 flex-shrink-0 ${ing.match ? 'bg-lime' : 'bg-rust'}`} />
                           <span className="font-mono text-xs text-ink flex-1 truncate">{ing.nome}</span>
                           <span className="font-mono text-xs text-mute qtm-num">{ing.quantidade_g}g</span>
                         </div>
@@ -279,7 +284,7 @@ export default function ImportarReceitas() {
     <Layout title="Importação concluída" onBack={() => navigate('/receitas')}>
       <div className="px-4 pt-6 space-y-4">
         <div className="border border-lime bg-lime/10 px-4 py-3">
-          <p className="font-mono text-sm text-ink">
+          <p className="font-sans text-sm text-ink">
             {resultados.filter((r) => r.ok).length} receita(s) cadastrada(s) com sucesso.
           </p>
         </div>
@@ -287,7 +292,7 @@ export default function ImportarReceitas() {
           <div className="border border-rust bg-rust/10 px-4 py-3 space-y-1">
             <p className="font-mono text-xs text-rust uppercase tracking-widest mb-1">Erros</p>
             {erros.map((r, i) => (
-              <p key={i} className="font-mono text-xs text-rust">{r.nome}: {r.msg}</p>
+              <p key={i} className="font-sans text-sm text-rust">{r.nome}: {r.msg}</p>
             ))}
           </div>
         )}

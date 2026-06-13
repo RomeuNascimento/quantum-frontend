@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
+import LoadError from '../../components/LoadError'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import { listarIngredientes, deletarIngrediente } from '../../api/ingredientes'
 import { brl4 } from '../../utils/format'
 
@@ -13,8 +15,9 @@ export default function Ingredientes() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
+  const [confirmar, setConfirmar] = useState(null) // { id, nome }
 
-  const { data: items = [], isLoading, isError, error } = useQuery({
+  const { data: items = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['ingredientes'],
     queryFn: () => listarIngredientes().then((r) => r.data),
   })
@@ -28,10 +31,12 @@ export default function Ingredientes() {
     onError: (e) => setErroDelete(e.message),
   })
 
-  const handleDelete = (id, nome) => {
-    if (!confirm(`Remover "${nome}"?`)) return
+  const handleDelete = (id, nome) => setConfirmar({ id, nome })
+
+  const confirmarDelete = () => {
     setErroDelete('')
-    remover.mutate(id)
+    remover.mutate(confirmar.id)
+    setConfirmar(null)
   }
 
   return (
@@ -71,14 +76,16 @@ export default function Ingredientes() {
 
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <p className="font-sans text-sm text-rust flex-1">{erroDelete}</p>
             <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}
 
         {isLoading ? (
           <LoadingSpinner />
-        ) : isError ? null : items.length === 0 ? (
+        ) : isError ? (
+          <LoadError onRetry={() => { setErroDelete(''); refetch() }} />
+        ) : items.length === 0 ? (
           <EmptyState
             title="Nenhum ingrediente"
             description="Cadastre seus ingredientes para calcular custos"
@@ -91,12 +98,13 @@ export default function Ingredientes() {
                   <p className="font-medium text-ink truncate">
                     {ing.nome}{ing.marca ? <span className="text-mute font-normal"> · {ing.marca}</span> : null}
                   </p>
-                  <p className="font-mono text-xs text-mute mt-0.5">
+                  <p className="qtm-num text-xs text-mute mt-0.5">
                     {ing.unidade} · fator {ing.fator_correcao} · {formatCusto(ing.custo_unitario_atual)}/un
                   </p>
                 </Link>
                 <button
                   onClick={() => handleDelete(ing.id, ing.nome)}
+                  aria-label={`Remover ${ing.nome}`}
                   className="p-2 text-mute active:text-rust flex-shrink-0"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -109,6 +117,14 @@ export default function Ingredientes() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmar != null}
+        onClose={() => setConfirmar(null)}
+        onConfirm={confirmarDelete}
+        title="Remover ingrediente"
+        message={`Remover "${confirmar?.nome}"? Esta ação não pode ser desfeita.`}
+      />
     </Layout>
   )
 }

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
+import LoadError from '../../components/LoadError'
 import MargemBadge from '../../components/MargemBadge'
 import { relatorioMargem } from '../../api/precificacao'
 
@@ -40,7 +41,7 @@ export default function Relatorio() {
   const navigate = useNavigate()
   const [erro, setErro] = useState('')
 
-  const { data: produtos = [], isLoading: loading, isError, error } = useQuery({
+  const { data: produtos = [], isLoading: loading, isError, error, refetch } = useQuery({
     queryKey: ['relatorio-margem'],
     queryFn: () => relatorioMargem().then((r) => r.data.produtos),
   })
@@ -55,11 +56,13 @@ export default function Relatorio() {
       <div className="px-4 pt-4">
         {erro && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-mono text-xs text-rust flex-1">{erro}</p>
+            <p className="font-sans text-sm text-rust flex-1">{erro}</p>
             <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}
-        {loading ? <LoadingSpinner /> : isError ? null : produtos.length === 0 ? (
+        {loading ? <LoadingSpinner /> : isError ? (
+          <LoadError onRetry={() => { setErro(''); refetch() }} />
+        ) : produtos.length === 0 ? (
           <EmptyState
             title="Nenhum produto cadastrado"
             description="Cadastre produtos e precifique-os para ver o relatório de margem."

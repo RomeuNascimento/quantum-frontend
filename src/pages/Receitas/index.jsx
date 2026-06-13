@@ -4,14 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
+import LoadError from '../../components/LoadError'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import { listarReceitas, deletarReceita } from '../../api/receitas'
 
 export default function Receitas() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [erroDelete, setErroDelete] = useState('')
+  const [confirmar, setConfirmar] = useState(null) // { id, nome }
 
-  const { data: items = [], isLoading, isError, error } = useQuery({
+  const { data: items = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['receitas'],
     queryFn: () => listarReceitas().then((r) => r.data),
   })
@@ -24,10 +27,12 @@ export default function Receitas() {
     onError: (e) => setErroDelete(e.message),
   })
 
-  const handleDelete = (id, nome) => {
-    if (!confirm(`Remover "${nome}"?`)) return
+  const handleDelete = (id, nome) => setConfirmar({ id, nome })
+
+  const confirmarDelete = () => {
     setErroDelete('')
-    remover.mutate(id)
+    remover.mutate(confirmar.id)
+    setConfirmar(null)
   }
 
   return (
@@ -48,12 +53,14 @@ export default function Receitas() {
 
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <p className="font-sans text-sm text-rust flex-1">{erroDelete}</p>
             <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}
 
-        {isLoading ? <LoadingSpinner /> : isError ? null : items.length === 0 ? (
+        {isLoading ? <LoadingSpinner /> : isError ? (
+          <LoadError onRetry={() => { setErroDelete(''); refetch() }} />
+        ) : items.length === 0 ? (
           <EmptyState
             title="Nenhuma receita"
             description="Cadastre suas receitas com ingredientes e mão de obra"
@@ -72,9 +79,9 @@ export default function Receitas() {
                     </div>
                   )}
                   <p className="font-medium text-ink truncate">{r.nome}</p>
-                  <p className="font-mono text-xs text-mute">Rendimento: {r.rendimento_g}g</p>
+                  <p className="qtm-num text-xs text-mute">Rendimento: {r.rendimento_g}g</p>
                 </Link>
-                <button onClick={() => handleDelete(r.id, r.nome)} className="p-2 text-mute active:text-rust">
+                <button onClick={() => handleDelete(r.id, r.nome)} aria-label={`Remover ${r.nome}`} className="p-2 text-mute active:text-rust">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
                     <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -85,6 +92,14 @@ export default function Receitas() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmar != null}
+        onClose={() => setConfirmar(null)}
+        onConfirm={confirmarDelete}
+        title="Remover receita"
+        message={`Remover "${confirmar?.nome}"? Esta ação não pode ser desfeita.`}
+      />
     </Layout>
   )
 }

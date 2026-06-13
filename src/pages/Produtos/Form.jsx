@@ -210,7 +210,7 @@ export default function ProdutoForm() {
           <SimuladorPreco custo={custoTotal} />
         )}
 
-        {erro && <p className="font-mono text-sm text-rust mt-4">{erro}</p>}
+        {erro && <p className="font-sans text-sm text-rust mt-4">{erro}</p>}
       </form>
       <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
         <button

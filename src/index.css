@@ -10,6 +10,11 @@
     @apply bg-bone text-ink font-sans;
     overscroll-behavior-y: contain;
   }
+  /* Foco de teclado visível em qualquer elemento interativo (não dispara em toque/clique) */
+  :focus-visible {
+    outline: 2px solid theme('colors.ink');
+    outline-offset: 2px;
+  }
 }
 
 @layer components {
@@ -35,8 +40,9 @@
     @apply bg-receipt border border-line rounded-none p-4;
   }
   .input {
+    /* sem outline-none: o :focus-visible global (outline ink) é o indicador acessível */
     @apply w-full bg-white border border-ink rounded-none px-4 py-3 text-sm font-sans
-           focus:outline-none focus:border-lime;
+           focus:border-lime;
   }
   .label {
     @apply block font-mono text-[11px] uppercase tracking-widest text-mute mb-1;

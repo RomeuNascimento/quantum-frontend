@@ -129,7 +129,7 @@ export default function IngredienteForm() {
             </>
           )}
 
-          {erro && <p className="font-mono text-sm text-rust">{erro}</p>}
+          {erro && <p className="font-sans text-sm text-rust">{erro}</p>}
 
           <div className="pt-2">
             <button type="submit" className="btn-primary" disabled={loading}>

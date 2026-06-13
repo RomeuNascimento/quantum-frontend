@@ -149,7 +149,7 @@ export default function ImportarNota() {
         <div className="px-4 pt-6 space-y-6">
           {erro && (
             <div className="bg-rust/10 border border-rust px-3 py-2">
-              <p className="font-mono text-xs text-rust">{erro}</p>
+              <p className="font-sans text-sm text-rust">{erro}</p>
             </div>
           )}
 
@@ -205,8 +205,8 @@ export default function ImportarNota() {
         <div className="px-4 pt-4 pb-32">
           {/* Data da compra */}
           <div className="mb-4">
-            <p className="label mb-1">Data da compra</p>
-            <input type="date" className="input" value={dataCompra}
+            <label className="label mb-1" htmlFor="nf-data">Data da compra</label>
+            <input id="nf-data" type="date" className="input" value={dataCompra}
               onChange={(e) => setDataCompra(e.target.value)} />
           </div>
 
@@ -220,10 +220,12 @@ export default function ImportarNota() {
                 <div className="flex items-start gap-3">
                   <input type="checkbox" checked={item.selecionado}
                     onChange={(e) => atualizarItem(item._id, 'selecionado', e.target.checked)}
+                    aria-label={`Incluir ${item.nome || 'item'}`}
                     className="mt-1 flex-shrink-0 w-4 h-4 accent-lime" />
                   <div className="flex-1 min-w-0">
                     <input
                       className="input w-full text-sm"
+                      aria-label="Nome do ingrediente"
                       value={item.nome}
                       onChange={(e) => atualizarItem(item._id, 'nome', e.target.value)}
                     />
@@ -238,6 +240,7 @@ export default function ImportarNota() {
                   <input
                     className="input w-full text-sm"
                     placeholder="Marca (opcional)"
+                    aria-label="Marca"
                     value={item.marca}
                     onChange={(e) => atualizarItem(item._id, 'marca', e.target.value)}
                   />
@@ -246,9 +249,11 @@ export default function ImportarNota() {
                 {/* Linha 2: quantidade + unidade + preço */}
                 <div className="flex gap-2 mt-2 ml-7">
                   <input type="number" step="0.001" className="input w-24 text-sm"
+                    aria-label="Quantidade"
                     value={item.quantidade}
                     onChange={(e) => atualizarItem(item._id, 'quantidade', e.target.value)} />
                   <select className="input w-20 text-sm"
+                    aria-label="Unidade"
                     value={item.unidade}
                     onChange={(e) => atualizarItem(item._id, 'unidade', e.target.value)}>
                     {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -256,6 +261,7 @@ export default function ImportarNota() {
                   <div className="relative flex-1">
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 font-mono text-xs text-mute">R$</span>
                     <input type="number" step="0.01" className="input w-full pl-8 text-sm"
+                      aria-label="Preço (R$)"
                       value={item.preco_total}
                       onChange={(e) => atualizarItem(item._id, 'preco_total', e.target.value)} />
                   </div>
@@ -270,6 +276,7 @@ export default function ImportarNota() {
                         <span className="label mb-0 flex-shrink-0">Vincular a:</span>
                         <select
                           className="input flex-1 text-sm"
+                          aria-label="Vincular a ingrediente existente"
                           value={item.vinculoId}
                           onChange={(e) => atualizarItem(item._id, 'vinculoId', e.target.value === '' ? '' : Number(e.target.value))}>
                           <option value="">➕ Criar novo ingrediente</option>
@@ -335,7 +342,7 @@ export default function ImportarNota() {
     <Layout title="Importação concluída" onBack={() => navigate('/ingredientes')}>
       <div className="px-4 pt-6 space-y-4">
         <div className="border border-lime bg-lime/10 px-4 py-3">
-          <p className="font-mono text-sm text-ink">
+          <p className="font-sans text-sm text-ink">
             {resultados.filter((r) => r.ok).length} ingrediente(s) cadastrado(s) com sucesso.
           </p>
         </div>
@@ -343,7 +350,7 @@ export default function ImportarNota() {
           <div className="border border-rust bg-rust/10 px-4 py-3 space-y-1">
             <p className="font-mono text-xs text-rust uppercase tracking-widest mb-1">Erros</p>
             {erros.map((r, i) => (
-              <p key={i} className="font-mono text-xs text-rust">{r.nome}: {r.msg}</p>
+              <p key={i} className="font-sans text-sm text-rust">{r.nome}: {r.msg}</p>
             ))}
           </div>
         )}

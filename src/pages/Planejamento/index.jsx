@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { listarReceitas, detalharReceita } from '../../api/receitas'
+import { brl } from '../../utils/format'
 
 const fmtQtd = (n) => {
   const v = Math.round(n * 100) / 100
@@ -10,8 +11,6 @@ const fmtQtd = (n) => {
   if (v % 1 === 0) return v.toString()
   return v.toFixed(2).replace('.', ',')
 }
-
-const fmtR = (n) => `R$ ${n.toFixed(2).replace('.', ',')}`
 
 const fmtPeso = (g) => {
   if (g >= 1000) {
@@ -262,22 +261,22 @@ export default function Planejamento() {
                   <div className="border border-line">
                     <div className="flex items-center justify-between px-3 py-2.5 border-b border-line">
                       <span className="font-mono text-xs uppercase tracking-widest text-mute">Matéria-prima</span>
-                      <span className="qtm-num text-sm text-ink">{fmtR(resultado.custo_mp)}</span>
+                      <span className="qtm-num text-sm text-ink">{brl(resultado.custo_mp)}</span>
                     </div>
                     {resultado.custo_mo > 0 && (
                       <div className="flex items-center justify-between px-3 py-2.5 border-b border-line">
                         <span className="font-mono text-xs uppercase tracking-widest text-mute">Mão de obra</span>
-                        <span className="qtm-num text-sm text-ink">{fmtR(resultado.custo_mo)}</span>
+                        <span className="qtm-num text-sm text-ink">{brl(resultado.custo_mo)}</span>
                       </div>
                     )}
                     <div className="flex items-center justify-between px-3 py-2.5 bg-lime">
                       <span className="font-mono text-xs uppercase tracking-widest text-ink font-bold">Total</span>
-                      <span className="qtm-num text-sm text-ink font-bold">{fmtR(resultado.custo_total)}</span>
+                      <span className="qtm-num text-sm text-ink font-bold">{brl(resultado.custo_total)}</span>
                     </div>
                     {resultado.custo_porcao !== null && (
                       <div className="flex items-center justify-between px-3 py-2.5 bg-receipt border-t border-line">
                         <span className="font-mono text-xs uppercase tracking-widest text-mute">Por porção</span>
-                        <span className="qtm-num text-sm text-ink">{fmtR(resultado.custo_porcao)}</span>
+                        <span className="qtm-num text-sm text-ink">{brl(resultado.custo_porcao)}</span>
                       </div>
                     )}
                   </div>

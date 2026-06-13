@@ -56,10 +56,12 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {modo === 'registro' && (
             <div>
-              <label className="label">Nome completo</label>
+              <label className="label" htmlFor="login-nome">Nome completo</label>
               <input
+                id="login-nome"
                 className="input"
                 placeholder="Sua confeitaria"
+                autoComplete="name"
                 {...register('nome', { required: 'Nome obrigatório' })}
               />
               {errors.nome && <p className="text-xs font-mono text-rust mt-1">{errors.nome.message}</p>}
@@ -67,23 +69,27 @@ export default function Login() {
           )}
 
           <div>
-            <label className="label">E-mail</label>
+            <label className="label" htmlFor="login-email">E-mail</label>
             <input
+              id="login-email"
               className="input"
               type="email"
               placeholder="seu@email.com"
+              autoComplete="email"
               {...register('email', { required: 'E-mail obrigatório' })}
             />
             {errors.email && <p className="text-xs font-mono text-rust mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
-            <label className="label">Senha</label>
+            <label className="label" htmlFor="login-senha">Senha</label>
             <input
+              id="login-senha"
               className="input"
               type="password"
               placeholder="••••••••"
-              {...register('senha', { required: 'Senha obrigatória', minLength: { value: 6, message: 'Mínimo 6 caracteres' } })}
+              autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
+              {...register('senha', { required: 'Senha obrigatória', minLength: { value: 8, message: 'Mínimo 8 caracteres' } })}
             />
             {errors.senha && <p className="text-xs font-mono text-rust mt-1">{errors.senha.message}</p>}
           </div>

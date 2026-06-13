@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
+import { listarCanais } from '../api/precificacao'
 import { brl } from '../utils/format'
 
 // Simulador "e se": preço derivado em tempo real da fórmula de precificação
@@ -7,6 +9,20 @@ import { brl } from '../utils/format'
 export default function SimuladorPreco({ custo }) {
   const [margem, setMargem] = useState(30)
   const [taxas, setTaxas] = useState(21)
+
+  // Inicializa as taxas com o primeiro canal real do usuário (ex: iFood);
+  // depois que o usuário mexe no slider, não sobrescreve mais
+  const tocouTaxas = useRef(false)
+  const { data: canais } = useQuery({
+    queryKey: ['canais'],
+    queryFn: () => listarCanais().then((r) => r.data),
+  })
+  useEffect(() => {
+    if (tocouTaxas.current || !canais?.length) return
+    const c = canais[0]
+    const total = Math.round((c.taxa_plataforma_pct || 0) + (c.taxa_cartao_pct || 0) + (c.imposto_pct || 0))
+    setTaxas(Math.min(40, Math.max(0, total)))
+  }, [canais])
 
   const divisor = 1 - margem / 100 - taxas / 100
   const preco = divisor > 0 ? custo / divisor : null
@@ -30,7 +46,7 @@ export default function SimuladorPreco({ custo }) {
       </div>
       <input
         type="range" min="0" max="40" step="1" value={taxas}
-        onChange={(e) => setTaxas(parseInt(e.target.value))}
+        onChange={(e) => { tocouTaxas.current = true; setTaxas(parseInt(e.target.value)) }}
         className="w-full accent-lime"
       />
       <div className="flex justify-between items-end mt-4 pt-3 border-t border-line">
