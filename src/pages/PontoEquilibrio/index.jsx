@@ -68,7 +68,7 @@ export default function PontoEquilibrio() {
             {/* Slider de margem */}
             <div className="card">
               <div className="flex justify-between items-end mb-1">
-                <span className="label mb-0">Margem de contribuição</span>
+                <span className="label mb-0">Margem (%)</span>
                 <span className="qtm-num text-lg text-ink">{margem}%</span>
               </div>
               <input
@@ -78,8 +78,8 @@ export default function PontoEquilibrio() {
                 aria-label="Margem de contribuição em porcentagem"
               />
               <p className="text-xs text-mute mt-2">
-                Quanto sobra de cada venda <strong>depois</strong> de pagar ingredientes,
-                embalagem e taxas. Arraste pra simular.
+                Margem = o que sobra de cada venda <strong>depois</strong> de pagar
+                ingredientes, embalagem e taxas. Arraste pra simular.
               </p>
             </div>
 
