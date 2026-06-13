@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
-import { billingStatus, criarCheckout, abrirPortal } from '../../api/billing'
+import { billingStatus, listarPlanos, criarCheckout, abrirPortal } from '../../api/billing'
+import { brl } from '../../utils/format'
 
 const dataBR = (iso) => (iso ? new Date(iso).toLocaleDateString('pt-BR') : null)
 
@@ -20,6 +21,16 @@ export default function Assinatura() {
     // após voltar do checkout, o webhook pode levar alguns segundos
     refetchInterval: sucesso ? 3000 : false,
   })
+
+  // Planos disponíveis (anual sempre; mensal se configurado no servidor)
+  const { data: planosData } = useQuery({
+    queryKey: ['billing-planos'],
+    queryFn: () => listarPlanos().then((r) => r.data),
+    staleTime: 60 * 60_000,
+  })
+  const planos = planosData?.planos ?? []
+  const anual = planos.find((p) => p.plano === 'anual')
+  const mensal = planos.find((p) => p.plano === 'mensal')
 
   const redirecionar = async (fn) => {
     setErro('')
@@ -53,8 +64,15 @@ export default function Assinatura() {
 
         <div className="card space-y-2">
           <p className="label">Plano</p>
-          <p className="text-ink font-bold">Quantum Anual</p>
-          <p className="qtm-num text-2xl font-bold text-ink">R$ 147<span className="text-sm font-normal text-mute">/ano</span></p>
+          <p className="text-ink font-bold">Quantum</p>
+          <p className="qtm-num text-2xl font-bold text-ink">
+            {brl(anual?.preco ?? 147)}<span className="text-sm font-normal text-mute">/ano</span>
+          </p>
+          {mensal && (
+            <p className="qtm-num text-sm text-mute">
+              ou {brl(mensal.preco)}/mês — no anual você economiza {brl(mensal.preco * 12 - (anual?.preco ?? 147))}
+            </p>
+          )}
 
           <p className="label pt-2">Status</p>
           {status === 'ativa' && (
@@ -73,13 +91,24 @@ export default function Assinatura() {
         </div>
 
         {status !== 'ativa' && (
-          <button
-            onClick={() => redirecionar(criarCheckout)}
-            disabled={carregandoAcao}
-            className="btn-primary w-full"
-          >
-            {carregandoAcao ? 'Abrindo...' : 'Assinar — R$ 147/ano'}
-          </button>
+          <>
+            <button
+              onClick={() => redirecionar(() => criarCheckout('anual'))}
+              disabled={carregandoAcao}
+              className="btn-primary w-full"
+            >
+              {carregandoAcao ? 'Abrindo...' : `Assinar anual — ${brl(anual?.preco ?? 147)}/ano`}
+            </button>
+            {mensal && (
+              <button
+                onClick={() => redirecionar(() => criarCheckout('mensal'))}
+                disabled={carregandoAcao}
+                className="btn-ghost w-full"
+              >
+                {carregandoAcao ? 'Abrindo...' : `Assinar mensal — ${brl(mensal.preco)}/mês`}
+              </button>
+            )}
+          </>
         )}
         {(status === 'ativa' || data?.validade) && (
           <button
