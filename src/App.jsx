@@ -23,6 +23,7 @@ import Precificacao from './pages/Precificacao/index'
 import Relatorio from './pages/Relatorio/index'
 import CustosFixos from './pages/CustosFixos/index'
 import Planejamento from './pages/Planejamento/index'
+import Orcamento from './pages/Orcamento/index'
 import Assinatura from './pages/Assinatura/index'
 
 function ScrollToTop() {
@@ -75,6 +76,7 @@ export default function App() {
         <Route path="/produtos/:id/ficha" element={<PrivateRoute><ProdutoFicha /></PrivateRoute>} />
 
         <Route path="/planejamento" element={<PrivateRoute><Planejamento /></PrivateRoute>} />
+        <Route path="/orcamento" element={<PrivateRoute><Orcamento /></PrivateRoute>} />
         <Route path="/precificacao" element={<PrivateRoute><Precificacao /></PrivateRoute>} />
         <Route path="/relatorio" element={<PrivateRoute><Relatorio /></PrivateRoute>} />
         <Route path="/custos-fixos" element={<PrivateRoute><CustosFixos /></PrivateRoute>} />

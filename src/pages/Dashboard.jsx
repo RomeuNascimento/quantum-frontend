@@ -163,6 +163,7 @@ export default function Dashboard() {
           <p className="label mb-3">Gerenciar</p>
           <div>
             {[
+              { to: '/orcamento', label: 'Criar orçamento (WhatsApp)' },
               { to: '/relatorio', label: 'Relatório de margem' },
               { to: '/custos-fixos', label: 'Custos fixos' },
             ].map((g) => (
