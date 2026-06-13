@@ -3,9 +3,33 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-13 (branch `claude/keen-goldberg-m8aqqx` — `logout()` revoga o token no servidor (`POST /auth/logout`), parte da revogação de JWT do backend; ⚠️ DEPLOY do frontend + backend (migration 008) pendentes)
-**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · rateio de custos fixos (#2 da pesquisa) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright · tela de configurações (usar `/auth/logout-all` e `/auth/alterar-senha`, já prontos no backend)
+**Última sessão:** 2026-06-13 (branch `claude/keen-goldberg-m8aqqx` — atalho de Embalagens no Dashboard + página `/ponto-equilibrio` (break-even com slider de margem + rateio % sobre faturamento); migration 008 do backend já aplicada em produção; ⚠️ DEPLOY do frontend pendente)
+**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright · tela de configurações (usar `/auth/logout-all` e `/auth/alterar-senha`, já prontos no backend)
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-06-13 (parte 4) — Acesso a Embalagens + Ponto de Equilíbrio
+
+> Branch `claude/keen-goldberg-m8aqqx`.
+
+**Atalho de Embalagens (era página órfã):** a tela `/embalagens` existia mas não tinha
+entrada no app (sumiu do Dashboard quando Orçamento/Relatório entraram). Adicionado:
+- `Dashboard` > "Cadastrar": novo atalho **Embalagem** (`/embalagens/novo`).
+- `Dashboard` > "Gerenciar": novo item **Embalagens** (`/embalagens`).
+
+**Ponto de equilíbrio (`/ponto-equilibrio`, novo):** `src/pages/PontoEquilibrio/index.jsx`,
+link em Dashboard > Gerenciar. Ferramenta de planejamento (informativa, não mexe no motor
+de preços — KISS, não é ERP):
+- Lê `GET /custos-fixos/resumo` (`total_mensal`); estado vazio se não há custos fixos.
+- **Slider de margem de contribuição** (5–90%) → faturamento de equilíbrio =
+  `CF / (margem/100)` + valor/dia. Banner ink/lime no padrão do design system.
+- **Meta de lucro** (input opcional) → faturamento = `(CF + lucro) / margem`.
+- **Rateio** (decisão: **% sobre faturamento**): input de faturamento estimado (default =
+  break-even) → `rateio% = CF / faturamento`; texto "reserve X% do preço de cada produto".
+  Escolhido por exigir 1 só estimativa do usuário e ser proporcional/justo (vs por hora de
+  produção, que pede dados demais; vs valor por unidade, que é injusto entre produtos).
+- Build validado (`npm run build` ✅).
 
 ---
 

@@ -13,6 +13,7 @@ import { brl } from '../utils/format'
 
 const atalhos = [
   { to: '/ingredientes/novo', label: 'Ingrediente' },
+  { to: '/embalagens/novo', label: 'Embalagem' },
   { to: '/receitas/novo', label: 'Receita' },
   { to: '/produtos/novo', label: 'Produto' },
 ]
@@ -165,6 +166,8 @@ export default function Dashboard() {
             {[
               { to: '/orcamento', label: 'Criar orçamento (WhatsApp)' },
               { to: '/relatorio', label: 'Relatório de margem' },
+              { to: '/ponto-equilibrio', label: 'Ponto de equilíbrio' },
+              { to: '/embalagens', label: 'Embalagens' },
               { to: '/custos-fixos', label: 'Custos fixos' },
             ].map((g) => (
               <Link
