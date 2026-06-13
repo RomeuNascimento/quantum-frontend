@@ -13,7 +13,6 @@ export default function PontoEquilibrio() {
   const navigate = useNavigate()
   const [margem, setMargem] = useState(40)
   const [lucro, setLucro] = useState('')
-  const [faturamento, setFaturamento] = useState('')
 
   const resumoQ = useQuery({
     queryKey: ['custos-fixos-resumo'],
@@ -40,8 +39,6 @@ export default function PontoEquilibrio() {
   const breakeven = fator > 0 ? cf / fator : 0
   const lucroNum = num(lucro)
   const comLucro = fator > 0 ? (cf + lucroNum) / fator : 0
-  const fatNum = num(faturamento) || breakeven
-  const rateioPct = fatNum > 0 ? (cf / fatNum) * 100 : 0
 
   return (
     <Layout title="Ponto de equilíbrio" onBack={() => navigate('/dashboard')}>
@@ -116,30 +113,6 @@ export default function PontoEquilibrio() {
                   faturar <span className="qtm-num font-semibold">{brl(comLucro)}</span>/mês.
                 </p>
               )}
-            </div>
-
-            {/* Rateio dos custos fixos */}
-            <div className="card">
-              <p className="label">Rateio dos custos fixos</p>
-              <label htmlFor="fat-estim" className="text-sm text-ink block mb-1">
-                Quanto você fatura por mês (estimativa)?
-              </label>
-              <input
-                id="fat-estim" inputMode="decimal" value={faturamento}
-                onChange={(e) => setFaturamento(e.target.value)}
-                placeholder={`Ex.: ${Math.round(breakeven)}`}
-                className="input"
-              />
-              <p className="text-sm text-ink mt-3">
-                Seus custos fixos representam{' '}
-                <span className="qtm-num font-semibold text-rust">{rateioPct.toFixed(1).replace('.', ',')}%</span>{' '}
-                do seu faturamento.
-              </p>
-              <p className="text-xs text-mute mt-1">
-                Ou seja: de cada R$ 100 vendidos, cerca de{' '}
-                <span className="qtm-num">{brl((rateioPct / 100) * 100)}</span> vão pros custos fixos.
-                Some essa fatia na margem de cada produto pra eles se pagarem sozinhos.
-              </p>
             </div>
           </>
         )}

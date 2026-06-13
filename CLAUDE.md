@@ -25,10 +25,14 @@ de preços — KISS, não é ERP):
 - **Slider de margem de contribuição** (5–90%) → faturamento de equilíbrio =
   `CF / (margem/100)` + valor/dia. Banner ink/lime no padrão do design system.
 - **Meta de lucro** (input opcional) → faturamento = `(CF + lucro) / margem`.
-- **Rateio** (decisão: **% sobre faturamento**): input de faturamento estimado (default =
-  break-even) → `rateio% = CF / faturamento`; texto "reserve X% do preço de cada produto".
-  Escolhido por exigir 1 só estimativa do usuário e ser proporcional/justo (vs por hora de
-  produção, que pede dados demais; vs valor por unidade, que é injusto entre produtos).
+
+> **Rateio por produto — DESCARTADO (decisão do usuário 13/06).** Cheguei a implementar
+> rateio "% sobre faturamento", mas o dono (ADM/MBA) apontou com razão que rateio é lógica
+> de **fábrica** (alocar custo indireto por unidade produzida). Micro empreendedor não pensa
+> "cada brigadeiro paga R$ 1 de aluguel" — ele pensa "tenho R$ X de conta, com Y% de margem
+> preciso faturar Z". Por isso a tela ficou **só com o ponto de equilíbrio** (CF + margem →
+> faturamento necessário, + meta de lucro). Não reintroduzir rateio sem pedido explícito.
+
 - Build validado (`npm run build` ✅).
 
 ---
