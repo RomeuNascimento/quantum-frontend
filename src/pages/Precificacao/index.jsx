@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Layout from '../../components/Layout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import FormField from '../../components/FormField'
+import EmptyState from '../../components/EmptyState'
 import CustoLineChart from '../../components/CustoLineChart'
 import MargemBadge from '../../components/MargemBadge'
 import { listarProdutos, historicoCustoProduto } from '../../api/produtos'
@@ -198,7 +199,7 @@ export default function Precificacao() {
       <div className="px-4 pt-4">
         {erro && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-mono text-xs text-rust flex-1">{erro}</p>
+            <p className="font-sans text-sm text-rust flex-1">{erro}</p>
             <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}
@@ -219,14 +220,23 @@ export default function Precificacao() {
                 <button key={c.id} onClick={() => abrirEditarCanal(c)}
                   className="flex-shrink-0 card text-left px-3 py-2 min-w-[140px] active:bg-line/40">
                   <p className="font-sans font-semibold text-ink text-sm">{c.nome}</p>
-                  <p className="font-mono text-xs text-mute">Plataforma: {c.taxa_plataforma_pct}%</p>
-                  <p className="font-mono text-xs text-mute">Cartão: {c.taxa_cartao_pct}%</p>
-                  <p className="font-mono text-xs text-mute">Imposto: {c.imposto_pct}%</p>
+                  <p className="qtm-num text-xs text-mute">Plataforma: {c.taxa_plataforma_pct}%</p>
+                  <p className="qtm-num text-xs text-mute">Cartão: {c.taxa_cartao_pct}%</p>
+                  <p className="qtm-num text-xs text-mute">Imposto: {c.imposto_pct}%</p>
                   <p className="font-mono text-[9px] text-mute uppercase tracking-widest mt-1">Toque p/ editar</p>
                 </button>
               ))}
             </div>
 
+            {/* Primeiro uso: sem produtos não há o que precificar */}
+            {produtos.length === 0 ? (
+              <EmptyState
+                title="Nenhum produto"
+                description="Cadastre um produto para calcular o preço por canal"
+                action={<Link to="/produtos/novo" className="btn-primary inline-block px-4 py-2 text-xs">+ Produto</Link>}
+              />
+            ) : (
+            <>
             {/* Seletor de produto */}
             <FormField label="Produto">
               <select className="input" value={produtoSelecionado || ''} onChange={(e) => selecionarProduto(e.target.value)}>
@@ -289,6 +299,8 @@ export default function Precificacao() {
                 </button>
               ))}
             </div>
+            </>
+            )}
           </>
         )}
       </div>

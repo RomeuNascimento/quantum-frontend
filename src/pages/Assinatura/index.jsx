@@ -41,13 +41,13 @@ export default function Assinatura() {
       <div className="px-4 pt-6 space-y-4">
         {erro && (
           <div className="bg-rust/10 border border-rust px-3 py-2">
-            <p className="font-mono text-xs text-rust">{erro}</p>
+            <p className="font-sans text-sm text-rust">{erro}</p>
           </div>
         )}
 
         {sucesso && status !== 'ativa' && (
           <div className="border border-lime bg-lime/10 px-4 py-3">
-            <p className="font-mono text-sm text-ink">Pagamento recebido — ativando sua assinatura...</p>
+            <p className="font-sans text-sm text-ink">Pagamento recebido — ativando sua assinatura...</p>
           </div>
         )}
 
@@ -58,17 +58,17 @@ export default function Assinatura() {
 
           <p className="label pt-2">Status</p>
           {status === 'ativa' && (
-            <p className="font-mono text-sm text-ink">
+            <p className="font-sans text-sm text-ink">
               ✓ Ativa{data.validade ? ` — renova em ${dataBR(data.validade)}` : ''}
             </p>
           )}
           {status === 'trial' && (
-            <p className="font-mono text-sm text-ink">
+            <p className="font-sans text-sm text-ink">
               Período de teste — termina em {dataBR(data.trial_fim)}
             </p>
           )}
           {status === 'vencida' && (
-            <p className="font-mono text-sm text-rust">Assinatura vencida ou teste encerrado</p>
+            <p className="font-sans text-sm text-rust">Assinatura vencida ou teste encerrado</p>
           )}
         </div>
 
@@ -91,7 +91,7 @@ export default function Assinatura() {
           </button>
         )}
 
-        <p className="font-mono text-[10px] text-mute">
+        <p className="font-sans text-xs text-mute">
           Pagamento processado pelo Stripe. Cancele quando quiser pelo botão acima.
         </p>
       </div>

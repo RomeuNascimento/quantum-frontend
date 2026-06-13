@@ -56,7 +56,7 @@ export default function Relatorio() {
       <div className="px-4 pt-4">
         {erro && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-mono text-xs text-rust flex-1">{erro}</p>
+            <p className="font-sans text-sm text-rust flex-1">{erro}</p>
             <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}

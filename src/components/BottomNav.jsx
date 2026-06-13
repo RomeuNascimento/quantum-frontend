@@ -82,7 +82,7 @@ export default function BottomNav() {
             }
           >
             {tab.icon}
-            <span className="font-mono text-[9px] uppercase tracking-wide">{tab.label}</span>
+            <span className="font-mono text-[10px] uppercase tracking-wide">{tab.label}</span>
           </NavLink>
         ))}
       </div>

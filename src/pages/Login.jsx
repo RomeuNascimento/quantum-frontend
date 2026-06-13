@@ -56,8 +56,9 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {modo === 'registro' && (
             <div>
-              <label className="label">Nome completo</label>
+              <label className="label" htmlFor="login-nome">Nome completo</label>
               <input
+                id="login-nome"
                 className="input"
                 placeholder="Sua confeitaria"
                 autoComplete="name"
@@ -68,8 +69,9 @@ export default function Login() {
           )}
 
           <div>
-            <label className="label">E-mail</label>
+            <label className="label" htmlFor="login-email">E-mail</label>
             <input
+              id="login-email"
               className="input"
               type="email"
               placeholder="seu@email.com"
@@ -80,8 +82,9 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="label">Senha</label>
+            <label className="label" htmlFor="login-senha">Senha</label>
             <input
+              id="login-senha"
               className="input"
               type="password"
               placeholder="••••••••"

@@ -21,7 +21,7 @@ export default function ReceitaFicha() {
   if (erro) {
     return (
       <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
-        <p className="font-mono text-xs text-rust px-4 pt-4">{erro}</p>
+        <p className="font-sans text-sm text-rust px-4 pt-4">{erro}</p>
       </Layout>
     )
   }

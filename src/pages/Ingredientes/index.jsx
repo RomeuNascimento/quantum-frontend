@@ -76,7 +76,7 @@ export default function Ingredientes() {
 
         {erroDelete && (
           <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-mono text-xs text-rust flex-1">{erroDelete}</p>
+            <p className="font-sans text-sm text-rust flex-1">{erroDelete}</p>
             <button onClick={() => setErroDelete('')} className="font-mono text-xs text-rust">✕</button>
           </div>
         )}
@@ -98,12 +98,13 @@ export default function Ingredientes() {
                   <p className="font-medium text-ink truncate">
                     {ing.nome}{ing.marca ? <span className="text-mute font-normal"> · {ing.marca}</span> : null}
                   </p>
-                  <p className="font-mono text-xs text-mute mt-0.5">
+                  <p className="qtm-num text-xs text-mute mt-0.5">
                     {ing.unidade} · fator {ing.fator_correcao} · {formatCusto(ing.custo_unitario_atual)}/un
                   </p>
                 </Link>
                 <button
                   onClick={() => handleDelete(ing.id, ing.nome)}
+                  aria-label={`Remover ${ing.nome}`}
                   className="p-2 text-mute active:text-rust flex-shrink-0"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
