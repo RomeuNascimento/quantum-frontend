@@ -9,6 +9,34 @@
 
 ---
 
+## Sessão 2026-06-13 (parte 5) — Precificação repensada + gráfico + label
+
+> Branch `claude/keen-goldberg-m8aqqx`.
+
+**Precificação (`src/pages/Precificacao/index.jsx`) — decisão do usuário: "canal padrão +
+extras opcionais".** Antes: a página liderava com canais e o "+ Precificar" obrigava a
+escolher um canal toda vez; produto novo mostrava "nenhum canal precificado". Agora:
+- **Lidera com o produto** (seletor no topo) + gráfico.
+- **Um card por canal já com preço sugerido calculado na hora.** Canal ainda não
+  precificado aparece como **"Prévia · margem 50%"** (`MARGEM_PADRAO`), calculado client-side
+  via `calcSugerido(custo, margem, canal)`. Custo vem de `precos[0].custo_total` ou, se nada
+  precificado, do último ponto do histórico.
+- **Tocar num card abre o ajuste de margem DAQUELE canal** — acabou o passo "escolher canal"
+  (o modal não tem mais select de canal; `canalModal` carrega o canal).
+- Gestão de **taxas dos canais** desceu pro rodapé ("Onde você vende" + "+ Novo canal").
+- Guard do backend (margem+taxas < 100%, sessão parte 3) protege o save.
+
+**Gráfico de custo (`CustoLineChart.jsx`):** maior e legível — valores **INÍCIO** e **ATUAL**
+em destaque (15px), área preenchida lime/20, só os pontos de início/fim (não polui), datas
+11px. Antes eram fontes 7.5px e bolinha em cada ponto.
+
+**Ponto de equilíbrio:** label "Margem de contribuição" → **"Margem (%)"** (jargão demais),
+explicação no helper.
+
+⚠️ Tudo buildado (`npm run build` ✅) mas **DEPLOY do frontend pendente**.
+
+---
+
 ## Sessão 2026-06-13 (parte 4) — Acesso a Embalagens + Ponto de Equilíbrio
 
 > Branch `claude/keen-goldberg-m8aqqx`.
