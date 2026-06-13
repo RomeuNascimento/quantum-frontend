@@ -3,9 +3,26 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-13 (branch `claude/inspiring-fermat-9xdxns` — auditoria UI/UX implementada · docs legais LGPD · embalagens na nota fiscal + conversão · análise competitiva · orçamento WhatsApp · plano mensal; ⚠️ DEPLOY do frontend pendente de conferir/disparar)
-**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · rateio de custos fixos (#2 da pesquisa) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright
+**Última sessão:** 2026-06-13 (branch `claude/keen-goldberg-m8aqqx` — `logout()` revoga o token no servidor (`POST /auth/logout`), parte da revogação de JWT do backend; ⚠️ DEPLOY do frontend + backend (migration 008) pendentes)
+**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · rateio de custos fixos (#2 da pesquisa) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright · tela de configurações (usar `/auth/logout-all` e `/auth/alterar-senha`, já prontos no backend)
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-06-13 (parte 3) — Logout revoga token no servidor
+
+> Branch `claude/keen-goldberg-m8aqqx`. Acompanha a revogação de JWT do backend.
+
+- `src/api/auth.js`: `logout(token)` → `POST /auth/logout` (token passado explícito no
+  header, pois o `authStore` já limpou o `localStorage` antes de chamar).
+- `src/store/authStore.js`: `logout()` captura o token, limpa o estado local e dispara
+  `apiLogout(token)` best-effort (`.catch(()=>{})`). **Sem recursão de 401:** como o
+  token local já foi limpo, se a chamada voltar 401 o interceptor vê `token: null` e não
+  re-dispara logout.
+- Backend correspondente (migration 008, ver CLAUDE.md do quantum-backend): denylist por
+  jti + token_version; endpoints `/auth/logout`, `/auth/logout-all`, `/auth/alterar-senha`.
+- ⚠️ `/auth/logout-all` e `/auth/alterar-senha` ainda **não têm UI** (não existe página de
+  configurações). Backend pronto p/ quando criarmos a tela.
 
 ---
 
