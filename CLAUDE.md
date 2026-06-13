@@ -3,9 +3,48 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-12 (branch `claude/practical-cray-vksesn` — billing/paywall + editar canais + deep-link cadastro + LANDING PAGE publicada; DEPLOY em produção)
-**Próxima sessão:** Fase 3 restante — modo offline com fila de escrita (pré-requisito M2 ✅; decidir UX de conflito/fila com o usuário antes) ou rateio de custos fixos (adiado por decisão do usuário)
+**Última sessão:** 2026-06-13 (branch `claude/inspiring-fermat-9xdxns` — auditoria UI/UX design-chief implementada e mergeada; rascunhos legais LGPD do legal-chief; ⚠️ CONFERIR se o deploy do frontend foi disparado)
+**Próxima sessão:** páginas `/termos` e `/privacidade` (após revisão dos rascunhos por advogado) · rateio de custos fixos ou modo offline · testes Playwright (scripts da sessão 13/06 são meio caminho)
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-06-13 — Auditoria UI/UX (squad design-chief) implementada + docs legais
+
+> Auditoria completa do squad design-chief (contraste WCAG com ratios calculados,
+> a11y, estados, consistência). **Toda a auditoria foi implementada e mergeada**
+> (PR #1, 2 commits). ⚠️ Deploy do frontend no EasyPanel: conferir se foi disparado
+> (o backend foi deployado em 13/06; o frontend pode ter ficado pendente).
+
+**Mergeado na main (PR #1):**
+- Tokens: `mute` #6B6A60→#5A584F e `rust` #C44A2A→#A63D22 (WCAG AA em cards e erros)
+- `Modal` acessível: role/aria, Escape, focus trap, retorno de foco
+- `:focus-visible` global (outline ink 2px) em `index.css`; `.input` sem `outline-none`
+- Login: senha min 8 (igual backend) + `autoComplete` + `htmlFor`/`id`
+- **`ConfirmDialog`** (novo) substitui `window.confirm()` nas 6 deleções
+- **`LoadError`** (novo) com "Tentar novamente" nas 6 telas que ficavam em branco em erro
+- `FormField` associa label↔campo via `useId`+`cloneElement` (clicar no label foca)
+- `aria-label` em inputs/checkboxes das importações IA, lixeiras, voltar, expandir
+- Tipografia: mensagens de erro/status mono-11px → `font-sans text-sm` em todo o app
+- CustosFixos com FAB padrão; `qtm-num` nos números das listas; BottomNav 9→10px
+- Precificação: EmptyState de primeiro uso sem produtos
+- `SimuladorPreco` deriva taxas do 1º canal real (query `['canais']`, ref `tocouTaxas`)
+- Planejamento usa `brl` de `utils/format`; dot da importação sem `rounded-full`
+
+**Docs legais (squad legal-chief) — `docs/legal/`:**
+- `termos-de-uso.md` + `politica-de-privacidade.md` — RASCUNHOS com placeholders
+  (`[RAZÃO SOCIAL]`, `[CNPJ]`, contato/DPO...) e 5 decisões para validar com advogado
+  (reembolso pós-arrependimento, limitação de responsabilidade vs CDC art. 51, foro
+  do consumidor, mecanismo de transferência internacional ANPD, destaque da renovação
+  automática). **Mergear no repo ≠ publicar** — falta criar `/termos` e `/privacidade`
+  no app + link no cadastro e na landing, SÓ após revisão jurídica.
+
+**Validação da sessão:** build ✅; testado em Chromium headless (mock de API):
+Escape fecha modais, label foca campo, ConfirmDialog/LoadError/EmptyState ok.
+Scripts de screenshot ficaram em `/tmp` (refazer como testes Playwright no repo).
+
+**Backend na mesma sessão:** auditoria de segurança cyber-chief + correções deployadas
+(ver CLAUDE.md do quantum-backend).
 
 ---
 
