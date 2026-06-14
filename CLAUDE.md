@@ -3,9 +3,30 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-13 (branch `claude/keen-goldberg-m8aqqx` — atalho de Embalagens no Dashboard + página `/ponto-equilibrio` (break-even com slider de margem + rateio % sobre faturamento); migration 008 do backend já aplicada em produção; ⚠️ DEPLOY do frontend pendente)
-**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright · tela de configurações (usar `/auth/logout-all` e `/auth/alterar-senha`, já prontos no backend)
+**Última sessão:** 2026-06-13 (branch `claude/keen-goldberg-m8aqqx` — tela de Configurações (`/configuracoes`): conta, valor-hora padrão, alterar senha, sair de todos os dispositivos; lista de compras + compartilhar por WhatsApp; precificação repensada; ponto de equilíbrio; ⚠️ DEPLOY do frontend pendente)
+**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-06-13 (parte 7) — Tela de Configurações
+
+> Branch `claude/keen-goldberg-m8aqqx`. Fecha o ciclo da revogação de JWT (backend já
+> tinha os endpoints, faltava a UI).
+
+**`/configuracoes` (novo):** `src/pages/Configuracoes/index.jsx`. Acesso: engrenagem no
+canto sup. direito do Dashboard (substituiu o botão "Sair", que agora vive aqui).
+- **Conta:** nome + e-mail (read-only, `GET /auth/me`).
+- **Mão de obra:** valor-hora padrão — `GET/PUT /auth/configuracao`. Ao salvar, invalida as
+  queries de custo (`receitas`/`produtos`/`relatorio-margem`/`precos-produto`/detalhes) porque
+  o valor-hora entra no custo de MO. Vazio = 0 (quem não cobra mão de obra).
+- **Alterar senha:** `POST /auth/alterar-senha` (senha_atual + nova ≥ 8 + confirmação). O
+  backend devolve um **token novo** → `authStore.setToken()` mantém este device logado; as
+  outras sessões caem (token_version++).
+- **Sair de todos os dispositivos:** `POST /auth/logout-all` (ConfirmDialog) → derruba tudo
+  inclusive este → `logout()` local + volta pro login.
+- **Sair deste dispositivo:** `logout()` normal.
+- API: `src/api/auth.js` ganhou `alterarSenha` e `logoutAll`.
 
 ---
 

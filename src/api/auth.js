@@ -9,3 +9,8 @@ export const logout = (token) =>
 export const getMe = () => api.get('/auth/me')
 export const getConfiguracao = () => api.get('/auth/configuracao')
 export const updateConfiguracao = (dados) => api.put('/auth/configuracao', dados)
+// Troca a senha; o backend derruba as outras sessões e devolve um token NOVO
+// para este dispositivo seguir logado (guardar via authStore.setToken).
+export const alterarSenha = (dados) => api.post('/auth/alterar-senha', dados)
+// Derruba TODAS as sessões (inclusive a atual — exige novo login depois).
+export const logoutAll = () => api.post('/auth/logout-all')
