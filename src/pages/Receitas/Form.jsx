@@ -17,9 +17,10 @@ export default function ReceitaForm() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm({
     defaultValues: { ingredientes: [], etapas_mo: [] },
   })
+  const ingsWatch = watch('ingredientes')
   const { fields: ingFields, append: appendIng, remove: removeIng } = useFieldArray({ control, name: 'ingredientes' })
   const { fields: moFields, append: appendMo, remove: removeMo } = useFieldArray({ control, name: 'etapas_mo' })
 
@@ -138,18 +139,29 @@ export default function ReceitaForm() {
             </button>
           </div>
           <div className="space-y-2">
-            {ingFields.map((field, idx) => (
+            {ingFields.map((field, idx) => {
+              const selId = ingsWatch?.[idx]?.ingrediente_id
+              const unidadeSel = ingredientes.find((i) => String(i.id) === String(selId))?.unidade || ''
+              return (
               <div key={field.id} className="flex gap-2 items-start">
                 <select className="input flex-1" {...register(`ingredientes.${idx}.ingrediente_id`, { required: true })}>
                   <option value="">Selecione</option>
                   {ingredientes.map((i) => <option key={i.id} value={i.id}>{i.nome} ({i.unidade})</option>)}
                 </select>
-                <input className="input w-28" type="number" step="0.1" placeholder="g"
-                  {...register(`ingredientes.${idx}.quantidade_g`, { required: true })} />
+                <div className="relative w-28">
+                  <input className="input w-full pr-9" type="number" step="0.1" placeholder={unidadeSel || 'qtd'}
+                    {...register(`ingredientes.${idx}.quantidade_g`, { required: true })} />
+                  {unidadeSel && (
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute pointer-events-none">
+                      {unidadeSel}
+                    </span>
+                  )}
+                </div>
                 <button type="button" onClick={() => removeIng(idx)}
                   className="p-3 font-mono text-mute active:text-rust">✕</button>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 

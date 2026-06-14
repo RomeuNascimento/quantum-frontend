@@ -9,6 +9,29 @@
 
 ---
 
+## Sessão 2026-06-14 — Água neutra + unidade no campo de quantidade
+
+> Branch `claude/keen-goldberg-m8aqqx`.
+
+**Água (ingrediente neutro):** feito **no backend** (seed no register + garantia na 1ª
+listagem; sem preço → custo 0; sem migration). No frontend não precisou nada — a água
+aparece sozinha no seletor de ingredientes da receita/produto. ⚠️ requer **deploy do backend**.
+
+**Fix do campo de quantidade (Receitas/Form + Produtos/Form):** o input de quantidade do
+ingrediente sempre sugeria "g", mesmo pra ovo (unid) ou óleo (ml) — enganoso. Agora mostra a
+**unidade real** do ingrediente selecionado (sufixo dentro do campo, via `watch`). O select de
+avulsos do produto passou a exibir `(unidade)` também.
+
+> **OVO / ÓLEO — estudo (decisão do usuário: "deixar como está por enquanto"):**
+> - Modelo atual: 1 unidade por ingrediente. Ovo = `unid` (conta "3 ovos", custo = preço da
+>   cartela ÷ nº). Óleo = `ml`/`L` (consumo em ml). Funciona pra maioria.
+> - Ovo por **peso** (ex.: 150g) não é suportado junto com contagem — exigiria campo "peso
+>   médio por unidade" + toggle unid/g na receita + migration. **Adiado.** Não implementar
+>   sem pedido.
+> - Óleo: ressalva da densidade (1ml≈0,92g ignorado) + gotcha kg/L (auditoria M3) seguem.
+
+---
+
 ## Sessão 2026-06-13 (parte 7) — Tela de Configurações
 
 > Branch `claude/keen-goldberg-m8aqqx`. Fecha o ciclo da revogação de JWT (backend já

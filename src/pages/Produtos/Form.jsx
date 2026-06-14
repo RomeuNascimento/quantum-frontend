@@ -21,9 +21,10 @@ export default function ProdutoForm() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm({
     defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
   })
+  const ingsWatch = watch('ingredientes')
   const { fields: prepFields, append: appendPrep, remove: removePrep } = useFieldArray({ control, name: 'preparacoes' })
   const { fields: ingFields, append: appendIng, remove: removeIng } = useFieldArray({ control, name: 'ingredientes' })
   const { fields: embFields, append: appendEmb, remove: removeEmb } = useFieldArray({ control, name: 'embalagens' })
@@ -158,18 +159,29 @@ export default function ProdutoForm() {
         </Section>
 
         <Section title="Ingredientes avulsos" onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
-          {ingFields.map((f, i) => (
+          {ingFields.map((f, i) => {
+            const selId = ingsWatch?.[i]?.ingrediente_id
+            const unidadeSel = ingredientes.find((r) => String(r.id) === String(selId))?.unidade || ''
+            return (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`ingredientes.${i}.ingrediente_id`)}>
                 <option value="">Ingrediente</option>
-                {ingredientes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+                {ingredientes.map((r) => <option key={r.id} value={r.id}>{r.nome} ({r.unidade})</option>)}
               </select>
-              <input className="input w-24" type="number" step="0.1" placeholder="g"
-                {...register(`ingredientes.${i}.quantidade_g`)} />
+              <div className="relative w-24">
+                <input className="input w-full pr-9" type="number" step="0.1" placeholder={unidadeSel || 'qtd'}
+                  {...register(`ingredientes.${i}.quantidade_g`)} />
+                {unidadeSel && (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute pointer-events-none">
+                    {unidadeSel}
+                  </span>
+                )}
+              </div>
               <button type="button" onClick={() => removeIng(i)}
                 className="p-3 font-mono text-mute active:text-rust">✕</button>
             </div>
-          ))}
+            )
+          })}
         </Section>
 
         <Section title="Embalagens" onAdd={() => appendEmb({ embalagem_id: '', quantidade: '' })}>
