@@ -7,6 +7,7 @@ import FormField from '../../components/FormField'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import useAuthStore from '../../store/authStore'
 import { getMe, getConfiguracao, updateConfiguracao, alterarSenha, logoutAll } from '../../api/auth'
+import { brl } from '../../utils/format'
 
 // Chaves cujos cálculos dependem do valor-hora (custo de mão de obra)
 const CHAVES_CUSTO = ['receitas', 'produtos', 'relatorio-margem', 'precos-produto', 'receita', 'produto', 'historico-custo-produto']
@@ -20,6 +21,28 @@ export default function Configuracoes() {
   const [vhPreenchido, setVhPreenchido] = useState(false)
   const [vhMsg, setVhMsg] = useState(null)
   const [vhSalvando, setVhSalvando] = useState(false)
+
+  // Calculadora de valor-hora a partir do salário + carga horária (guardada no aparelho)
+  const [calcAberto, setCalcAberto] = useState(false)
+  const [calc, setCalc] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('quantum_vh_calc')) || { salario: '', horas: '' }
+    } catch {
+      return { salario: '', horas: '' }
+    }
+  })
+  useEffect(() => {
+    localStorage.setItem('quantum_vh_calc', JSON.stringify(calc))
+  }, [calc])
+
+  // 52 semanas / 12 meses ≈ 4,33 semanas por mês
+  const SEMANAS_MES = 52 / 12
+  const calcValorHora = (() => {
+    const s = parseFloat(String(calc.salario).replace(',', '.'))
+    const h = parseFloat(String(calc.horas).replace(',', '.'))
+    if (!s || !h || s <= 0 || h <= 0) return null
+    return s / (h * SEMANAS_MES)
+  })()
 
   const [senhaAtual, setSenhaAtual] = useState('')
   const [senhaNova, setSenhaNova] = useState('')
@@ -62,6 +85,13 @@ export default function Configuracoes() {
     } finally {
       setVhSalvando(false)
     }
+  }
+
+  const usarValorCalculado = () => {
+    if (calcValorHora == null) return
+    setValorHora(calcValorHora.toFixed(2))
+    setVhMsg(null)
+    setCalcAberto(false)
   }
 
   const trocarSenha = async (e) => {
@@ -127,6 +157,50 @@ export default function Configuracoes() {
             <p className="text-xs text-mute">
               Usado pra calcular o custo de mão de obra nas receitas e produtos.
             </p>
+
+            {/* Calculadora: valor-hora a partir do salário + carga horária */}
+            <div className="border-t border-line pt-2">
+              <button type="button" onClick={() => setCalcAberto((v) => !v)}
+                aria-expanded={calcAberto}
+                className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-ink">
+                <span className="qtm-num">{calcAberto ? '−' : '+'}</span>
+                Calcular a partir do salário
+              </button>
+              {calcAberto && (
+                <div className="mt-3 space-y-3 bg-bone border border-line p-3">
+                  <div>
+                    <label htmlFor="calc-sal" className="label">Salário mensal (R$)</label>
+                    <input id="calc-sal" className="input qtm-num" inputMode="decimal"
+                      value={calc.salario}
+                      onChange={(e) => setCalc((c) => ({ ...c, salario: e.target.value }))}
+                      placeholder="Ex.: 1500" />
+                  </div>
+                  <div>
+                    <label htmlFor="calc-h" className="label">Horas por semana</label>
+                    <input id="calc-h" className="input qtm-num" inputMode="decimal"
+                      value={calc.horas}
+                      onChange={(e) => setCalc((c) => ({ ...c, horas: e.target.value }))}
+                      placeholder="Ex.: 44" />
+                  </div>
+                  <p className="text-xs text-mute">
+                    Salário de quem produz (ou seu pró-labore) dividido pela jornada do mês.
+                    44h/semana é a jornada cheia (CLT).
+                  </p>
+                  {calcValorHora != null ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm text-ink">
+                        ≈ <span className="qtm-num font-semibold">{brl(calcValorHora)}</span> por hora
+                      </p>
+                      <button type="button" onClick={usarValorCalculado}
+                        className="btn-primary px-3 py-2 text-[11px]">Usar este valor</button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-mute">Preencha salário e horas para ver o valor-hora.</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             {vhMsg && <p className={`text-sm ${vhMsg.tipo === 'ok' ? 'text-ink' : 'text-rust'}`}>{vhMsg.texto}</p>}
             <button onClick={salvarValorHora} disabled={vhSalvando} className="btn-primary">
               {vhSalvando ? 'Salvando...' : 'Salvar'}
