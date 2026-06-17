@@ -7,6 +7,7 @@ import FormField from '../../components/FormField'
 import useVoltar from '../../hooks/useVoltar'
 import { criarReceita, detalharReceita, atualizarReceita } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
+import { listarColaboradores } from '../../api/colaboradores'
 
 export default function ReceitaForm() {
   const { id } = useParams()
@@ -27,6 +28,10 @@ export default function ReceitaForm() {
   const { data: ingredientes = [] } = useQuery({
     queryKey: ['ingredientes'],
     queryFn: () => listarIngredientes().then((r) => r.data),
+  })
+  const { data: colaboradores = [] } = useQuery({
+    queryKey: ['colaboradores'],
+    queryFn: () => listarColaboradores().then((r) => r.data),
   })
 
   const detalheQ = useQuery({
@@ -53,7 +58,7 @@ export default function ReceitaForm() {
         etapas_mo: d.etapas_mo.map((e) => ({
           descricao: e.descricao,
           tempo_min: e.tempo_min,
-          colaborador_id: e.colaborador_id ?? null,
+          colaborador_id: e.colaborador_id ?? '',
         })),
       })
       formPreenchido.current = true
@@ -75,7 +80,7 @@ export default function ReceitaForm() {
         etapas_mo: dados.etapas_mo.map((e) => ({
           descricao: e.descricao,
           tempo_min: parseFloat(e.tempo_min),
-          colaborador_id: e.colaborador_id ?? null,
+          colaborador_id: e.colaborador_id ? parseInt(e.colaborador_id) : null,
         })),
       }
       if (isEdit) {
@@ -169,20 +174,28 @@ export default function ReceitaForm() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="label">Mão de obra</p>
-            <button type="button" onClick={() => appendMo({ descricao: '', tempo_min: '' })}
+            <button type="button" onClick={() => appendMo({ descricao: '', tempo_min: '', colaborador_id: '' })}
               className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
               + Adicionar
             </button>
           </div>
           <div className="space-y-2">
             {moFields.map((field, idx) => (
-              <div key={field.id} className="flex gap-2 items-start">
-                <input className="input flex-1" placeholder="Descrição da etapa"
-                  {...register(`etapas_mo.${idx}.descricao`, { required: true })} />
-                <input className="input w-24" type="number" step="1" placeholder="min"
-                  {...register(`etapas_mo.${idx}.tempo_min`, { required: true })} />
-                <button type="button" onClick={() => removeMo(idx)}
-                  className="p-3 font-mono text-mute active:text-rust">✕</button>
+              <div key={field.id} className="space-y-1.5">
+                <div className="flex gap-2 items-start">
+                  <input className="input flex-1" placeholder="Descrição da etapa"
+                    {...register(`etapas_mo.${idx}.descricao`, { required: true })} />
+                  <input className="input w-24" type="number" step="1" placeholder="min"
+                    {...register(`etapas_mo.${idx}.tempo_min`, { required: true })} />
+                  <button type="button" onClick={() => removeMo(idx)}
+                    className="p-3 font-mono text-mute active:text-rust">✕</button>
+                </div>
+                {colaboradores.length > 0 && (
+                  <select className="input w-full text-sm" {...register(`etapas_mo.${idx}.colaborador_id`)}>
+                    <option value="">Valor-hora padrão</option>
+                    {colaboradores.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                  </select>
+                )}
               </div>
             ))}
           </div>

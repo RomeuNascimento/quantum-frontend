@@ -171,6 +171,7 @@ export default function Dashboard() {
               { to: '/relatorio', label: 'Relatório de margem' },
               { to: '/ponto-equilibrio', label: 'Ponto de equilíbrio' },
               { to: '/embalagens', label: 'Embalagens' },
+              { to: '/colaboradores', label: 'Colaboradores (mão de obra)' },
               { to: '/custos-fixos', label: 'Custos fixos' },
             ].map((g) => (
               <Link
