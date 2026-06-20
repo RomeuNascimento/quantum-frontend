@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { processarReceitas } from '../../api/ia'
 import StepBar from './StepBar'
 import Etapa2Precos from './Etapa2Precos'
+import Etapa3Tempo from './Etapa3Tempo'
+import { brl } from '../../utils/format'
 
 // ── Fluxo guiado do Assistente — ETAPA 1 (Receita) ─────────────────────────────
 // Layout do zero: barra fixa com etapas no topo, conversa do assistente no corpo,
@@ -48,6 +50,7 @@ export default function Fluxo() {
   const [texto, setTexto] = useState('')
   const [receita, setReceita] = useState(null)
   const [precos, setPrecos] = useState(null) // resultado da Etapa 2
+  const [mo, setMo] = useState(null)         // resultado da Etapa 3
   const [erro, setErro] = useState('')
 
   const totalTempo = (r) =>
@@ -250,38 +253,63 @@ export default function Fluxo() {
         <Topo atual={2} onBack={() => setFase('revisao')} />
         <Etapa2Precos
           receita={receita}
-          onConcluir={(resultado) => { setPrecos(resultado); setFase('confirmado') }}
+          onConcluir={(resultado) => { setPrecos(resultado); setFase('tempo') }}
         />
       </div>
     )
   }
 
-  // ── CONFIRMADO (Etapas 1+2 feitas · teaser etapa 3) ────────────────────────
+  // ── ETAPA 3 — TEMPO / MÃO DE OBRA ──────────────────────────────────────────
+  if (fase === 'tempo') {
+    return (
+      <div className="min-h-screen bg-bone">
+        <Topo atual={3} onBack={() => setFase('precos')} />
+        <Etapa3Tempo
+          receita={receita}
+          onConcluir={(resultado) => { setMo(resultado); setFase('confirmado') }}
+        />
+      </div>
+    )
+  }
+
+  // ── CONFIRMADO (Etapas 1-3 feitas · teaser etapa 4) ────────────────────────
+  const custoMP = precos?.totalReceita || 0
+  const custoMO = mo?.custoMO || 0
+  const custoTotal = custoMP + custoMO
   return (
     <div className="min-h-screen bg-bone">
-      <Topo atual={3} onBack={() => setFase('precos')} />
+      <Topo atual={4} onBack={() => setFase('tempo')} />
       <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
         <Bolha>
           <p className="font-sans text-sm text-ink">
-            Fechado! Receita <strong>{receita.nome}</strong> com custo de matéria-prima de{' '}
-            <strong>{brl(precos?.totalReceita || 0)}</strong>. ✅
-          </p>
-          <p className="font-sans text-sm text-ink mt-2">
-            Agora a <strong>Etapa 3 — tempo de preparo</strong>: já extraí ~{totalTempo(receita)}min da
-            receita; vou transformar isso em custo de mão de obra (pelo seu valor-hora). Depois, a
-            Etapa 4 fecha o preço de venda.
+            Já temos o custo total da receita <strong>{receita.nome}</strong>: 👇
           </p>
         </Bolha>
+
+        <div className="border border-ink bg-bone">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-line">
+            <span className="font-sans text-sm text-ink">Matéria-prima</span>
+            <span className="qtm-num text-sm text-ink">{brl(custoMP)}</span>
+          </div>
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-line">
+            <span className="font-sans text-sm text-ink">Mão de obra ({mo?.tempoMin || 0}min)</span>
+            <span className="qtm-num text-sm text-ink">{brl(custoMO)}</span>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3 bg-ink text-bone">
+            <span className="font-mono text-xs uppercase tracking-widest">Custo total</span>
+            <span className="qtm-num text-base font-bold text-lime">{brl(custoTotal)}</span>
+          </div>
+        </div>
 
         <div className="border border-line bg-receipt px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">Protótipo</p>
           <p className="font-sans text-sm text-ink">
-            <strong>Etapas 1 e 2 prontas.</strong> Tempo (3) e preço final (4) entram em seguida — e é
-            no fim delas que faço o "salvar tudo" no backend.
+            <strong>Etapas 1, 2 e 3 prontas.</strong> A Etapa 4 (porções → preço de venda por margem/canal)
+            e o "salvar tudo" entram a seguir.
           </p>
         </div>
 
-        <button onClick={() => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null) }}
+        <button onClick={() => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null) }}
           className="btn-ghost w-full">Testar outra receita</button>
         <button onClick={voltarHome} className="btn-secondary w-full">Voltar ao início</button>
       </main>
