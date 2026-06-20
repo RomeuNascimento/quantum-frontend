@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listarIngredientes } from '../../api/ingredientes'
 import { processarNotaFiscal, estimarPrecos } from '../../api/ia'
 import { brl, brl4 } from '../../utils/format'
-import { normalizar, custoUnitario } from './custo'
+import { normalizar, custoUnitario, quantidadeConsumida } from './custo'
 
 // ── Etapa 2 do Assistente — PREÇOS DOS INGREDIENTES ────────────────────────────
 // Recebe a receita confirmada (Etapa 1). Descobre o que já tem preço no catálogo
@@ -52,6 +52,8 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 
       let custoUnit = 0
       let fonte = null
+      // Unidade de PREÇO (da fonte local, ou do catálogo): define se o consumo é peso ou contagem
+      const unidadePreco = local?.unidade || cat?.unidade || 'g'
       if (local) {
         custoUnit = custoUnitario(local.preco, local.quantidade_embalagem, local.unidade, cat?.fator_correcao || 1)
         fonte = local.fonte
@@ -60,15 +62,27 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         fonte = 'catalogo'
       }
       const resolvido = Boolean(local) || prontoCatalogo
+      // Quando é por unidade (ovo), consumo = contagem ("3 ovos" → 3); senão, peso em g/ml
+      const qtdConsumida = quantidadeConsumida({
+        unidadePreco,
+        quantidade_g: ing.quantidade_g,
+        unidade_original: ing.unidade_original,
+      })
+      const porUnidade = unidadePreco === 'unid'
       return {
         chave,
         nome: ing.nome,
         quantidade_g: ing.quantidade_g,
-        unidadeCatalogo: cat?.unidade || 'g',
+        unidadePreco,
+        porUnidade,
+        // rótulo da quantidade: "3 un" (contagem) ou "150g" (peso)
+        rotuloQtd: porUnidade ? `${qtdConsumida} un` : `${ing.quantidade_g}g`,
+        // rótulo do custo unitário: "/un" ou "/g" (g/ml já está na base)
+        rotuloCustoUnit: porUnidade ? '/un' : `/${unidadePreco === 'ml' || unidadePreco === 'L' ? 'ml' : 'g'}`,
         resolvido,
         fonte,
         custoUnit,
-        custoReceita: custoUnit * (parseFloat(ing.quantidade_g) || 0),
+        custoReceita: custoUnit * qtdConsumida,
         local,
       }
     })
@@ -156,7 +170,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
               {i.fonte === 'estimativa' && (
                 <span className="font-mono text-[9px] uppercase tracking-wide text-rust border border-rust px-1">est</span>
               )}
-              <span className="qtm-num text-xs text-mute">{i.quantidade_g}g</span>
+              <span className="qtm-num text-xs text-mute w-12 text-right">{i.rotuloQtd}</span>
               <span className="qtm-num text-sm text-ink w-16 text-right">{brl(i.custoReceita)}</span>
             </div>
           ))}
@@ -264,7 +278,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
                     {i.fonte === 'estimativa' && (
                       <span className="font-mono text-[9px] uppercase tracking-wide text-rust border border-rust px-1">est</span>
                     )}
-                    <span className="qtm-num text-xs text-mute">{brl4(i.custoUnit)}/{i.unidadeCatalogo === 'kg' || i.unidadeCatalogo === 'L' ? i.unidadeCatalogo.replace('kg','g').replace('L','ml') : i.unidadeCatalogo}</span>
+                    <span className="qtm-num text-xs text-mute">{brl4(i.custoUnit)}{i.rotuloCustoUnit}</span>
                   </>
                 ) : (
                   <div className="flex gap-1">

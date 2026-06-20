@@ -70,7 +70,11 @@ export default function Fluxo() {
         nome: rec.nome || '',
         tipo: rec.tipo || '',
         rendimento_g: rec.rendimento_g || 0,
-        ingredientes: rec.ingredientes || [],
+        ingredientes: (rec.ingredientes || []).map((ing) => ({
+          nome: ing.nome,
+          quantidade_g: ing.quantidade_g,
+          unidade_original: ing.unidade_original || null,
+        })),
         etapas_mo: rec.etapas_mo || [],
       })
       setFase('revisao')
@@ -204,7 +208,7 @@ export default function Fluxo() {
                   <div key={i} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />
                     <span className="font-sans text-sm text-ink flex-1 truncate">{ing.nome}</span>
-                    <span className="qtm-num text-xs text-mute">{ing.quantidade_g}g</span>
+                    <span className="qtm-num text-xs text-mute">{ing.unidade_original || `${ing.quantidade_g}g`}</span>
                   </div>
                 ))}
               </div>
