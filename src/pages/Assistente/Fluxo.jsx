@@ -4,6 +4,7 @@ import { processarReceitas } from '../../api/ia'
 import StepBar from './StepBar'
 import Etapa2Precos from './Etapa2Precos'
 import Etapa3Tempo from './Etapa3Tempo'
+import Etapa4Preco from './Etapa4Preco'
 import { brl } from '../../utils/format'
 
 // ── Fluxo guiado do Assistente — ETAPA 1 (Receita) ─────────────────────────────
@@ -51,6 +52,7 @@ export default function Fluxo() {
   const [receita, setReceita] = useState(null)
   const [precos, setPrecos] = useState(null) // resultado da Etapa 2
   const [mo, setMo] = useState(null)         // resultado da Etapa 3
+  const [preco, setPreco] = useState(null)   // resultado da Etapa 4
   const [erro, setErro] = useState('')
 
   const totalTempo = (r) =>
@@ -266,51 +268,73 @@ export default function Fluxo() {
         <Topo atual={3} onBack={() => setFase('precos')} />
         <Etapa3Tempo
           receita={receita}
-          onConcluir={(resultado) => { setMo(resultado); setFase('confirmado') }}
+          onConcluir={(resultado) => { setMo(resultado); setFase('preco') }}
         />
       </div>
     )
   }
 
-  // ── CONFIRMADO (Etapas 1-3 feitas · teaser etapa 4) ────────────────────────
+  // ── ETAPA 4 — PREÇO FINAL ──────────────────────────────────────────────────
+  if (fase === 'preco') {
+    return (
+      <div className="min-h-screen bg-bone">
+        <Topo atual={4} onBack={() => setFase('tempo')} />
+        <Etapa4Preco
+          receita={receita}
+          custoTotal={(precos?.totalReceita || 0) + (mo?.custoMO || 0)}
+          onConcluir={(resultado) => { setPreco(resultado); setFase('confirmado') }}
+        />
+      </div>
+    )
+  }
+
+  // ── CONFIRMADO (fluxo completo · falta o "salvar tudo") ────────────────────
   const custoMP = precos?.totalReceita || 0
   const custoMO = mo?.custoMO || 0
   const custoTotal = custoMP + custoMO
+  const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null) }
   return (
     <div className="min-h-screen bg-bone">
-      <Topo atual={4} onBack={() => setFase('tempo')} />
+      <Topo atual={4} onBack={() => setFase('preco')} />
       <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
         <Bolha>
           <p className="font-sans text-sm text-ink">
-            Já temos o custo total da receita <strong>{receita.nome}</strong>: 👇
+            Prontinho! 🎉 Montei o <strong>{receita.nome}</strong> do zero com você.
           </p>
         </Bolha>
 
-        <div className="border border-ink bg-bone">
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-line">
+        {/* Preço de venda em destaque */}
+        <div className="border border-ink bg-ink text-bone px-4 py-4 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">
+            Preço de venda{preco?.porcoes > 1 ? ' (por unidade)' : ''}
+          </p>
+          <p className="qtm-num text-4xl font-bold text-lime">{brl(preco?.precoDireto || 0)}</p>
+          <p className="font-mono text-[11px] text-bone/70 mt-1">
+            custo {brl(preco?.custoUnit || 0)} · lucro {brl(preco?.lucroDireto || 0)} · margem {preco?.margem}%
+          </p>
+        </div>
+
+        {/* Resumo de custo */}
+        <div className="border border-line bg-bone">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-line">
             <span className="font-sans text-sm text-ink">Matéria-prima</span>
             <span className="qtm-num text-sm text-ink">{brl(custoMP)}</span>
           </div>
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-line">
+          <div className="flex items-center justify-between px-4 py-2">
             <span className="font-sans text-sm text-ink">Mão de obra ({mo?.tempoMin || 0}min)</span>
             <span className="qtm-num text-sm text-ink">{brl(custoMO)}</span>
-          </div>
-          <div className="flex items-center justify-between px-4 py-3 bg-ink text-bone">
-            <span className="font-mono text-xs uppercase tracking-widest">Custo total</span>
-            <span className="qtm-num text-base font-bold text-lime">{brl(custoTotal)}</span>
           </div>
         </div>
 
         <div className="border border-line bg-receipt px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">Protótipo</p>
           <p className="font-sans text-sm text-ink">
-            <strong>Etapas 1, 2 e 3 prontas.</strong> A Etapa 4 (porções → preço de venda por margem/canal)
-            e o "salvar tudo" entram a seguir.
+            <strong>Fluxo completo das 4 etapas!</strong> Falta só o <strong>"salvar tudo"</strong> — gravar
+            ingredientes, receita, produto e preço de verdade no backend. É o próximo passo.
           </p>
         </div>
 
-        <button onClick={() => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null) }}
-          className="btn-ghost w-full">Testar outra receita</button>
+        <button onClick={limpar} className="btn-ghost w-full">Montar outro produto</button>
         <button onClick={voltarHome} className="btn-secondary w-full">Voltar ao início</button>
       </main>
     </div>
