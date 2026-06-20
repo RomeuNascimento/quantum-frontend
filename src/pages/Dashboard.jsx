@@ -125,21 +125,6 @@ export default function Dashboard() {
           </Link>
         )}
 
-        {/* Assistente IA (protótipo) */}
-        <Link to="/assistente" className="flex items-center gap-3 bg-ink text-bone border border-ink px-4 py-3 active:opacity-80">
-          <div className="w-8 h-8 flex-shrink-0 bg-lime text-ink flex items-center justify-center font-mono text-sm font-bold">
-            Q
-          </div>
-          <div className="flex-1">
-            <p className="font-mono text-xs font-bold uppercase tracking-widest text-lime">Montar preço com a IA</p>
-            <p className="font-mono text-[10px] text-bone/70">Receita → preços → tempo → preço final</p>
-          </div>
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </Link>
-
         {/* Cards resumo */}
         <div className="grid grid-cols-2 gap-3">
           <Link to="/produtos" className="card active:bg-line/50">

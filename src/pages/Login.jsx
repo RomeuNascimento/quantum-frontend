@@ -24,7 +24,7 @@ export default function Login() {
       const fn = modo === 'login' ? login : registerUser
       const res = await fn(dados)
       setToken(res.data.access_token)
-      navigate('/dashboard')
+      navigate('/assistente')
     } catch (e) {
       setErro(e.message)
     } finally {

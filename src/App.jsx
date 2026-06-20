@@ -28,6 +28,7 @@ import PontoEquilibrio from './pages/PontoEquilibrio/index'
 import ListaCompras from './pages/ListaCompras/index'
 import Configuracoes from './pages/Configuracoes/index'
 import Assistente from './pages/Assistente/index'
+import AssistenteFluxo from './pages/Assistente/Fluxo'
 import Assinatura from './pages/Assinatura/index'
 
 function ScrollToTop() {
@@ -44,7 +45,7 @@ function PrivateRoute({ children }) {
 
 function PublicRoute({ children }) {
   const token = useAuthStore((s) => s.token)
-  return token ? <Navigate to="/dashboard" replace /> : children
+  return token ? <Navigate to="/assistente" replace /> : children
 }
 
 export default function App() {
@@ -55,10 +56,11 @@ export default function App() {
       <UpdatePrompt />
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/assistente" replace />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/assistente" element={<PrivateRoute><Assistente /></PrivateRoute>} />
+        <Route path="/assistente/novo" element={<PrivateRoute><AssistenteFluxo /></PrivateRoute>} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
         <Route path="/ingredientes" element={<PrivateRoute><Ingredientes /></PrivateRoute>} />
         <Route path="/ingredientes/importar-nota" element={<PrivateRoute><ImportarNota /></PrivateRoute>} />

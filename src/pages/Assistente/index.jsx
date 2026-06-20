@@ -1,279 +1,165 @@
-import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Layout from '../../components/Layout'
-import { processarReceitas } from '../../api/ia'
-import StepBar from './StepBar'
+import { Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import BottomNav from '../../components/BottomNav'
+import { getMe } from '../../api/auth'
+import { listarProdutos } from '../../api/produtos'
+import { relatorioMargem } from '../../api/precificacao'
+import useAuthStore from '../../store/authStore'
 
-// ── Protótipo do Assistente Quantum — ETAPA 1 (Receita) ────────────────────────
-// Reusa o endpoint /ia/receitas (sem mudança no backend). A intenção é dar a
-// sensação de que a IA conduz: ela "fala", lê o que você manda e devolve pronto
-// para confirmar. Etapas 2-4 (preços, tempo, preço final) entram depois.
+// ── Assistente Quantum — TELA PRINCIPAL (hub) ──────────────────────────────────
+// Porta de entrada do app. Hero escuro com o assistente + CTA primário "Nova
+// precificação" (abre o fluxo guiado). Corpo claro com atalhos e os produtos do
+// usuário. Design system Quantum: cantos vivos, lime/ink/bone, mono nos números.
 
-function MsgIA({ children }) {
-  return (
-    <div className="flex gap-2.5">
-      <div className="w-7 h-7 flex-shrink-0 bg-ink text-lime flex items-center justify-center font-mono text-xs font-bold">
-        Q
-      </div>
-      <div className="flex-1 bg-receipt border border-line px-3 py-2.5">
-        {children}
-      </div>
-    </div>
-  )
+function saudacao() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Bom dia'
+  if (h < 18) return 'Boa tarde'
+  return 'Boa noite'
 }
 
 export default function Assistente() {
   const navigate = useNavigate()
-  const inputRef = useRef()
+  const { user } = useAuthStore()
 
-  const [fase, setFase] = useState('intro') // intro | processando | revisao | confirmado
-  const [arquivo, setArquivo] = useState(null)
-  const [texto, setTexto] = useState('')
-  const [receita, setReceita] = useState(null)
-  const [erro, setErro] = useState('')
+  const meQ = useQuery({ queryKey: ['me'], queryFn: () => getMe().then((r) => r.data) })
+  const produtosQ = useQuery({ queryKey: ['produtos'], queryFn: () => listarProdutos().then((r) => r.data) })
+  const margemQ = useQuery({
+    queryKey: ['relatorio-margem'],
+    queryFn: () => relatorioMargem().then((r) => r.data.produtos),
+  })
 
-  const totalTempo = (r) =>
-    (r?.etapas_mo || []).reduce((s, e) => s + (parseFloat(e.tempo_min) || 0), 0)
+  const nome = (meQ.data?.nome || user?.nome || '').split(' ')[0]
+  const produtos = produtosQ.data ?? []
+  const margens = margemQ.data ?? []
+  const alertas = margens.filter((p) => p.canais.some((c) => c.margem_real_pct < 10)).length
 
-  const processar = async () => {
-    if (!arquivo && !texto.trim()) return
-    setErro('')
-    setFase('processando')
-    try {
-      // O endpoint aceita texto (.txt) ou imagem/PDF. Para texto digitado,
-      // empacotamos como um arquivo .txt para reusar o mesmo caminho.
-      const file = arquivo || new File([texto], 'receita.txt', { type: 'text/plain' })
-      const r = await processarReceitas(file)
-      const rec = (r.data.receitas || [])[0]
-      if (!rec) {
-        setErro('Não consegui identificar uma receita. Tente uma foto mais nítida ou digite o texto.')
-        setFase('intro')
-        return
-      }
-      setReceita({
-        nome: rec.nome || '',
-        tipo: rec.tipo || '',
-        rendimento_g: rec.rendimento_g || 0,
-        ingredientes: rec.ingredientes || [],
-        etapas_mo: rec.etapas_mo || [],
-      })
-      setFase('revisao')
-    } catch (e) {
-      setErro(e.message)
-      setFase('intro')
-    }
-  }
-
-  const up = (campo, valor) => setReceita((r) => ({ ...r, [campo]: valor }))
-
-  // ── INTRO ────────────────────────────────────────────────────────────────
-  if (fase === 'intro') {
-    return (
-      <Layout title="Assistente" onBack={() => navigate('/dashboard')}>
-        <StepBar atual={1} />
-        <div className="px-4 pt-4 space-y-4">
-          <MsgIA>
-            <p className="font-sans text-sm text-ink">
-              Oi! Eu sou o assistente do Quantum. Vou montar o preço do seu produto
-              com você — <strong>sem formulário, sem digitação chata</strong>.
-            </p>
-            <p className="font-sans text-sm text-ink mt-2">
-              Pra começar, me mostra a <strong>receita</strong>. Pode mandar uma foto,
-              um print, um PDF — ou escrever aqui mesmo. Eu leio e organizo tudo. 📸
-            </p>
-          </MsgIA>
-
-          {erro && (
-            <div className="bg-rust/10 border border-rust px-3 py-2">
-              <p className="font-sans text-sm text-rust">{erro}</p>
-            </div>
-          )}
-
-          <button
-            onClick={() => inputRef.current?.click()}
-            className="w-full border-2 border-dashed border-line bg-receipt flex flex-col items-center justify-center py-10 active:bg-line"
-          >
-            <svg className="w-9 h-9 text-mute mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
-              <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <p className="font-mono text-xs uppercase tracking-widest text-mute">
-              {arquivo ? arquivo.name : 'Tirar foto ou anexar arquivo'}
-            </p>
-            <p className="font-mono text-[10px] text-mute mt-1">Foto, PDF, Excel, CSV</p>
-          </button>
-
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*,application/pdf,.xlsx,.xls,.csv,.txt"
-            className="hidden"
-            onChange={(e) => setArquivo(e.target.files[0] || null)}
-          />
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1 border-t border-line" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">ou escreva</span>
-            <div className="flex-1 border-t border-line" />
+  return (
+    <div className="min-h-screen bg-bone">
+      {/* ── HERO (ink) ──────────────────────────────────────────────────────── */}
+      <header className="bg-ink text-bone print:hidden">
+        <div className="max-w-xl mx-auto px-5 pt-5 pb-6">
+          {/* topo: wordmark + config */}
+          <div className="flex items-center justify-between mb-7">
+            <span className="font-mono text-sm uppercase tracking-[0.3em] text-bone">Quantum</span>
+            <Link to="/configuracoes" aria-label="Configurações" className="p-1 -mr-1 text-mute active:text-lime">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </Link>
           </div>
 
-          <textarea
-            className="input w-full h-28 text-sm"
-            placeholder={'Ex: Bolo de cenoura\n3 ovos, 2 xícaras de açúcar, 1 xícara de óleo,\n3 cenouras médias, 2 xícaras de farinha...'}
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-          />
+          {/* fala do assistente */}
+          <div className="flex gap-3 mb-6">
+            <div className="w-9 h-9 flex-shrink-0 bg-lime text-ink flex items-center justify-center font-mono text-base font-bold">
+              Q
+            </div>
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-widest text-mute">
+                {saudacao()}{nome ? `, ${nome}` : ''}
+              </p>
+              <h1 className="text-2xl font-bold font-sans leading-tight text-bone">
+                O que vamos<br />precificar hoje?
+              </h1>
+            </div>
+          </div>
 
+          {/* CTA primário */}
           <button
-            onClick={processar}
-            disabled={!arquivo && !texto.trim()}
-            className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40"
+            onClick={() => navigate('/assistente/novo')}
+            className="w-full bg-lime text-ink flex items-center gap-3 px-5 py-4 active:bg-lime-dim"
           >
-            Ler minha receita
-          </button>
-        </div>
-      </Layout>
-    )
-  }
-
-  // ── PROCESSANDO ──────────────────────────────────────────────────────────
-  if (fase === 'processando') {
-    return (
-      <Layout title="Assistente">
-        <StepBar atual={1} />
-        <div className="px-4 pt-4 space-y-4">
-          <MsgIA>
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-lime/30 border-t-lime rounded-full animate-spin flex-shrink-0" />
-              <p className="font-sans text-sm text-ink">
-                Tô lendo sua receita e organizando os ingredientes...
+            <span className="font-mono text-2xl leading-none font-bold">+</span>
+            <div className="flex-1 text-left">
+              <p className="font-mono text-sm font-bold uppercase tracking-widest">Nova precificação</p>
+              <p className="font-mono text-[10px] tracking-wide text-ink/70">
+                Receita · preços · tempo · preço final
               </p>
             </div>
-          </MsgIA>
-        </div>
-      </Layout>
-    )
-  }
-
-  // ── REVISÃO ──────────────────────────────────────────────────────────────
-  if (fase === 'revisao') {
-    return (
-      <Layout title="Assistente" onBack={() => setFase('intro')}>
-        <StepBar atual={1} />
-        <div className="px-4 pt-4 pb-40 space-y-4">
-          <MsgIA>
-            <p className="font-sans text-sm text-ink">
-              Pronto! Entendi sua receita assim 👇 Dá uma conferida e ajusta o que
-              precisar — depois é só confirmar.
-            </p>
-          </MsgIA>
-
-          {/* Card editável da receita */}
-          <div className="border border-ink bg-bone">
-            <div className="p-3 border-b border-line space-y-2">
-              <div>
-                <p className="label">Nome</p>
-                <input className="input w-full text-sm font-medium" value={receita.nome}
-                  aria-label="Nome da receita"
-                  onChange={(e) => up('nome', e.target.value)} />
-              </div>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <p className="label">Categoria</p>
-                  <input className="input w-full text-xs" placeholder="opcional" value={receita.tipo}
-                    aria-label="Categoria" onChange={(e) => up('tipo', e.target.value)} />
-                </div>
-                <div className="w-28">
-                  <p className="label">Rende</p>
-                  <div className="relative">
-                    <input type="number" className="input w-full text-xs pr-5" value={receita.rendimento_g}
-                      aria-label="Rendimento em gramas"
-                      onChange={(e) => up('rendimento_g', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute">g</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Ingredientes */}
-            <div className="p-3 border-b border-line">
-              <p className="label mb-2">Ingredientes ({receita.ingredientes.length})</p>
-              <div className="space-y-1.5">
-                {receita.ingredientes.map((ing, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />
-                    <span className="font-sans text-sm text-ink flex-1 truncate">{ing.nome}</span>
-                    <span className="qtm-num text-xs text-mute">{ing.quantidade_g}g</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tempo de preparo (prévia da etapa 3) */}
-            {receita.etapas_mo.length > 0 && (
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="label">Modo de preparo ({receita.etapas_mo.length} etapas)</p>
-                  <span className="qtm-num text-xs text-ink">~{totalTempo(receita)}min</span>
-                </div>
-                <div className="space-y-1.5">
-                  {receita.etapas_mo.map((e, i) => (
-                    <div key={i} className="flex gap-2 items-start">
-                      <span className="qtm-num text-[11px] text-mute w-9 flex-shrink-0">{e.tempo_min}min</span>
-                      <span className="font-sans text-xs text-ink">{e.descricao}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
-          <button onClick={() => setFase('confirmado')} disabled={!receita.nome}
-            className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40">
-            Confirmar receita →
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
-      </Layout>
-    )
-  }
+      </header>
 
-  // ── CONFIRMADO (teaser das próximas etapas) ────────────────────────────────
-  return (
-    <Layout title="Assistente">
-      <StepBar atual={2} />
-      <div className="px-4 pt-4 space-y-4">
-        <MsgIA>
-          <p className="font-sans text-sm text-ink">
-            Boa! Já tenho a receita <strong>{receita.nome}</strong> com{' '}
-            {receita.ingredientes.length} ingredientes. ✅
-          </p>
-          <p className="font-sans text-sm text-ink mt-2">
-            Agora o próximo passo é descobrir <strong>quanto custa cada ingrediente</strong>.
-            Você vai poder mandar foto da nota fiscal ou da etiqueta — eu preencho os preços
-            e você só confirma.
-          </p>
-        </MsgIA>
+      {/* ── CORPO (bone) ────────────────────────────────────────────────────── */}
+      <main className="max-w-xl mx-auto px-5 pt-6 pb-24 space-y-7">
+        {/* Alerta de margem */}
+        {alertas > 0 && (
+          <Link to="/relatorio" className="flex items-center gap-3 bg-rust text-bone px-4 py-3 active:opacity-80">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="font-mono text-xs font-bold uppercase tracking-widest flex-1">
+              {alertas === 1 ? '1 produto precisa de reajuste' : `${alertas} produtos precisam de reajuste`}
+            </p>
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        )}
 
-        <div className="border border-line bg-receipt px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">Protótipo</p>
-          <p className="font-sans text-sm text-ink">
-            Esta é a <strong>Etapa 1</strong> do novo assistente. As próximas etapas
-            (preços → tempo → preço final) entram em seguida. Quis te mostrar a "vibe"
-            antes de construir o resto.
-          </p>
-        </div>
+        {/* Atalhos rápidos */}
+        <section>
+          <p className="label mb-3">Atalhos</p>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { to: '/ingredientes/importar-nota', label: 'Importar nota', sub: 'Foto da nota fiscal' },
+              { to: '/relatorio', label: 'Relatório', sub: 'Margem por produto' },
+              { to: '/orcamento', label: 'Orçamento', sub: 'Enviar por WhatsApp' },
+              { to: '/lista-compras', label: 'Lista de compras', sub: 'Do que comprar' },
+            ].map((a) => (
+              <Link key={a.to} to={a.to}
+                className="border border-ink bg-bone px-3 py-3 active:bg-ink active:text-bone group">
+                <p className="font-mono text-xs font-bold uppercase tracking-widest text-ink group-active:text-bone">{a.label}</p>
+                <p className="font-mono text-[10px] text-mute group-active:text-bone/70 mt-0.5">{a.sub}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-        <button onClick={() => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null) }}
-          className="btn-ghost w-full">
-          Testar com outra receita
-        </button>
-        <button onClick={() => navigate('/dashboard')} className="btn-secondary w-full">
-          Voltar ao início
-        </button>
-      </div>
-    </Layout>
+        {/* Seus produtos */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <p className="label mb-0">Seus produtos</p>
+            <Link to="/produtos" className="font-mono text-[10px] uppercase tracking-widest text-mute active:text-ink">
+              Ver todos →
+            </Link>
+          </div>
+
+          {produtosQ.isLoading ? (
+            <p className="font-mono text-xs text-mute py-3">Carregando…</p>
+          ) : produtos.length === 0 ? (
+            <div className="border border-dashed border-line px-4 py-6 text-center">
+              <p className="font-sans text-sm text-mute">
+                Nenhum produto ainda. Toque em <strong className="text-ink">Nova precificação</strong> e
+                deixe a IA montar o primeiro com você.
+              </p>
+            </div>
+          ) : (
+            <div>
+              {produtos.slice(0, 6).map((p) => (
+                <Link key={p.id} to={`/produtos/${p.id}`}
+                  className="flex items-center justify-between border-b border-line py-3 last:border-b-0">
+                  <span className="text-sm font-medium text-ink">{p.nome}</span>
+                  <svg className="w-4 h-4 text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                    <path d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      <BottomNav />
+    </div>
   )
 }

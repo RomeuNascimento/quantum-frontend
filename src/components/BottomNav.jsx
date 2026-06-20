@@ -12,7 +12,7 @@ const iconProps = {
 
 const tabs = [
   {
-    to: '/dashboard',
+    to: '/assistente',
     label: 'Início',
     icon: (
       <svg {...iconProps}>
