@@ -27,6 +27,7 @@ import Orcamento from './pages/Orcamento/index'
 import PontoEquilibrio from './pages/PontoEquilibrio/index'
 import ListaCompras from './pages/ListaCompras/index'
 import Configuracoes from './pages/Configuracoes/index'
+import Assistente from './pages/Assistente/index'
 import Assinatura from './pages/Assinatura/index'
 
 function ScrollToTop() {
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/assistente" element={<PrivateRoute><Assistente /></PrivateRoute>} />
 
         <Route path="/ingredientes" element={<PrivateRoute><Ingredientes /></PrivateRoute>} />
         <Route path="/ingredientes/importar-nota" element={<PrivateRoute><ImportarNota /></PrivateRoute>} />
