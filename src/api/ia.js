@@ -11,3 +11,8 @@ export const processarReceitas = (file) => {
   form.append('file', file)
   return api.post('/ia/receitas', form, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
+
+// Estima preço de mercado (BR) para uma lista de ingredientes (por nome).
+// Devolve { itens: [{ nome, preco, quantidade_embalagem, unidade, fonte:'estimativa' }] }
+export const estimarPrecos = (nomes) =>
+  api.post('/ia/estimar-precos', { ingredientes: nomes.map((nome) => ({ nome })) })

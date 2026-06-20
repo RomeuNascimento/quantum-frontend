@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { processarReceitas } from '../../api/ia'
 import StepBar from './StepBar'
+import Etapa2Precos from './Etapa2Precos'
 
 // ── Fluxo guiado do Assistente — ETAPA 1 (Receita) ─────────────────────────────
 // Layout do zero: barra fixa com etapas no topo, conversa do assistente no corpo,
@@ -42,10 +43,11 @@ export default function Fluxo() {
   const navigate = useNavigate()
   const inputRef = useRef()
 
-  const [fase, setFase] = useState('intro') // intro | processando | revisao | confirmado
+  const [fase, setFase] = useState('intro') // intro | processando | revisao | precos | confirmado
   const [arquivo, setArquivo] = useState(null)
   const [texto, setTexto] = useState('')
   const [receita, setReceita] = useState(null)
+  const [precos, setPrecos] = useState(null) // resultado da Etapa 2
   const [erro, setErro] = useState('')
 
   const totalTempo = (r) =>
@@ -228,7 +230,7 @@ export default function Fluxo() {
         </main>
 
         <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
-          <button onClick={() => setFase('confirmado')} disabled={!receita.nome}
+          <button onClick={() => setFase('precos')} disabled={!receita.nome}
             className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40">
             Confirmar receita →
           </button>
@@ -237,30 +239,45 @@ export default function Fluxo() {
     )
   }
 
-  // ── CONFIRMADO (teaser etapa 2) ────────────────────────────────────────────
+  // ── ETAPA 2 — PREÇOS ───────────────────────────────────────────────────────
+  if (fase === 'precos') {
+    return (
+      <div className="min-h-screen bg-bone">
+        <Topo atual={2} onBack={() => setFase('revisao')} />
+        <Etapa2Precos
+          receita={receita}
+          onConcluir={(resultado) => { setPrecos(resultado); setFase('confirmado') }}
+        />
+      </div>
+    )
+  }
+
+  // ── CONFIRMADO (Etapas 1+2 feitas · teaser etapa 3) ────────────────────────
   return (
     <div className="min-h-screen bg-bone">
-      <Topo atual={2} onBack={() => setFase('revisao')} />
+      <Topo atual={3} onBack={() => setFase('precos')} />
       <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
         <Bolha>
           <p className="font-sans text-sm text-ink">
-            Boa! Guardei a receita <strong>{receita.nome}</strong> com {receita.ingredientes.length} ingredientes. ✅
+            Fechado! Receita <strong>{receita.nome}</strong> com custo de matéria-prima de{' '}
+            <strong>{brl(precos?.totalReceita || 0)}</strong>. ✅
           </p>
           <p className="font-sans text-sm text-ink mt-2">
-            Próximo passo: <strong>quanto custa cada ingrediente</strong>. Você vai poder mandar
-            foto da nota fiscal ou etiqueta — eu preencho os preços e você confirma.
+            Agora a <strong>Etapa 3 — tempo de preparo</strong>: já extraí ~{totalTempo(receita)}min da
+            receita; vou transformar isso em custo de mão de obra (pelo seu valor-hora). Depois, a
+            Etapa 4 fecha o preço de venda.
           </p>
         </Bolha>
 
         <div className="border border-line bg-receipt px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">Protótipo</p>
           <p className="font-sans text-sm text-ink">
-            Esta é a <strong>Etapa 1</strong>. As próximas (preços → tempo → preço final) entram em
-            seguida — quis te mostrar a vibe do novo layout antes.
+            <strong>Etapas 1 e 2 prontas.</strong> Tempo (3) e preço final (4) entram em seguida — e é
+            no fim delas que faço o "salvar tudo" no backend.
           </p>
         </div>
 
-        <button onClick={() => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null) }}
+        <button onClick={() => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null) }}
           className="btn-ghost w-full">Testar outra receita</button>
         <button onClick={voltarHome} className="btn-secondary w-full">Voltar ao início</button>
       </main>
