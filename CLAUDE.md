@@ -3,9 +3,52 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-13 (branch `claude/keen-goldberg-m8aqqx` — tela de Configurações (`/configuracoes`): conta, valor-hora padrão, alterar senha, sair de todos os dispositivos; lista de compras + compartilhar por WhatsApp; precificação repensada; ponto de equilíbrio; ⚠️ DEPLOY do frontend pendente)
-**Próxima sessão:** DECISÃO PENDENTE: app Android via TWA (ver seção abaixo) · alertas proativos (#6) · páginas `/termos`/`/privacidade` (pós-advogado) · testes Playwright
+**Última sessão:** 2026-06-21 (branch `claude/loving-fermat-s7fhsl` — **Assistente "cadastro guiado em 4 etapas" como tela principal** + **Freemium** (sem paywall de bloqueio, banner de uso). ⚠️ DEPLOY do frontend pendente — ver "Sessão 2026-06-21" abaixo)
+**Penúltima:** 2026-06-13/14 — Configurações, lista de compras, água neutra (DEPLOY também pendente)
+**Próxima sessão:** **refinar o visual do assistente** (combinado: ajustar estética no fim); cópia de `/assinatura` falar freemium em vez de trial; DEPLOY frontend; app Android via TWA; testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-06-21 — Assistente (cadastro guiado em 4 etapas) + Freemium
+
+> Branch `claude/loving-fermat-s7fhsl`. Reframe do app: a tela principal virou um
+> **assistente conversacional** que cadastra receita→ingredientes→preço→produto numa
+> tacada. Backend correspondente: ver "Sessão 2026-06-21" no CLAUDE.md do quantum-backend
+> (`/assistente/salvar`, `/ia/estimar-precos`, `/ia/sugerir-embalagem`).
+
+### O fluxo — `src/pages/Assistente/`
+
+- **`index.jsx`** — entrada (tela principal). **`Fluxo.jsx`** — orquestra as 4 etapas
+  (estado: `receita`, `precos`, `mo`, `preco`) e no fim chama **salvar tudo** (`POST
+  /assistente/salvar`). **`StepBar.jsx`** — barra de progresso 1·2·3·4. **`custo.js`** —
+  helpers de cálculo.
+- **Etapa 1 · Receita** — foto/texto → `POST /ia/receitas` (já existia) → confirma
+  nome/ingredientes/etapas. Ingrediente **por unidade** usa contagem ("3 ovos"), não gramas
+  (`fcf7567`).
+- **Etapa 2 · Preços** (`Etapa2Precos.jsx`) — para cada ingrediente sem preço no catálogo:
+  3 caminhos — **nota fiscal** (foto, `/ia/nota-fiscal`), **"estime pra mim"** (IA,
+  `/ia/estimar-precos`, selo "EST" vermelho), ou **digitar**. + Seção **"Embalagem
+  (opcional)"**: botão "🤖 Esse produto vai embalado? Sugerir" → `/ia/sugerir-embalagem` →
+  confirma/remove. Match por nome normalizado decide o que já existe.
+- **Etapa 3 · Tempo** (`Etapa3Tempo.jsx`) — "quanto tempo leva?" → mão de obra. 3 modos:
+  valor/hora, salário mensal (→ valor/hora), ou **não contar** mão de obra.
+- **Etapa 4 · Preço** (`Etapa4Preco.jsx`) — porções (quantas unidades a receita rende),
+  slider de margem (default 50%), canais. **Custo por unidade = (MP+MO)/porções +
+  embalagem por unidade** (embalagem não escala com porções — é custo do produto). Mostra
+  preço sugerido. "Finalizar" → salvar tudo → produto criado e precificado.
+
+### Freemium (`a2917fc`)
+
+- **Removido o `PaywallGate` de bloqueio.** Banner discreto de uso ("X de 3 produtos") em
+  vez de "teste encerrado". Acima do limite, o backend devolve 402 (→ `/assinatura`); abaixo,
+  uso livre pra sempre. `src/api/billing.js` lê `produtos_usados`/`limite_free` do status.
+
+### Estado / pendências
+- Build ✅. Verificado em Chromium headless (mock de API): fluxo 4 etapas, estimativa IA,
+  embalagem sugerida renderizando. **DEPLOY do frontend pendente** (junto do backend).
+- ⚠️ **Visual a refinar** (combinado com o usuário: funcionalidade primeiro, estética no fim).
+- ⚠️ Página `/assinatura` ainda tem cópia de trial/vencida — ajustar pra linguagem freemium.
 
 ---
 
