@@ -69,7 +69,7 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
         await updateConfiguracao({ valor_hora_padrao: vh })
         queryClient.invalidateQueries({ queryKey: ['configuracao'] })
       }
-      onConcluir({ tempoMin: parseFloat(tempoMin) || 0, valorHora: vh, custoMO })
+      onConcluir({ tempoMin: parseFloat(tempoMin) || 0, valorHora: vh, custoMO, contar: modo !== 'nao' })
     } catch (e) {
       setErro(e.message)
     } finally {

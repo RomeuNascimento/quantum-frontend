@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { processarReceitas } from '../../api/ia'
+import { salvarAssistente } from '../../api/assistente'
 import StepBar from './StepBar'
 import Etapa2Precos from './Etapa2Precos'
 import Etapa3Tempo from './Etapa3Tempo'
@@ -44,6 +46,7 @@ function Topo({ atual, onBack }) {
 
 export default function Fluxo() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const inputRef = useRef()
 
   const [fase, setFase] = useState('intro') // intro | processando | revisao | precos | confirmado
@@ -53,6 +56,8 @@ export default function Fluxo() {
   const [precos, setPrecos] = useState(null) // resultado da Etapa 2
   const [mo, setMo] = useState(null)         // resultado da Etapa 3
   const [preco, setPreco] = useState(null)   // resultado da Etapa 4
+  const [produtoId, setProdutoId] = useState(null) // id do produto gravado
+  const [erroSalvar, setErroSalvar] = useState('')
   const [erro, setErro] = useState('')
 
   const totalTempo = (r) =>
@@ -91,6 +96,32 @@ export default function Fluxo() {
 
   const up = (campo, valor) => setReceita((r) => ({ ...r, [campo]: valor }))
   const voltarHome = () => navigate('/assistente')
+
+  // Grava tudo no backend (transacional). Chamado ao Finalizar a Etapa 4.
+  const finalizar = async (resultado) => {
+    setErroSalvar(''); setFase('salvando')
+    try {
+      const payload = {
+        nome: receita.nome,
+        tipo: receita.tipo || null,
+        rendimento_g: Math.max(parseFloat(receita.rendimento_g) || 0, 1),
+        porcoes: resultado.porcoes,
+        margem_pct: resultado.margem,
+        etapas_mo: mo?.contar ? [{ descricao: 'Preparo', tempo_min: mo.tempoMin }] : [],
+        ingredientes: precos?.ingredientesPayload || [],
+      }
+      const r = await salvarAssistente(payload)
+      setProdutoId(r.data.produto_id)
+      // os novos dados aparecem nas listas/dashboard
+      for (const k of ['produtos', 'ingredientes', 'receitas', 'relatorio-margem', 'canais']) {
+        queryClient.invalidateQueries({ queryKey: [k] })
+      }
+      setFase('confirmado')
+    } catch (e) {
+      setErroSalvar(e.message)
+      setFase('preco')
+    }
+  }
 
   // ── INTRO ────────────────────────────────────────────────────────────────
   if (fase === 'intro') {
@@ -282,8 +313,26 @@ export default function Fluxo() {
         <Etapa4Preco
           receita={receita}
           custoTotal={(precos?.totalReceita || 0) + (mo?.custoMO || 0)}
-          onConcluir={(resultado) => { setPreco(resultado); setFase('confirmado') }}
+          erro={erroSalvar}
+          onConcluir={(resultado) => { setPreco(resultado); finalizar(resultado) }}
         />
+      </div>
+    )
+  }
+
+  // ── SALVANDO ───────────────────────────────────────────────────────────────
+  if (fase === 'salvando') {
+    return (
+      <div className="min-h-screen bg-bone">
+        <Topo atual={4} onBack={() => {}} />
+        <main className="max-w-xl mx-auto px-4 pt-5">
+          <Bolha>
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 border-2 border-lime/30 border-t-lime rounded-full animate-spin flex-shrink-0" />
+              <p className="font-sans text-sm text-ink">Gravando tudo: ingredientes, receita, produto e preço…</p>
+            </div>
+          </Bolha>
+        </main>
       </div>
     )
   }
@@ -292,14 +341,15 @@ export default function Fluxo() {
   const custoMP = precos?.totalReceita || 0
   const custoMO = mo?.custoMO || 0
   const custoTotal = custoMP + custoMO
-  const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null) }
+  const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null); setProdutoId(null); setErroSalvar('') }
   return (
     <div className="min-h-screen bg-bone">
       <Topo atual={4} onBack={() => setFase('preco')} />
       <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
         <Bolha>
           <p className="font-sans text-sm text-ink">
-            Prontinho! 🎉 Montei o <strong>{receita.nome}</strong> do zero com você.
+            Prontinho! 🎉 Salvei o <strong>{receita.nome}</strong> — já está no seu app com
+            ingredientes, receita, produto e preço.
           </p>
         </Bolha>
 
@@ -326,14 +376,11 @@ export default function Fluxo() {
           </div>
         </div>
 
-        <div className="border border-line bg-receipt px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">Protótipo</p>
-          <p className="font-sans text-sm text-ink">
-            <strong>Fluxo completo das 4 etapas!</strong> Falta só o <strong>"salvar tudo"</strong> — gravar
-            ingredientes, receita, produto e preço de verdade no backend. É o próximo passo.
-          </p>
-        </div>
-
+        {produtoId && (
+          <button onClick={() => navigate(`/produtos/${produtoId}`)} className="btn-primary w-full">
+            Ver produto no app →
+          </button>
+        )}
         <button onClick={limpar} className="btn-ghost w-full">Montar outro produto</button>
         <button onClick={voltarHome} className="btn-secondary w-full">Voltar ao início</button>
       </main>

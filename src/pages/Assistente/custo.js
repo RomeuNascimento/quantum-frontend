@@ -24,6 +24,13 @@ export function contagemDe(unidadeOriginal) {
   return m ? parseFloat(m[1]) : null
 }
 
+// Converte uma quantidade de embalagem entre unidades (kg↔g, L↔ml). Usado ao
+// gravar um preço num ingrediente já existente cuja unidade difere da coletada.
+export function converterEmbalagem(qtd, deUnidade, paraUnidade) {
+  const q = parseFloat(qtd) || 0
+  return q * fatorUnidade(deUnidade) / fatorUnidade(paraUnidade)
+}
+
 // Quantidade efetiva consumida na receita, conforme a unidade de PREÇO do ingrediente.
 // Se o preço é por 'unid', o consumo é a contagem ('3 ovos' → 3). Senão, é o peso em g/ml.
 export function quantidadeConsumida({ unidadePreco, quantidade_g, unidade_original }) {

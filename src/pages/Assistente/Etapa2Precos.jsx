@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listarIngredientes } from '../../api/ingredientes'
 import { processarNotaFiscal, estimarPrecos } from '../../api/ia'
 import { brl, brl4 } from '../../utils/format'
-import { normalizar, custoUnitario, quantidadeConsumida } from './custo'
+import { normalizar, custoUnitario, quantidadeConsumida, converterEmbalagem } from './custo'
 
 // ── Etapa 2 do Assistente — PREÇOS DOS INGREDIENTES ────────────────────────────
 // Recebe a receita confirmada (Etapa 1). Descobre o que já tem preço no catálogo
@@ -73,6 +73,9 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         chave,
         nome: ing.nome,
         quantidade_g: ing.quantidade_g,
+        ingredienteId: cat?.id || null,
+        catUnidade: cat?.unidade || null,
+        qtdConsumida,
         unidadePreco,
         porUnidade,
         // rótulo da quantidade: "3 un" (contagem) ou "150g" (peso)
@@ -91,6 +94,34 @@ export default function Etapa2Precos({ receita, onConcluir }) {
   const faltantes = itens.filter((i) => !i.resolvido)
   const prontos = itens.filter((i) => i.resolvido)
   const totalReceita = itens.reduce((s, i) => s + i.custoReceita, 0)
+
+  // Monta os ingredientes no formato do endpoint /assistente/salvar.
+  const construirPayload = () => itens.map((i) => {
+    const base = { nome: i.nome, quantidade: i.qtdConsumida }
+    // Já precificado pelo catálogo: só referencia, sem novo preço
+    if (i.fonte === 'catalogo') return { ...base, ingrediente_id: i.ingredienteId }
+    // Preço coletado nesta sessão (nota/estimativa/manual)
+    if (i.local) {
+      if (i.ingredienteId) {
+        // Ingrediente existente: grava o preço na unidade DELE (converte se preciso)
+        return {
+          ...base,
+          ingrediente_id: i.ingredienteId,
+          preco: i.local.preco,
+          quantidade_embalagem: converterEmbalagem(i.local.quantidade_embalagem, i.local.unidade, i.catUnidade),
+        }
+      }
+      // Ingrediente novo: cria com a unidade coletada
+      return {
+        ...base,
+        unidade: i.local.unidade,
+        preco: i.local.preco,
+        quantidade_embalagem: i.local.quantidade_embalagem,
+      }
+    }
+    // Sem preço (não deveria acontecer aqui) — referencia/cria sem preço
+    return i.ingredienteId ? { ...base, ingrediente_id: i.ingredienteId } : base
+  })
 
   // Aplica preços recebidos (nota/estimativa) casando por nome normalizado
   const aplicar = (lista, fonte) => {
@@ -183,7 +214,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
           <div className="max-w-xl mx-auto flex gap-2">
             <button onClick={() => setRevisando(false)} className="btn-ghost flex-1">Voltar</button>
-            <button onClick={() => onConcluir({ precos, totalReceita })} className="btn-primary flex-1">
+            <button onClick={() => onConcluir({ totalReceita, ingredientesPayload: construirPayload() })} className="btn-primary flex-1">
               Confirmar preços →
             </button>
           </div>

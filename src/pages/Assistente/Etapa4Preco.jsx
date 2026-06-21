@@ -25,7 +25,7 @@ const precoCom = (custo, margem, taxasPct = 0) => {
   return div > 0 ? custo / div : 0
 }
 
-export default function Etapa4Preco({ custoTotal, receita, onConcluir }) {
+export default function Etapa4Preco({ custoTotal, receita, erro, onConcluir }) {
   const canaisQ = useQuery({ queryKey: ['canais'], queryFn: () => listarCanais().then((r) => r.data) })
 
   const [porcoes, setPorcoes] = useState(1)
@@ -125,11 +125,17 @@ export default function Etapa4Preco({ custoTotal, receita, onConcluir }) {
         )}
       </div>
 
+      {erro && (
+        <div className="bg-rust/10 border border-rust px-3 py-2">
+          <p className="font-sans text-sm text-rust">Não consegui salvar: {erro}</p>
+        </div>
+      )}
+
       <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
         <button
           onClick={() => onConcluir({ porcoes: n, margem, custoUnit, precoDireto, lucroDireto })}
           className="btn-primary w-full max-w-xl mx-auto block">
-          Finalizar →
+          Finalizar e salvar →
         </button>
       </div>
     </div>
