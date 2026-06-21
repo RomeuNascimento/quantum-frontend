@@ -16,3 +16,7 @@ export const processarReceitas = (file) => {
 // Devolve { itens: [{ nome, preco, quantidade_embalagem, unidade, fonte:'estimativa' }] }
 export const estimarPrecos = (nomes) =>
   api.post('/ia/estimar-precos', { ingredientes: nomes.map((nome) => ({ nome })) })
+
+// Sugere embalagem(ns) provável(is) do produto. Devolve { itens: [...] } (pode ser vazio).
+export const sugerirEmbalagem = (produto) =>
+  api.post('/ia/sugerir-embalagem', { produto })

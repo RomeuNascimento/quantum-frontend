@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listarIngredientes } from '../../api/ingredientes'
-import { processarNotaFiscal, estimarPrecos } from '../../api/ia'
+import { processarNotaFiscal, estimarPrecos, sugerirEmbalagem } from '../../api/ia'
 import { brl, brl4 } from '../../utils/format'
 import { normalizar, custoUnitario, quantidadeConsumida, converterEmbalagem } from './custo'
 
@@ -34,6 +34,29 @@ export default function Etapa2Precos({ receita, onConcluir }) {
   const [erro, setErro] = useState('')
   const [revisando, setRevisando] = useState(false)
   const [digitando, setDigitando] = useState(null) // chave em edição manual
+  // Embalagens coletadas: { nome, preco, quantidade_embalagem, quantidade_usada }
+  const [embalagens, setEmbalagens] = useState([])
+  const [embConsultado, setEmbConsultado] = useState(false)
+  const [embLoading, setEmbLoading] = useState(false)
+
+  const sugerirEmb = async () => {
+    setEmbLoading(true)
+    try {
+      const r = await sugerirEmbalagem(receita.nome || 'produto')
+      const itens = (r.data.itens || []).map((e) => ({
+        nome: e.nome,
+        preco: e.preco,
+        quantidade_embalagem: e.quantidade_embalagem || 1,
+        quantidade_usada: e.quantidade_usada || 1,
+      }))
+      setEmbalagens((prev) => [...prev, ...itens])
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setEmbConsultado(true); setEmbLoading(false)
+    }
+  }
+  const removerEmb = (i) => setEmbalagens((prev) => prev.filter((_, idx) => idx !== i))
 
   const catalogo = ingredientesQ.data || []
   const achaNoCatalogo = (nome) =>
@@ -214,7 +237,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
           <div className="max-w-xl mx-auto flex gap-2">
             <button onClick={() => setRevisando(false)} className="btn-ghost flex-1">Voltar</button>
-            <button onClick={() => onConcluir({ totalReceita, ingredientesPayload: construirPayload() })} className="btn-primary flex-1">
+            <button onClick={() => onConcluir({ totalReceita, ingredientesPayload: construirPayload(), embalagens })} className="btn-primary flex-1">
               Confirmar preços →
             </button>
           </div>
@@ -329,6 +352,31 @@ export default function Etapa2Precos({ receita, onConcluir }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Embalagem (opcional) — IA sugere por produto */}
+      {faltantes.length === 0 && (
+        <div className="border border-line p-3 space-y-2">
+          <p className="label mb-0">Embalagem (opcional)</p>
+          {embalagens.map((e, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />
+              <span className="font-sans text-sm text-ink flex-1 truncate">{e.nome}</span>
+              <span className="qtm-num text-xs text-mute">{brl4(e.preco / e.quantidade_embalagem * e.quantidade_usada)}/un</span>
+              <button onClick={() => removerEmb(i)} aria-label="Remover" className="text-mute px-1">✕</button>
+            </div>
+          ))}
+          {embLoading ? (
+            <p className="font-mono text-xs text-mute">Pensando na embalagem…</p>
+          ) : !embConsultado ? (
+            <button onClick={sugerirEmb}
+              className="w-full border border-ink bg-bone px-3 py-2 active:bg-ink active:text-bone font-mono text-[11px] uppercase tracking-widest">
+              🤖 Esse produto vai embalado? Sugerir
+            </button>
+          ) : embalagens.length === 0 ? (
+            <p className="font-mono text-[11px] text-mute">Sem embalagem (você pode adicionar depois).</p>
+          ) : null}
         </div>
       )}
 

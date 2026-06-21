@@ -109,6 +109,12 @@ export default function Fluxo() {
         margem_pct: resultado.margem,
         etapas_mo: mo?.contar ? [{ descricao: 'Preparo', tempo_min: mo.tempoMin }] : [],
         ingredientes: precos?.ingredientesPayload || [],
+        embalagens: (precos?.embalagens || []).map((e) => ({
+          nome: e.nome,
+          preco: e.preco,
+          quantidade_embalagem: e.quantidade_embalagem,
+          quantidade_usada: e.quantidade_usada,
+        })),
       }
       const r = await salvarAssistente(payload)
       setProdutoId(r.data.produto_id)
@@ -313,6 +319,7 @@ export default function Fluxo() {
         <Etapa4Preco
           receita={receita}
           custoTotal={(precos?.totalReceita || 0) + (mo?.custoMO || 0)}
+          embalagens={precos?.embalagens || []}
           erro={erroSalvar}
           onConcluir={(resultado) => { setPreco(resultado); finalizar(resultado) }}
         />

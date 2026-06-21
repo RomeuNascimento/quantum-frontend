@@ -25,7 +25,7 @@ const precoCom = (custo, margem, taxasPct = 0) => {
   return div > 0 ? custo / div : 0
 }
 
-export default function Etapa4Preco({ custoTotal, receita, erro, onConcluir }) {
+export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro, onConcluir }) {
   const canaisQ = useQuery({ queryKey: ['canais'], queryFn: () => listarCanais().then((r) => r.data) })
 
   const [porcoes, setPorcoes] = useState(1)
@@ -33,7 +33,10 @@ export default function Etapa4Preco({ custoTotal, receita, erro, onConcluir }) {
   const [verCanais, setVerCanais] = useState(false)
 
   const n = Math.max(parseFloat(porcoes) || 1, 1)
-  const custoUnit = custoTotal / n
+  // embalagem é custo por UNIDADE do produto (não escala com porções)
+  const embPorUnidade = embalagens.reduce(
+    (s, e) => s + (e.preco / (e.quantidade_embalagem || 1)) * (e.quantidade_usada || 1), 0)
+  const custoUnit = custoTotal / n + embPorUnidade
   const precoDireto = precoCom(custoUnit, margem)
   const lucroDireto = precoDireto - custoUnit
   const canais = (canaisQ.data || []).filter((c) => c.ativo !== false)
