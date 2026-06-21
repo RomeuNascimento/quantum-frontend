@@ -4,6 +4,7 @@ import BottomNav from '../../components/BottomNav'
 import { getMe } from '../../api/auth'
 import { listarProdutos } from '../../api/produtos'
 import { relatorioMargem } from '../../api/precificacao'
+import { billingStatus } from '../../api/billing'
 import useAuthStore from '../../store/authStore'
 
 // ── Assistente Quantum — TELA PRINCIPAL (hub) ──────────────────────────────────
@@ -27,6 +28,11 @@ export default function Assistente() {
   const margemQ = useQuery({
     queryKey: ['relatorio-margem'],
     queryFn: () => relatorioMargem().then((r) => r.data.produtos),
+  })
+  const billingQ = useQuery({
+    queryKey: ['billing-status'],
+    queryFn: () => billingStatus().then((r) => r.data),
+    staleTime: 60_000,
   })
 
   const nome = (meQ.data?.nome || user?.nome || '').split(' ')[0]
@@ -104,6 +110,29 @@ export default function Assistente() {
             </svg>
           </Link>
         )}
+
+        {/* Freemium — uso do tier grátis */}
+        {billingQ.data?.plano === 'gratis' && (() => {
+          const usados = billingQ.data.produtos_usados ?? 0
+          const limite = billingQ.data.produtos_limite ?? 0
+          const noLimite = usados >= limite
+          return (
+            <Link to="/assinatura"
+              className={`flex items-center justify-between px-4 py-3 active:opacity-80 ${noLimite ? 'bg-ink text-bone border border-ink' : 'border border-line'}`}>
+              <div>
+                <p className={`font-mono text-[10px] uppercase tracking-widest ${noLimite ? 'text-lime' : 'text-mute'}`}>
+                  Plano grátis
+                </p>
+                <p className={`font-sans text-sm ${noLimite ? 'text-bone' : 'text-ink'}`}>
+                  {noLimite
+                    ? 'Você atingiu o limite — assine para produtos ilimitados'
+                    : <><span className="qtm-num">{usados}</span> de <span className="qtm-num">{limite}</span> produtos usados</>}
+                </p>
+              </div>
+              <span className={`font-mono text-xs flex-shrink-0 ${noLimite ? 'text-lime' : 'text-mute'}`}>Assinar →</span>
+            </Link>
+          )
+        })()}
 
         {/* Atalhos rápidos */}
         <section>

@@ -83,19 +83,12 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Assinatura vencida / trial */}
-        {billingQ.data?.status === 'vencida' && (
-          <Link to="/assinatura" className="flex items-center justify-between bg-ink text-bone border border-ink px-4 py-3 active:opacity-80">
-            <p className="font-mono text-xs font-bold uppercase tracking-widest">
-              Teste encerrado — assine para continuar
-            </p>
-            <span className="font-mono text-xs text-lime flex-shrink-0">R$ 147/ano →</span>
-          </Link>
-        )}
-        {billingQ.data?.status === 'trial' && (
+        {/* Freemium — uso do tier grátis */}
+        {billingQ.data?.plano === 'gratis' && (
           <Link to="/assinatura" className="flex items-center justify-between border border-line px-4 py-2 active:bg-line/50">
             <p className="font-mono text-[10px] uppercase tracking-widest text-mute">
-              Período de teste até {new Date(billingQ.data.trial_fim).toLocaleDateString('pt-BR')}
+              Plano grátis · <span className="qtm-num">{billingQ.data.produtos_usados ?? 0}</span> de{' '}
+              <span className="qtm-num">{billingQ.data.produtos_limite ?? 0}</span> produtos
             </p>
             <span className="font-mono text-[10px] text-mute flex-shrink-0">Assinar →</span>
           </Link>
