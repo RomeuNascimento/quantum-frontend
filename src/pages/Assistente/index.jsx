@@ -67,7 +67,7 @@ export default function Assistente() {
                 {saudacao()}{nome ? `, ${nome}` : ''}
               </p>
               <h1 className="text-2xl font-bold font-sans leading-tight text-bone">
-                O que vamos<br />precificar hoje?
+                Vamos descobrir<br />quanto cobrar?
               </h1>
             </div>
           </div>
@@ -79,9 +79,9 @@ export default function Assistente() {
           >
             <span className="font-mono text-2xl leading-none font-bold">+</span>
             <div className="flex-1 text-left">
-              <p className="font-mono text-sm font-bold uppercase tracking-widest">Nova precificação</p>
+              <p className="font-mono text-sm font-bold uppercase tracking-widest">Calcular meu preço</p>
               <p className="font-mono text-[10px] tracking-wide text-ink/70">
-                Receita · preços · tempo · preço final
+                Mande a receita · eu faço as contas
               </p>
             </div>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -167,8 +167,8 @@ export default function Assistente() {
           ) : produtos.length === 0 ? (
             <div className="border border-dashed border-line px-4 py-6 text-center">
               <p className="font-sans text-sm text-mute">
-                Nenhum produto ainda. Toque em <strong className="text-ink">Nova precificação</strong> e
-                deixe a IA montar o primeiro com você.
+                Nenhum produto ainda. Toque em <strong className="text-ink">Calcular meu preço</strong> e
+                eu monto o primeiro com você.
               </p>
             </div>
           ) : (

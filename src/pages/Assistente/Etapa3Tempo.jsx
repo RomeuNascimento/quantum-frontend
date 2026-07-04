@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getConfiguracao, updateConfiguracao } from '../../api/auth'
-import { brl } from '../../utils/format'
+import { brl, parseDecimal } from '../../utils/format'
 
 // ── Etapa 3 do Assistente — TEMPO DE PREPARO → MÃO DE OBRA ──────────────────────
 // Mostra o tempo extraído da receita (editável) e pergunta como a pessoa pensa o
@@ -44,22 +44,22 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
 
   // inicializa o modo uma vez quando a config chega
   if (modo === null && configQ.data) {
-    if (valorHoraSalvo > 0) { setModo('hora'); setValorHora(String(valorHoraSalvo)) }
+    if (valorHoraSalvo > 0) { setModo('hora'); setValorHora(String(valorHoraSalvo).replace('.', ',')) }
     else setModo('hora')
   }
 
-  // valor-hora efetivo conforme o modo
+  // valor-hora efetivo conforme o modo (aceita vírgula decimal)
   const vh = modo === 'salario'
-    ? (parseFloat(salario) || 0) / (parseFloat(horasMes) || 1)
+    ? (parseDecimal(salario) || 0) / (parseDecimal(horasMes) || 1)
     : modo === 'hora'
-      ? (parseFloat(valorHora) || 0)
+      ? (parseDecimal(valorHora) || 0)
       : 0
 
-  const custoMO = (parseFloat(tempoMin) || 0) / 60 * vh
+  const custoMO = (parseDecimal(tempoMin) || 0) / 60 * vh
 
   const podeAvancar = modo === 'nao'
-    || (modo === 'hora' && parseFloat(valorHora) > 0)
-    || (modo === 'salario' && parseFloat(salario) > 0 && parseFloat(horasMes) > 0)
+    || (modo === 'hora' && parseDecimal(valorHora) > 0)
+    || (modo === 'salario' && parseDecimal(salario) > 0 && parseDecimal(horasMes) > 0)
 
   const avancar = async () => {
     setErro(''); setSalvando(true)
@@ -69,7 +69,7 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
         await updateConfiguracao({ valor_hora_padrao: vh })
         queryClient.invalidateQueries({ queryKey: ['configuracao'] })
       }
-      onConcluir({ tempoMin: parseFloat(tempoMin) || 0, valorHora: vh, custoMO, contar: modo !== 'nao' })
+      onConcluir({ tempoMin: parseDecimal(tempoMin) || 0, valorHora: vh, custoMO, contar: modo !== 'nao' })
     } catch (e) {
       setErro(e.message)
     } finally {
@@ -113,7 +113,7 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
           <p className="label">Quanto vale 1 hora do seu trabalho?</p>
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm text-mute">R$</span>
-            <input type="number" inputMode="decimal" className="input w-28 text-sm" value={valorHora}
+            <input type="text" inputMode="decimal" className="input w-28 text-sm" value={valorHora}
               onChange={(e) => setValorHora(e.target.value)} placeholder="20,00" aria-label="Valor da hora" />
             <span className="font-mono text-xs text-mute">/hora</span>
           </div>
@@ -127,7 +127,7 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
             <div className="flex-1">
               <div className="flex items-center gap-1">
                 <span className="font-mono text-sm text-mute">R$</span>
-                <input type="number" inputMode="decimal" className="input w-full text-sm" value={salario}
+                <input type="text" inputMode="decimal" className="input w-full text-sm" value={salario}
                   onChange={(e) => setSalario(e.target.value)} placeholder="2000" aria-label="Salário mensal desejado" />
               </div>
             </div>

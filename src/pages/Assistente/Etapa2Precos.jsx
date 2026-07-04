@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listarIngredientes } from '../../api/ingredientes'
 import { processarNotaFiscal, estimarPrecos, sugerirEmbalagem } from '../../api/ia'
-import { brl, brl4 } from '../../utils/format'
+import { brl, brl4, parseDecimal } from '../../utils/format'
 import { normalizar, custoUnitario, quantidadeConsumida, converterEmbalagem } from './custo'
 
 // ── Etapa 2 do Assistente — PREÇOS DOS INGREDIENTES ────────────────────────────
@@ -196,9 +196,9 @@ export default function Etapa2Precos({ receita, onConcluir }) {
     setPrecos((prev) => ({
       ...prev,
       [chave]: {
-        preco: parseFloat(dados.preco) || 0,
-        quantidade_embalagem: parseFloat(dados.quantidade_embalagem) || 1,
-        unidade: dados.unidade,
+        preco: parseDecimal(dados.preco) || 0,
+        quantidade_embalagem: parseDecimal(dados.quantidade_embalagem) || 1,
+        unidade: dados.unidade || 'g',
         fonte: 'manual',
       },
     }))
@@ -346,7 +346,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 
               {/* Edição manual inline */}
               {digitando === i.chave && (
-                <ManualForm unidadePadrao={i.unidadeCatalogo}
+                <ManualForm unidadePadrao={i.catUnidade || 'g'}
                   onSalvar={(d) => salvarManual(i.chave, d)}
                   onCancelar={() => setDigitando(null)} />
               )}
@@ -393,24 +393,29 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 function ManualForm({ unidadePadrao, onSalvar, onCancelar }) {
   const [preco, setPreco] = useState('')
   const [qtd, setQtd] = useState('')
-  const [unidade, setUnidade] = useState(unidadePadrao)
+  const [unidade, setUnidade] = useState(unidadePadrao || 'g')
+  const valido = parseDecimal(preco) > 0 && parseDecimal(qtd) > 0
   return (
     <div className="px-3 pb-3 pt-1 bg-receipt border-t border-line space-y-2">
-      <p className="font-mono text-[10px] text-mute">Quanto custou a embalagem que você comprou?</p>
+      <p className="font-sans text-xs text-mute">
+        Quanto você pagou? Ex.: pacote de <strong className="text-ink">1 kg</strong> por{' '}
+        <strong className="text-ink">R$ 5,99</strong>
+      </p>
       <div className="flex gap-2">
         <div className="flex-1">
-          <p className="label">Preço R$</p>
-          <input type="number" inputMode="decimal" className="input w-full text-sm" value={preco}
-            onChange={(e) => setPreco(e.target.value)} placeholder="5,99" />
+          <p className="label">Paguei (R$)</p>
+          <input type="text" inputMode="decimal" className="input w-full text-sm" value={preco}
+            aria-label="Preço pago" onChange={(e) => setPreco(e.target.value)} placeholder="5,99" />
         </div>
         <div className="w-20">
-          <p className="label">Qtd</p>
-          <input type="number" inputMode="decimal" className="input w-full text-sm" value={qtd}
-            onChange={(e) => setQtd(e.target.value)} placeholder="1" />
+          <p className="label">Veio</p>
+          <input type="text" inputMode="decimal" className="input w-full text-sm" value={qtd}
+            aria-label="Quantidade na embalagem" onChange={(e) => setQtd(e.target.value)} placeholder="1" />
         </div>
         <div className="w-20">
-          <p className="label">Unid.</p>
-          <select className="input w-full text-sm" value={unidade} onChange={(e) => setUnidade(e.target.value)}>
+          <p className="label">&nbsp;</p>
+          <select className="input w-full text-sm" aria-label="Unidade"
+            value={unidade} onChange={(e) => setUnidade(e.target.value)}>
             {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
           </select>
         </div>
@@ -418,7 +423,7 @@ function ManualForm({ unidadePadrao, onSalvar, onCancelar }) {
       <div className="flex gap-2">
         <button onClick={onCancelar} className="btn-ghost flex-1 py-2">Cancelar</button>
         <button onClick={() => onSalvar({ preco, quantidade_embalagem: qtd, unidade })}
-          disabled={!preco || !qtd} className="btn-primary flex-1 py-2 disabled:opacity-40">Salvar</button>
+          disabled={!valido} className="btn-primary flex-1 py-2 disabled:opacity-40">Salvar</button>
       </div>
     </div>
   )

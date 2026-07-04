@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { login, register as registerUser } from '../api/auth'
 import useAuthStore from '../store/authStore'
@@ -60,9 +60,9 @@ export default function Login() {
               <input
                 id="login-nome"
                 className="input"
-                placeholder="Sua confeitaria"
+                placeholder="Maria da Silva"
                 autoComplete="name"
-                {...register('nome', { required: 'Nome obrigatório' })}
+                {...register('nome', { required: 'Escreva seu nome' })}
               />
               {errors.nome && <p className="text-xs font-mono text-rust mt-1">{errors.nome.message}</p>}
             </div>
@@ -76,7 +76,7 @@ export default function Login() {
               type="email"
               placeholder="seu@email.com"
               autoComplete="email"
-              {...register('email', { required: 'E-mail obrigatório' })}
+              {...register('email', { required: 'Escreva seu e-mail' })}
             />
             {errors.email && <p className="text-xs font-mono text-rust mt-1">{errors.email.message}</p>}
           </div>
@@ -89,9 +89,14 @@ export default function Login() {
               type="password"
               placeholder="••••••••"
               autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
-              {...register('senha', { required: 'Senha obrigatória', minLength: { value: 8, message: 'Mínimo 8 caracteres' } })}
+              {...register('senha', { required: 'Escreva sua senha', minLength: { value: 8, message: 'Use pelo menos 8 letras ou números' } })}
             />
             {errors.senha && <p className="text-xs font-mono text-rust mt-1">{errors.senha.message}</p>}
+            {modo === 'login' && (
+              <Link to="/esqueci-senha" className="inline-block text-sm font-sans text-mute underline mt-2">
+                Esqueci minha senha
+              </Link>
+            )}
           </div>
 
           {erro && (

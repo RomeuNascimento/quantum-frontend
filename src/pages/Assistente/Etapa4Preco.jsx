@@ -87,6 +87,9 @@ export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro
           <input type="range" min="0" max="90" step="5" value={margem}
             onChange={(e) => setMargem(parseInt(e.target.value))}
             aria-label="Margem de lucro" className="w-full accent-lime" />
+          <p className="font-sans text-[11px] text-bone/60 mt-1">
+            Margem é o quanto sobra pra você. Arraste e veja o preço mudar.
+          </p>
         </div>
       </div>
 

@@ -104,7 +104,7 @@ export default function Relatorio() {
 
             {semPrecificacao.length > 0 && (
               <div className="mt-5">
-                <p className="label mb-2">Sem precificação</p>
+                <p className="label mb-2">Ainda sem preço</p>
                 {semPrecificacao.map((p) => (
                   <Link
                     key={p.produto_id}

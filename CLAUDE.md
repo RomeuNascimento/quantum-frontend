@@ -3,10 +3,54 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-06-21 (branch `claude/loving-fermat-s7fhsl` — **Assistente "cadastro guiado em 4 etapas" como tela principal** + **Freemium** (sem paywall de bloqueio, banner de uso). ⚠️ DEPLOY do frontend pendente — ver "Sessão 2026-06-21" abaixo)
-**Penúltima:** 2026-06-13/14 — Configurações, lista de compras, água neutra (DEPLOY também pendente)
-**Próxima sessão:** **refinar o visual do assistente** (combinado: ajustar estética no fim); cópia de `/assinatura` falar freemium em vez de trial; DEPLOY frontend; app Android via TWA; testes Playwright
+**Última sessão:** 2026-07-03 (branch `claude/simplicidade-reset-senha` — **Simplicidade para usuário leigo/semianalfabeto**: linguagem sem jargão, vírgula decimal aceita em todo campo de dinheiro, `/assinatura` com cópia freemium, recuperação de senha (`/esqueci-senha` + `/redefinir-senha`), fixes de bugs no Assistente. ⚠️ DEPLOY pendente — junto do backend)
+**Penúltima:** 2026-06-21 — Assistente (cadastro guiado em 4 etapas) + Freemium
+**Próxima sessão:** DEPLOY frontend+backend; configurar SMTP no EasyPanel; app Android via TWA; testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-07-03 — Simplicidade (usuário leigo) + recuperação de senha
+
+> Branch `claude/simplicidade-reset-senha`. Objetivo declarado do dono: o app precisa
+> ser usável por **pessoas semianalfabetas** — simples, intuitivo, à prova de erros.
+
+### Linguagem sem jargão (regra: manter nas próximas telas)
+- Hub: "O que vamos precificar hoje?" → **"Vamos descobrir quanto cobrar?"**; CTA
+  "Nova precificação" → **"Calcular meu preço"** (sub: "Mande a receita · eu faço as contas").
+- BottomNav: "Insumos" → **"Ingredientes"** (labels em 9px pra caber; verificado em 375px).
+- Etapa 4: slider ganhou a frase "Margem é o quanto sobra pra você. Arraste e veja o preço mudar."
+- Produtos: "Ver custo e precificação" → "Ver custo e preço"; Relatório: "Sem precificação"
+  → "Ainda sem preço". Login: mensagens de erro em linguagem falada ("Escreva seu e-mail").
+- client.js: fallback "Não deu pra falar com o servidor. Espere um pouco e tente de novo."
+
+### À prova de erros
+- **`parseDecimal` em `utils/format.js`** — TODO campo de dinheiro digitado aceita
+  vírgula ("5,99"). Antes `parseFloat("5,99")` = 5 (erro silencioso de preço!). Aplicado
+  em Etapa2 (ManualForm), Etapa3 (valor-hora/salário). Inputs de dinheiro viraram
+  `type="text" inputMode="decimal"`. **Usar parseDecimal em qualquer campo novo.**
+- Fluxo do Assistente: tela "confirmado" tinha voltar → Etapa 4 (permitia salvar
+  duplicado) — agora volta pro hub.
+- Etapa2 ManualForm: bug `i.unidadeCatalogo` (campo inexistente → unidade undefined
+  → 422 no salvar) corrigido para `i.catUnidade || 'g'`; botão salvar exige preço e qtd > 0.
+
+### `/assinatura` — cópia freemium (era trial/vencida)
+- Lê `plano`/`produtos_usados`/`produtos_limite` do `/billing/status` (não mais `status`).
+- "Você usou X de 3 produtos grátis" + "o grátis é seu pra sempre" + lista do que ganha
+  assinando. Botões: "Assinar — R$ X por ano" / "Ou R$ Y por mês".
+
+### Recuperação de senha (backend correspondente na mesma branch)
+- `/esqueci-senha` (pede o link) e `/redefinir-senha?token=` (cria senha nova + campo
+  "escreva de novo, igual"). Depois de redefinir **já entra logado** (backend devolve sessão).
+- Link "Esqueci minha senha" no Login (só no modo entrar).
+- ⚠️ E-mail só sai com `SMTP_*` configurado no EasyPanel (ver backend).
+
+### Validação
+- Backend: 53 testes passando (6 novos de reset). Frontend: build ✅ + E2E manual em
+  Chromium (preview): registro → hub → Etapa 1 (erro IA exibido sem crash) →
+  esqueci-senha → redefinir → entra logado; /assinatura freemium; mobile 375px ok.
+- ⚠️ `.venv` py3.13 local do backend usa sqlalchemy ≥2.0.36 e pydantic ≥2.9 (pins do
+  requirements.txt não instalam no 3.13; produção nixpacks segue com o requirements).
 
 ---
 

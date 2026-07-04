@@ -138,7 +138,7 @@ export default function Fluxo() {
           <Bolha>
             <p className="font-sans text-sm text-ink">
               Vamos lá! Primeiro me mostra a <strong>receita</strong> do que você quer
-              precificar. Pode mandar uma foto, um print, um PDF — ou escrever aqui.
+              vender. Pode mandar uma foto, um print, um PDF — ou escrever aqui.
             </p>
             <p className="font-sans text-sm text-ink mt-2">Eu leio e organizo tudo. 📸</p>
           </Bolha>
@@ -351,7 +351,8 @@ export default function Fluxo() {
   const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null); setProdutoId(null); setErroSalvar('') }
   return (
     <div className="min-h-screen bg-bone">
-      <Topo atual={4} onBack={() => setFase('preco')} />
+      {/* voltar leva pro início — voltar à Etapa 4 permitiria salvar duplicado */}
+      <Topo atual={4} onBack={voltarHome} />
       <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
         <Bolha>
           <p className="font-sans text-sm text-ink">

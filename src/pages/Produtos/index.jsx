@@ -59,7 +59,7 @@ export default function Produtos() {
               <div key={p.id} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
                 <Link to={`/produtos/${p.id}`} className="flex-1 min-w-0">
                   <p className="font-medium text-ink truncate">{p.nome}</p>
-                  <p className="font-mono text-xs text-mute">Ver custo e precificação →</p>
+                  <p className="font-mono text-xs text-mute">Ver custo e preço →</p>
                 </Link>
                 <button onClick={() => handleDelete(p.id, p.nome)} aria-label={`Remover ${p.nome}`} className="p-2 text-mute active:text-rust">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"

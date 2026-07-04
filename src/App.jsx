@@ -6,6 +6,8 @@ import PaywallGate from './components/PaywallGate'
 import OfflineBanner from './components/OfflineBanner'
 import UpdatePrompt from './components/UpdatePrompt'
 import Login from './pages/Login'
+import EsqueciSenha from './pages/EsqueciSenha'
+import RedefinirSenha from './pages/RedefinirSenha'
 import Dashboard from './pages/Dashboard'
 import Ingredientes from './pages/Ingredientes/index'
 import IngredienteForm from './pages/Ingredientes/Form'
@@ -58,6 +60,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/assistente" replace />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/esqueci-senha" element={<PublicRoute><EsqueciSenha /></PublicRoute>} />
+        {/* sem PublicRoute: quem clica no link do e-mail pode ter sessão velha aberta */}
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route path="/assistente" element={<PrivateRoute><Assistente /></PrivateRoute>} />
         <Route path="/assistente/novo" element={<PrivateRoute><AssistenteFluxo /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

@@ -32,7 +32,8 @@ api.interceptors.response.use(
     }
     // Em erros 422 do FastAPI, detail é um array de objetos de validação —
     // sem normalizar, a UI exibiria "[object Object]"
-    let msg = error.response?.data?.detail || 'Erro ao conectar com o servidor'
+    let msg = error.response?.data?.detail
+      || 'Não deu pra falar com o servidor. Espere um pouco e tente de novo.'
     if (Array.isArray(msg)) {
       msg = msg
         .map((e) => {

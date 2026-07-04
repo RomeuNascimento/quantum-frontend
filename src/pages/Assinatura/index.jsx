@@ -46,9 +46,14 @@ export default function Assinatura() {
 
   if (isLoading) return <Layout title="Assinatura"><LoadingSpinner /></Layout>
 
-  const status = data?.status
+  // Freemium: 'pago' = ilimitado; 'gratis' = até N produtos, sem prazo
+  const pago = data?.plano === 'pago'
+  const usados = data?.produtos_usados ?? 0
+  const limite = data?.produtos_limite ?? 3
+  const noLimite = !pago && usados >= limite
+
   return (
-    <Layout title="Assinatura" onBack={() => navigate('/dashboard')}>
+    <Layout title="Assinatura" onBack={() => navigate('/assistente')}>
       <div className="px-4 pt-6 space-y-4">
         {erro && (
           <div className="bg-rust/10 border border-rust px-3 py-2">
@@ -56,48 +61,60 @@ export default function Assinatura() {
           </div>
         )}
 
-        {sucesso && status !== 'ativa' && (
+        {sucesso && !pago && (
           <div className="border border-lime bg-lime/10 px-4 py-3">
-            <p className="font-sans text-sm text-ink">Pagamento recebido — ativando sua assinatura...</p>
+            <p className="font-sans text-sm text-ink">Pagamento recebido — liberando seu acesso...</p>
           </div>
         )}
 
+        {/* Situação atual — em palavras simples */}
         <div className="card space-y-2">
-          <p className="label">Plano</p>
-          <p className="text-ink font-bold">Quantum</p>
-          <p className="qtm-num text-2xl font-bold text-ink">
-            {brl(anual?.preco ?? 147)}<span className="text-sm font-normal text-mute">/ano</span>
-          </p>
-          {mensal && (
-            <p className="qtm-num text-sm text-mute">
-              ou {brl(mensal.preco)}/mês — no anual você economiza {brl(mensal.preco * 12 - (anual?.preco ?? 147))}
-            </p>
-          )}
-
-          <p className="label pt-2">Status</p>
-          {status === 'ativa' && (
-            <p className="font-sans text-sm text-ink">
-              ✓ Ativa{data.validade ? ` — renova em ${dataBR(data.validade)}` : ''}
-            </p>
-          )}
-          {status === 'trial' && (
-            <p className="font-sans text-sm text-ink">
-              Período de teste — termina em {dataBR(data.trial_fim)}
-            </p>
-          )}
-          {status === 'vencida' && (
-            <p className="font-sans text-sm text-rust">Assinatura vencida ou teste encerrado</p>
+          <p className="label">Seu plano hoje</p>
+          {pago ? (
+            <>
+              <p className="text-ink font-bold">✓ Quantum completo</p>
+              <p className="font-sans text-sm text-ink">
+                Produtos sem limite{data?.validade ? ` — vale até ${dataBR(data.validade)}` : ''}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-ink font-bold">Grátis</p>
+              <p className="font-sans text-sm text-ink">
+                Você usou <strong className="qtm-num">{usados}</strong> de{' '}
+                <strong className="qtm-num">{limite}</strong> produtos grátis.
+              </p>
+              {noLimite ? (
+                <p className="font-sans text-sm text-rust">
+                  Você chegou no limite. Assine para criar quantos produtos quiser.
+                </p>
+              ) : (
+                <p className="font-sans text-xs text-mute">
+                  Sem prazo pra acabar — o grátis é seu pra sempre, até {limite} produtos.
+                </p>
+              )}
+            </>
           )}
         </div>
 
-        {status !== 'ativa' && (
+        {!pago && (
           <>
+            {/* O que ganha assinando */}
+            <div className="card space-y-1.5">
+              <p className="label">Assinando você ganha</p>
+              {['Produtos sem limite', 'Leitura de nota fiscal por foto', 'Preço certo em todos os canais'].map((t) => (
+                <p key={t} className="font-sans text-sm text-ink flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />{t}
+                </p>
+              ))}
+            </div>
+
             <button
               onClick={() => redirecionar(() => criarCheckout('anual'))}
               disabled={carregandoAcao}
               className="btn-primary w-full"
             >
-              {carregandoAcao ? 'Abrindo...' : `Assinar anual — ${brl(anual?.preco ?? 147)}/ano`}
+              {carregandoAcao ? 'Abrindo...' : `Assinar — ${brl(anual?.preco ?? 147)} por ano`}
             </button>
             {mensal && (
               <button
@@ -105,12 +122,18 @@ export default function Assinatura() {
                 disabled={carregandoAcao}
                 className="btn-ghost w-full"
               >
-                {carregandoAcao ? 'Abrindo...' : `Assinar mensal — ${brl(mensal.preco)}/mês`}
+                {carregandoAcao ? 'Abrindo...' : `Ou ${brl(mensal.preco)} por mês`}
               </button>
+            )}
+            {mensal && (
+              <p className="font-sans text-xs text-mute text-center">
+                No anual você economiza {brl(mensal.preco * 12 - (anual?.preco ?? 147))} por ano.
+              </p>
             )}
           </>
         )}
-        {(status === 'ativa' || data?.validade) && (
+
+        {(pago || data?.validade) && (
           <button
             onClick={() => redirecionar(abrirPortal)}
             disabled={carregandoAcao}
@@ -121,7 +144,7 @@ export default function Assinatura() {
         )}
 
         <p className="font-sans text-xs text-mute">
-          Pagamento processado pelo Stripe. Cancele quando quiser pelo botão acima.
+          Pagamento seguro pelo Stripe. Pode cancelar quando quiser.
         </p>
       </div>
     </Layout>
