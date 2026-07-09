@@ -311,12 +311,16 @@ export default function ImportarNota() {
                   </select>
                   <div className="relative flex-1">
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 font-mono text-xs text-on-surface-dim">R$</span>
-                    <input type="number" step="0.01" className="input w-full pl-8 text-sm"
+                    <input type="number" step="0.01"
+                      className={`input w-full pl-8 text-sm ${(!item.preco_total || Number(item.preco_total) <= 0) ? 'border-danger' : ''}`}
                       aria-label="Preço (R$)"
                       value={item.preco_total}
                       onChange={(e) => atualizarItem(item._id, 'preco_total', e.target.value)} />
                   </div>
                 </div>
+                {item.selecionado && (!item.preco_total || Number(item.preco_total) <= 0) && (
+                  <p className="ml-7 mt-1 font-sans text-[11px] text-danger">⚠ Não li o preço deste item — confira antes de salvar.</p>
+                )}
 
                 {/* Destino + vínculo com o catálogo */}
                 {item.selecionado && (() => {

@@ -85,7 +85,12 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         custoUnit = catCusto || 0
         fonte = 'catalogo'
       }
-      const resolvido = Boolean(local) || prontoCatalogo
+      // Catálogo já conta como confirmado. Preço coletado agora (nota/estimativa)
+      // precisa de confirmação do usuário; manual já nasce confirmado.
+      const confirmado = local ? local.confirmado === true : false
+      const resolvido = prontoCatalogo || confirmado
+      const aConfirmar = Boolean(local) && !confirmado
+      const semPreco = !local && !prontoCatalogo
       // Quando é por unidade (ovo), consumo = contagem ("3 ovos" → 3); senão, peso em g/ml
       const qtdConsumida = quantidadeConsumida({
         unidadePreco,
@@ -93,6 +98,17 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         unidade_original: ing.unidade_original,
       })
       const porUnidade = unidadePreco === 'unid'
+      // "Vigia" de discrepância: sinaliza valores fora do comum p/ conferência.
+      // Pega preço não lido (o sal) e custo por g/ml absurdo (peso do queijo errado).
+      let suspeito = false, motivoSuspeita = ''
+      if (aConfirmar) {
+        if (!local.preco || local.preco <= 0) {
+          suspeito = true; motivoSuspeita = 'não consegui ler o preço — digite'
+        } else if (!porUnidade) {
+          if (custoUnit > 0.5) { suspeito = true; motivoSuspeita = 'preço por peso parece ALTO — confira o peso' }
+          else if (custoUnit > 0 && custoUnit < 0.0005) { suspeito = true; motivoSuspeita = 'preço por peso parece BAIXO — confira o peso' }
+        }
+      }
       return {
         chave,
         nome: ing.nome,
@@ -107,6 +123,11 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         // rótulo do custo unitário: "/un" ou "/g" (g/ml já está na base)
         rotuloCustoUnit: porUnidade ? '/un' : `/${unidadePreco === 'ml' || unidadePreco === 'L' ? 'ml' : 'g'}`,
         resolvido,
+        aConfirmar,
+        semPreco,
+        confirmado,
+        suspeito,
+        motivoSuspeita,
         fonte,
         custoUnit,
         custoReceita: custoUnit * qtdConsumida,
@@ -115,8 +136,11 @@ export default function Etapa2Precos({ receita, onConcluir }) {
     })
   }, [receita, precos, catalogo])
 
-  const faltantes = itens.filter((i) => !i.resolvido)
-  const prontos = itens.filter((i) => i.resolvido)
+  const semPreco = itens.filter((i) => i.semPreco)          // sem nenhum preço ainda
+  const aConfirmar = itens.filter((i) => i.aConfirmar)      // tem sugestão, falta confirmar
+  const resolvidos = itens.filter((i) => i.resolvido)       // catálogo ou já confirmado
+  const confirmaveis = aConfirmar.filter((i) => !i.suspeito && i.local?.preco > 0)
+  const pendentes = semPreco.length + aConfirmar.length     // total não-final
   const totalReceita = itens.reduce((s, i) => s + i.custoReceita, 0)
 
   // Monta os ingredientes no formato do endpoint /assistente/salvar.
@@ -147,25 +171,40 @@ export default function Etapa2Precos({ receita, onConcluir }) {
     return i.ingredienteId ? { ...base, ingrediente_id: i.ingredienteId } : base
   })
 
-  // Aplica preços recebidos (nota/estimativa) casando por nome normalizado
+  // Aplica preços recebidos (nota/estimativa) casando por nome normalizado.
+  // Entra como sugestão (confirmado: false) — o usuário CONFIRMA antes de valer.
   const aplicar = (lista, fonte) => {
     setPrecos((prev) => {
       const novo = { ...prev }
       for (const it of lista) {
         const chave = normalizar(it.nome)
-        // Só preenche faltantes (não sobrescreve o que já foi resolvido)
-        const alvo = faltantes.find((f) => f.chave === chave)
+        // Só preenche quem ainda não tem preço (não sobrescreve confirmado nem sugestão editada)
+        const alvo = semPreco.find((f) => f.chave === chave)
         if (!alvo) continue
         novo[chave] = {
           preco: parseFloat(it.preco_unitario ?? it.preco) || 0,
           quantidade_embalagem: parseFloat(it.peso_embalagem_g ?? it.quantidade_embalagem) || 1,
           unidade: UNIDADES.includes(it.unidade) ? it.unidade : 'g',
           fonte,
+          confirmado: false,
         }
       }
       return novo
     })
   }
+
+  // Confirma uma sugestão como está (só se tiver preço válido)
+  const confirmarItem = (chave) =>
+    setPrecos((prev) => (prev[chave]?.preco > 0
+      ? { ...prev, [chave]: { ...prev[chave], confirmado: true } } : prev))
+
+  // Confirma de uma vez as sugestões válidas e sem alerta (as suspeitas ficam p/ conferir)
+  const confirmarTodos = () =>
+    setPrecos((prev) => {
+      const novo = { ...prev }
+      for (const i of confirmaveis) novo[i.chave] = { ...novo[i.chave], confirmado: true }
+      return novo
+    })
 
   const enviarNota = async (file) => {
     if (!file) return
@@ -181,10 +220,10 @@ export default function Etapa2Precos({ receita, onConcluir }) {
   }
 
   const estimarFaltantes = async () => {
-    if (faltantes.length === 0) return
+    if (semPreco.length === 0) return
     setErro(''); setProcessando(true)
     try {
-      const r = await estimarPrecos(faltantes.map((f) => f.nome))
+      const r = await estimarPrecos(semPreco.map((f) => f.nome))
       aplicar(r.data.itens || [], 'estimativa')
     } catch (e) {
       setErro(e.message)
@@ -201,12 +240,14 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         quantidade_embalagem: parseDecimal(dados.quantidade_embalagem) || 1,
         unidade: dados.unidade || 'g',
         fonte: 'manual',
+        confirmado: true, // digitado à mão já vale
       },
     }))
     setDigitando(null)
   }
 
   const SeloEst = () => <span className="badge bg-warm text-on-warm">EST</span>
+  const Selo = ({ fonte }) => <span className="badge bg-warm text-on-warm">{fonte === 'nota' ? 'NOTA' : 'EST'}</span>
 
   // ── REVISÃO (custos) ───────────────────────────────────────────────────────
   if (revisando) {
@@ -252,20 +293,25 @@ export default function Etapa2Precos({ receita, onConcluir }) {
       <Bolha>
         {ingredientesQ.isLoading ? (
           <p className="font-sans text-sm text-on-surface">Conferindo o que você já tem cadastrado…</p>
-        ) : faltantes.length === 0 ? (
+        ) : semPreco.length === 0 && aConfirmar.length === 0 ? (
           <p className="font-sans text-sm text-on-surface">
             Boa notícia: <strong>já tenho o preço de todos</strong> os ingredientes! Pode seguir. ✅
           </p>
-        ) : (
+        ) : semPreco.length > 0 ? (
           <>
             <p className="font-sans text-sm text-on-surface">
-              {prontos.length > 0 && <>Já sei o preço de <strong>{prontos.length}</strong>. </>}
-              Faltam <strong>{faltantes.length}</strong>: {faltantes.map((f) => f.nome).join(', ')}.
+              {resolvidos.length > 0 && <>Já sei o preço de <strong>{resolvidos.length}</strong>. </>}
+              Faltam <strong>{semPreco.length}</strong>: {semPreco.map((f) => f.nome).join(', ')}.
             </p>
             <p className="font-sans text-sm text-on-surface mt-2">
               Manda a <strong>foto da nota</strong> que eu pego tudo de uma vez. 📸
             </p>
           </>
+        ) : (
+          <p className="font-sans text-sm text-on-surface">
+            Peguei os preços! <strong>Confira</strong> os {aConfirmar.length} abaixo antes de seguir —
+            marquei em <span className="text-danger font-medium">vermelho</span> os que parecem fora do comum.
+          </p>
         )}
       </Bolha>
 
@@ -284,7 +330,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         </Bolha>
       )}
 
-      {faltantes.length > 0 && !processando && (
+      {semPreco.length > 0 && !processando && (
         <>
           {/* CTA: foto da nota */}
           <label className="block w-full bg-primary text-on-primary rounded-2xl px-4 py-4 active:brightness-125 cursor-pointer">
@@ -325,32 +371,60 @@ export default function Etapa2Precos({ receita, onConcluir }) {
           {itens.map((i) => (
             <div key={i.chave} className="border-b border-outline last:border-b-0">
               <div className="flex items-center gap-2 px-3 py-2.5">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${i.resolvido ? 'bg-positive' : 'bg-warm'}`} />
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${i.resolvido ? 'bg-positive' : i.suspeito ? 'bg-danger' : 'bg-warm'}`} />
                 <span className="font-sans text-sm text-on-surface flex-1 truncate">{i.nome}</span>
                 {i.resolvido ? (
                   <>
                     {i.fonte === 'estimativa' && <SeloEst />}
                     <span className="qtm-num text-xs text-on-surface-dim">{brl4(i.custoUnit)}{i.rotuloCustoUnit}</span>
                   </>
-                ) : (
-                  <div className="flex gap-1">
+                ) : i.aConfirmar ? (
+                  <>
+                    <Selo fonte={i.fonte} />
+                    <span className="qtm-num text-xs text-on-surface-dim">
+                      {i.local?.preco > 0 ? `${brl4(i.custoUnit)}${i.rotuloCustoUnit}` : '—'}
+                    </span>
+                    {!i.suspeito && i.local?.preco > 0 && (
+                      <button onClick={() => confirmarItem(i.chave)} aria-label={`Confirmar ${i.nome}`}
+                        className="font-mono text-[10px] uppercase tracking-wide border border-positive text-positive rounded-full px-2 py-1 active:bg-positive active:text-on-primary">
+                        ✓
+                      </button>
+                    )}
                     <button onClick={() => setDigitando(digitando === i.chave ? null : i.chave)}
                       className="font-mono text-[10px] uppercase tracking-wide border border-outline-strong rounded-full px-3 py-1 active:bg-primary active:text-on-primary">
-                      Digitar
+                      {i.suspeito ? 'Corrigir' : 'Editar'}
                     </button>
-                  </div>
+                  </>
+                ) : (
+                  <button onClick={() => setDigitando(digitando === i.chave ? null : i.chave)}
+                    className="font-mono text-[10px] uppercase tracking-wide border border-outline-strong rounded-full px-3 py-1 active:bg-primary active:text-on-primary">
+                    Digitar
+                  </button>
                 )}
               </div>
 
-              {/* Edição manual inline */}
+              {/* Alerta do vigia de discrepância */}
+              {i.suspeito && digitando !== i.chave && (
+                <p className="px-3 pb-2 -mt-1 font-sans text-[11px] text-danger">⚠ {i.motivoSuspeita}</p>
+              )}
+
+              {/* Edição manual inline (prefill quando é sugestão a conferir) */}
               {digitando === i.chave && (
-                <ManualForm unidadePadrao={i.catUnidade || 'g'}
+                <ManualForm unidadePadrao={i.catUnidade || i.local?.unidade || 'g'}
+                  inicial={i.local}
                   onSalvar={(d) => salvarManual(i.chave, d)}
                   onCancelar={() => setDigitando(null)} />
               )}
             </div>
           ))}
         </div>
+      )}
+
+      {/* Confirmar em lote as sugestões válidas (as suspeitas continuam pedindo conferência) */}
+      {confirmaveis.length > 0 && (
+        <button onClick={confirmarTodos} className="btn-secondary">
+          ✓ Confirmar {confirmaveis.length} preço(s) que estão ok
+        </button>
       )}
 
       {/* Embalagem (opcional) — o que embrulha o produto pronto (caixa, saco…) */}
@@ -396,19 +470,24 @@ export default function Etapa2Precos({ receita, onConcluir }) {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
-        <button onClick={() => setRevisando(true)} disabled={faltantes.length > 0}
+        <button onClick={() => setRevisando(true)} disabled={pendentes > 0}
           className="btn-primary max-w-xl mx-auto block">
-          {faltantes.length > 0 ? `Faltam ${faltantes.length} preço(s)` : 'Ver custo da receita →'}
+          {semPreco.length > 0
+            ? `Faltam ${semPreco.length} preço(s)`
+            : aConfirmar.length > 0
+              ? `Confira ${aConfirmar.length} preço(s)`
+              : 'Ver custo da receita →'}
         </button>
       </div>
     </div>
   )
 }
 
-function ManualForm({ unidadePadrao, onSalvar, onCancelar }) {
-  const [preco, setPreco] = useState('')
-  const [qtd, setQtd] = useState('')
-  const [unidade, setUnidade] = useState(unidadePadrao || 'g')
+function ManualForm({ unidadePadrao, inicial, onSalvar, onCancelar }) {
+  const numStr = (n) => (n && n > 0 ? String(n).replace('.', ',') : '')
+  const [preco, setPreco] = useState(numStr(inicial?.preco))
+  const [qtd, setQtd] = useState(numStr(inicial?.quantidade_embalagem))
+  const [unidade, setUnidade] = useState(inicial?.unidade || unidadePadrao || 'g')
   const valido = parseDecimal(preco) > 0 && parseDecimal(qtd) > 0
   return (
     <div className="px-3 pb-3 pt-2 bg-surface-1 border-t border-outline space-y-2">
