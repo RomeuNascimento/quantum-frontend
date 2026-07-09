@@ -14,18 +14,18 @@ function Tabela({ titulo, colunas, linhas }) {
       <p className="label mb-2">{titulo}</p>
       <table className="w-full mb-5">
         <thead>
-          <tr className="border-b border-ink">
-            <th className="text-left font-mono text-[9px] uppercase tracking-widest text-mute py-1">{colunas[0]}</th>
-            <th className="text-right font-mono text-[9px] uppercase tracking-widest text-mute py-1">{colunas[1]}</th>
-            <th className="text-right font-mono text-[9px] uppercase tracking-widest text-mute py-1">Custo</th>
+          <tr className="border-b border-outline-strong">
+            <th className="text-left font-mono text-[9px] uppercase tracking-widest text-on-surface-dim py-1">{colunas[0]}</th>
+            <th className="text-right font-mono text-[9px] uppercase tracking-widest text-on-surface-dim py-1">{colunas[1]}</th>
+            <th className="text-right font-mono text-[9px] uppercase tracking-widest text-on-surface-dim py-1">Custo</th>
           </tr>
         </thead>
         <tbody>
           {linhas.map((l) => (
-            <tr key={l.id} className="border-b border-line">
-              <td className="text-sm text-ink py-1.5">{l.nome}</td>
-              <td className="qtm-num text-sm text-ink text-right py-1.5">{l.qtd}</td>
-              <td className="qtm-num text-sm text-mute text-right py-1.5">{brl(l.custo)}</td>
+            <tr key={l.id} className="border-b border-outline">
+              <td className="text-sm text-on-surface py-1.5">{l.nome}</td>
+              <td className="qtm-num text-sm text-on-surface text-right py-1.5">{l.qtd}</td>
+              <td className="qtm-num text-sm text-on-surface-dim text-right py-1.5">{brl(l.custo)}</td>
             </tr>
           ))}
         </tbody>
@@ -49,7 +49,11 @@ export default function ProdutoFicha() {
   if (erro) {
     return (
       <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
-        <p className="font-sans text-sm text-rust px-4 pt-4">{erro}</p>
+        <div className="px-4 pt-4">
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+            <p className="font-sans text-sm">{erro}</p>
+          </div>
+        </div>
       </Layout>
     )
   }
