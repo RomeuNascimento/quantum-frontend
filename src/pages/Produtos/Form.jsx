@@ -111,15 +111,16 @@ export default function ProdutoForm() {
     }
   }
 
-  const Section = ({ title, onAdd, children }) => (
+  const Section = ({ title, hint, onAdd, children }) => (
     <div className="card mt-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <p className="label mb-0">{title}</p>
         <button type="button" onClick={onAdd}
           className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1">
           + Adicionar
         </button>
       </div>
+      {hint && <p className="font-sans text-xs text-on-surface-dim mb-2">{hint}</p>}
       <div className="space-y-2">{children}</div>
     </div>
   )
@@ -138,29 +139,52 @@ export default function ProdutoForm() {
           </button>
         )}
 
+        {!isEdit && (
+          <div className="bg-primary/5 border border-outline rounded-xl px-4 py-3 mb-4">
+            <p className="font-sans text-sm text-on-surface">
+              <strong>Produto</strong> é o que você vende. Junte aqui as <strong>receitas</strong> que
+              você já fez (ex.: massa + cobertura) e a embalagem — o app soma o custo e sugere o preço.
+              Pra vender por sabor, crie um produto por sabor reaproveitando a mesma massa.
+            </p>
+          </div>
+        )}
+
         <div className="card">
           <FormField label="Nome do produto" error={errors.nome?.message}>
-            <input className="input" placeholder="Ex: Bolo de chocolate 1kg"
+            <input className="input" placeholder="Ex: Bolo de chocolate com morango"
               {...register('nome', { required: 'Obrigatório' })} />
           </FormField>
         </div>
 
-        <Section title="Preparações" onAdd={() => appendPrep({ receita_id: '', quantidade_g: '' })}>
+        <Section title="Receitas que compõem"
+          hint="Combine receitas que você já fez — ex.: massa + cobertura — para vender por sabor. Diga quantos gramas de cada vão em 1 unidade do produto."
+          onAdd={() => appendPrep({ receita_id: '', quantidade_g: '' })}>
+          {prepFields.length === 0 && (
+            <p className="font-sans text-xs text-on-surface-dim">
+              Toque em <strong>+ Adicionar</strong> e escolha uma receita.
+            </p>
+          )}
           {prepFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`preparacoes.${i}.receita_id`)}>
-                <option value="">Receita</option>
+                <option value="">Escolha a receita</option>
                 {receitas.map((r) => <option key={r.id} value={r.id}>{r.nome}{r.tipo ? ` (${r.tipo})` : ''}</option>)}
               </select>
-              <input className="input w-24" type="number" step="0.1" placeholder="g"
-                {...register(`preparacoes.${i}.quantidade_g`)} />
+              <div className="relative w-24">
+                <input className="input w-full pr-6" type="number" step="0.1" placeholder="qto"
+                  aria-label="Gramas usadas por unidade"
+                  {...register(`preparacoes.${i}.quantidade_g`)} />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-on-surface-dim pointer-events-none">g</span>
+              </div>
               <button type="button" onClick={() => removePrep(i)}
                 className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
             </div>
           ))}
         </Section>
 
-        <Section title="Ingredientes avulsos" onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
+        <Section title="Ingredientes extras (opcional)"
+          hint="Coisas fora das receitas — ex.: um confeito ou uma fruta na decoração."
+          onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
           {ingFields.map((f, i) => {
             const selId = ingsWatch?.[i]?.ingrediente_id
             const unidadeSel = ingredientes.find((r) => String(r.id) === String(selId))?.unidade || ''

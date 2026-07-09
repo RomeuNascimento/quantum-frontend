@@ -6,7 +6,7 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 import EmptyState from '../../components/EmptyState'
 import LoadError from '../../components/LoadError'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import { listarReceitas, deletarReceita } from '../../api/receitas'
+import { listarReceitas, deletarReceita, detalharReceita, criarReceita } from '../../api/receitas'
 import { tagColor } from '../../utils/tagColor'
 
 export default function Receitas() {
@@ -27,6 +27,27 @@ export default function Receitas() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['receitas'] }),
     onError: (e) => setErroDelete(e.message),
   })
+
+  const [duplicando, setDuplicando] = useState(null)
+  const duplicar = async (id) => {
+    setErroDelete(''); setDuplicando(id)
+    try {
+      const { data: d } = await detalharReceita(id)
+      const nova = await criarReceita({
+        nome: `${d.nome} (cópia)`,
+        tipo: d.tipo || null,
+        rendimento_g: d.rendimento_g,
+        ingredientes: (d.ingredientes || []).map((i) => ({ ingrediente_id: i.ingrediente_id, quantidade_g: i.quantidade_g })),
+        etapas_mo: (d.etapas_mo || []).map((e) => ({ descricao: e.descricao, tempo_min: e.tempo_min, colaborador_id: e.colaborador_id ?? null })),
+      })
+      queryClient.invalidateQueries({ queryKey: ['receitas'] })
+      navigate(`/receitas/${nova.data.id}`) // abre a cópia pra ajustar/adicionar item
+    } catch (e) {
+      setErroDelete(e.message)
+    } finally {
+      setDuplicando(null)
+    }
+  }
 
   const handleDelete = (id, nome) => setConfirmar({ id, nome })
 
@@ -76,6 +97,13 @@ export default function Receitas() {
                   <p className="font-serif font-semibold text-lg text-on-surface truncate">{r.nome}</p>
                   <p className="text-sm text-on-surface-dim mt-0.5">Rendimento: <span className="qtm-num">{r.rendimento_g}</span>g</p>
                 </Link>
+                <button onClick={() => duplicar(r.id)} disabled={duplicando === r.id}
+                  aria-label={`Duplicar ${r.nome}`} className="p-2 text-on-surface-dim active:text-primary flex-shrink-0 disabled:opacity-40">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-2" />
+                  </svg>
+                </button>
                 <button onClick={() => handleDelete(r.id, r.nome)} aria-label={`Remover ${r.nome}`} className="p-2 text-on-surface-dim active:text-danger flex-shrink-0">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
