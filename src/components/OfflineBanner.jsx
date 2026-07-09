@@ -26,14 +26,14 @@ export default function OfflineBanner() {
 
   if (status === 'reconnected') {
     return (
-      <div className="fixed top-0 left-0 right-0 z-50 bg-lime text-ink font-mono text-[10px] uppercase tracking-widest text-center py-1.5">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-positive text-white font-mono text-[10px] uppercase tracking-widest text-center py-1.5">
         Conexão restaurada
       </div>
     )
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-ink text-bone/70 font-mono text-[10px] uppercase tracking-widest text-center py-1.5 border-b border-plasma">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-warm text-on-warm font-mono text-[10px] uppercase tracking-widest text-center py-1.5 border-b border-outline">
       Sem conexão — modo leitura
     </div>
   )

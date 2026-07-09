@@ -104,6 +104,14 @@ export default function Planejamento() {
     <Layout title="Produção" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4 space-y-5 pb-6">
 
+        <div>
+          <p className="eyebrow">Planejamento</p>
+          <h1 className="title-serif text-3xl">Produção</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Escale a receita e veja ingredientes e custos.
+          </p>
+        </div>
+
         {/* Selecionar receita */}
         <div>
           <p className="label">Receita</p>
@@ -120,7 +128,7 @@ export default function Planejamento() {
             ))}
           </select>
           {detalhe && !loadingDetalhe && (
-            <p className="font-mono text-[10px] text-mute mt-1 uppercase tracking-widest">
+            <p className="font-mono text-[10px] text-on-surface-dim mt-1 uppercase tracking-widest">
               Rendimento base: {fmtPeso(detalhe.rendimento_g)}
             </p>
           )}
@@ -133,23 +141,23 @@ export default function Planejamento() {
             {/* Modo */}
             <div>
               <p className="label">Calcular por</p>
-              <div className="flex">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setModo('peso')}
-                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest border ${
+                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest rounded-full border ${
                     modo === 'peso'
-                      ? 'bg-ink text-bone border-ink'
-                      : 'bg-bone text-mute border-line'
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-card text-on-surface-dim border-outline'
                   }`}
                 >
                   Peso total
                 </button>
                 <button
                   onClick={() => setModo('porcoes')}
-                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest border-t border-b border-r ${
+                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest rounded-full border ${
                     modo === 'porcoes'
-                      ? 'bg-ink text-bone border-ink'
-                      : 'bg-bone text-mute border-line'
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-card text-on-surface-dim border-outline'
                   }`}
                 >
                   Por porções
@@ -174,7 +182,7 @@ export default function Planejamento() {
                   />
                   <button
                     onClick={() => setUnidadePeso((u) => (u === 'g' ? 'kg' : 'g'))}
-                    className="bg-ink text-bone font-mono text-xs uppercase tracking-widest px-5 border border-l-0 border-ink flex-shrink-0 active:opacity-80"
+                    className="bg-primary text-on-primary font-mono text-xs uppercase tracking-widest px-5 rounded-r-xl border border-l-0 border-primary flex-shrink-0 active:brightness-125"
                   >
                     {unidadePeso}
                   </button>
