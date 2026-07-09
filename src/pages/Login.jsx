@@ -33,20 +33,20 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-ink flex items-end sm:items-center justify-center">
-      <div className="bg-bone w-full max-w-sm p-6 rounded-none">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-ink font-sans">Quantum</h1>
-          <p className="font-mono text-xs uppercase tracking-widest text-mute mt-1">Gestão para confeiteiros</p>
+    <div className="min-h-screen bg-surface flex items-end sm:items-center justify-center p-4">
+      <div className="card w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <h1 className="title-serif text-4xl">Quantum</h1>
+          <p className="eyebrow mt-2">Gestão para confeiteiros</p>
         </div>
 
-        <div className="flex border border-ink mb-6">
+        <div className="flex gap-1 p-1 bg-surface-2 rounded-full mb-6">
           {['login', 'registro'].map((m) => (
             <button
               key={m}
               onClick={() => { setModo(m); setErro('') }}
-              className={`flex-1 py-2 font-mono text-xs uppercase tracking-widest transition-colors
-                ${modo === m ? 'bg-ink text-bone' : 'text-mute'}`}
+              className={`flex-1 py-2 font-sans font-semibold text-sm rounded-full transition-colors
+                ${modo === m ? 'bg-primary text-on-primary' : 'text-on-surface-dim'}`}
             >
               {m === 'login' ? 'Entrar' : 'Criar conta'}
             </button>
@@ -64,7 +64,7 @@ export default function Login() {
                 autoComplete="name"
                 {...register('nome', { required: 'Escreva seu nome' })}
               />
-              {errors.nome && <p className="text-xs font-mono text-rust mt-1">{errors.nome.message}</p>}
+              {errors.nome && <p className="text-sm text-danger mt-1">{errors.nome.message}</p>}
             </div>
           )}
 
@@ -78,7 +78,7 @@ export default function Login() {
               autoComplete="email"
               {...register('email', { required: 'Escreva seu e-mail' })}
             />
-            {errors.email && <p className="text-xs font-mono text-rust mt-1">{errors.email.message}</p>}
+            {errors.email && <p className="text-sm text-danger mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -91,17 +91,17 @@ export default function Login() {
               autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
               {...register('senha', { required: 'Escreva sua senha', minLength: { value: 8, message: 'Use pelo menos 8 letras ou números' } })}
             />
-            {errors.senha && <p className="text-xs font-mono text-rust mt-1">{errors.senha.message}</p>}
+            {errors.senha && <p className="text-sm text-danger mt-1">{errors.senha.message}</p>}
             {modo === 'login' && (
-              <Link to="/esqueci-senha" className="inline-block text-sm font-sans text-mute underline mt-2">
+              <Link to="/esqueci-senha" className="inline-block text-sm font-sans text-primary mt-2">
                 Esqueci minha senha
               </Link>
             )}
           </div>
 
           {erro && (
-            <div className="bg-rust/10 border border-rust px-4 py-3">
-              <p className="text-sm font-mono text-rust">{erro}</p>
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+              <p className="text-sm font-sans">{erro}</p>
             </div>
           )}
 

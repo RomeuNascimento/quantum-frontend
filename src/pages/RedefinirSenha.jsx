@@ -36,10 +36,10 @@ export default function RedefinirSenha() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-ink flex items-center justify-center">
-        <div className="bg-bone w-full max-w-sm p-6">
-          <div className="border border-rust bg-rust/10 px-4 py-3 mb-6">
-            <p className="text-sm font-sans text-rust">
+      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+        <div className="card w-full max-w-sm">
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3 mb-6">
+            <p className="text-sm font-sans">
               Este link não está completo. Peça um novo, é rapidinho.
             </p>
           </div>
@@ -52,11 +52,11 @@ export default function RedefinirSenha() {
   }
 
   return (
-    <div className="min-h-screen bg-ink flex items-end sm:items-center justify-center">
-      <div className="bg-bone w-full max-w-sm p-6 rounded-none">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-ink font-sans">Quantum</h1>
-          <p className="font-mono text-xs uppercase tracking-widest text-mute mt-1">
+    <div className="min-h-screen bg-surface flex items-end sm:items-center justify-center p-4">
+      <div className="card w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <h1 className="title-serif text-4xl">Quantum</h1>
+          <p className="eyebrow mt-2">
             Criar senha nova
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function RedefinirSenha() {
                 minLength: { value: 8, message: 'Use pelo menos 8 letras ou números' },
               })}
             />
-            {errors.nova_senha && <p className="text-xs font-sans text-rust mt-1">{errors.nova_senha.message}</p>}
+            {errors.nova_senha && <p className="text-sm font-sans text-danger mt-1">{errors.nova_senha.message}</p>}
           </div>
 
           <div>
@@ -90,13 +90,13 @@ export default function RedefinirSenha() {
                 validate: (v) => v === watch('nova_senha') || 'As duas senhas não estão iguais',
               })}
             />
-            {errors.confirma && <p className="text-xs font-sans text-rust mt-1">{errors.confirma.message}</p>}
+            {errors.confirma && <p className="text-sm font-sans text-danger mt-1">{errors.confirma.message}</p>}
           </div>
 
           {erro && (
-            <div className="bg-rust/10 border border-rust px-4 py-3">
-              <p className="text-sm font-sans text-rust">{erro}</p>
-              <Link to="/esqueci-senha" className="text-sm font-sans text-rust underline">
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+              <p className="text-sm font-sans">{erro}</p>
+              <Link to="/esqueci-senha" className="text-sm font-sans text-on-danger-bg underline">
                 Pedir um link novo
               </Link>
             </div>

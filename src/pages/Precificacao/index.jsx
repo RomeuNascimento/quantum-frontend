@@ -32,24 +32,24 @@ function PrecoDecomposicao({ pp }) {
   const taxasR = Math.max(0, preco - custoR - margemR)
   const pct = (v) => `${Math.max(0, (v / preco) * 100).toFixed(1)}%`
   return (
-    <div className="mt-3 pt-3 border-t border-line">
-      <div className="flex h-2.5 w-full overflow-hidden border border-ink/15">
-        <div style={{ width: pct(custoR) }} className="bg-ink flex-shrink-0" />
-        <div style={{ width: pct(margemR) }} className="bg-lime flex-shrink-0" />
-        <div style={{ width: pct(taxasR) }} className="bg-line flex-shrink-0" />
+    <div className="mt-3 pt-3 border-t border-outline">
+      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-surface-2">
+        <div style={{ width: pct(custoR) }} className="bg-primary flex-shrink-0" />
+        <div style={{ width: pct(margemR) }} className="bg-positive flex-shrink-0" />
+        <div style={{ width: pct(taxasR) }} className="bg-outline-strong flex-shrink-0" />
       </div>
       <div className="flex gap-3 mt-1.5 flex-wrap">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-ink inline-block flex-shrink-0" />
-          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Custo {pctStr((custoR / preco) * 100)}</span>
+          <span className="w-2 h-2 rounded-full bg-primary inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest">Custo {pctStr((custoR / preco) * 100)}</span>
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-lime inline-block flex-shrink-0" />
-          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Margem {pctStr(pp.margem_pct)}</span>
+          <span className="w-2 h-2 rounded-full bg-positive inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest">Margem {pctStr(pp.margem_pct)}</span>
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-line border border-ink/20 inline-block flex-shrink-0" />
-          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Taxas {pctStr((taxasR / preco) * 100)}</span>
+          <span className="w-2 h-2 rounded-full bg-outline-strong inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest">Taxas {pctStr((taxasR / preco) * 100)}</span>
         </span>
       </div>
     </div>
@@ -204,10 +204,18 @@ export default function Precificacao() {
   return (
     <Layout title="Precificação" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
+        <div className="mb-5">
+          <p className="eyebrow">Preço de venda</p>
+          <h1 className="title-serif text-3xl">Precificação</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Escolha o produto e ajuste a margem por canal.
+          </p>
+        </div>
+
         {erro && (
-          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-sans text-sm text-rust flex-1">{erro}</p>
-            <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-sans text-sm flex-1">{erro}</p>
+            <button onClick={() => setErro('')} className="font-mono text-xs">✕</button>
           </div>
         )}
         {loading ? <LoadingSpinner /> : produtos.length === 0 ? (
@@ -240,15 +248,15 @@ export default function Precificacao() {
 
             {/* Preço de venda por canal */}
             <p className="label mt-4 mb-1">Preço de venda</p>
-            <p className="text-xs text-mute mb-3">
+            <p className="text-xs text-on-surface-dim mb-3">
               Toque num canal pra ajustar a margem. O preço sugerido já desconta as taxas de cada lugar.
             </p>
 
             {precosQ.isLoading ? (
               <div className="py-6"><LoadingSpinner /></div>
             ) : custoProduto == null ? (
-              <div className="border border-line py-8 px-4 text-center">
-                <p className="font-mono text-xs uppercase tracking-widest text-mute mb-3">
+              <div className="border border-outline rounded-xl py-8 px-4 text-center">
+                <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim mb-3">
                   Este produto ainda não tem custo
                 </p>
                 <Link to={`/produtos/${produtoSelecionado}`} className="btn-ghost w-auto inline-block px-6 py-2 text-xs">
@@ -264,23 +272,23 @@ export default function Precificacao() {
                 return (
                   <button key={canal.id} onClick={() => abrirPreco(canal, pp)} className="card w-full text-left mb-2">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-sans font-semibold text-ink text-sm">{canal.nome}</span>
+                      <span className="font-serif font-bold text-primary text-base">{canal.nome}</span>
                       {pp
                         ? <MargemBadge margem={margem} />
-                        : <span className="font-mono text-[9px] uppercase tracking-widest text-mute border border-line px-1.5 py-0.5">Prévia · margem {margem}%</span>}
+                        : <span className="font-mono text-[9px] uppercase tracking-widest text-on-surface-dim border border-outline rounded-full px-2 py-0.5">Prévia · margem {margem}%</span>}
                     </div>
                     <div className="flex justify-between">
                       <div>
                         <p className="label">Custo total</p>
-                        <p className="qtm-num text-sm text-ink">{brl(view.custo_total)}</p>
+                        <p className="qtm-num text-sm text-on-surface">{brl(view.custo_total)}</p>
                       </div>
                       <div className="text-center">
                         <p className="label">Sugerido</p>
-                        <p className="qtm-num text-base font-bold text-ink bg-lime px-2">{brl(sugerido)}</p>
+                        <p className="qtm-num text-base font-bold text-on-primary bg-primary px-2 rounded-md">{brl(sugerido)}</p>
                       </div>
                       <div className="text-right">
                         <p className="label">Manual</p>
-                        <p className="qtm-num text-sm text-mute">{pp?.preco_final ? brl(pp.preco_final) : '—'}</p>
+                        <p className="qtm-num text-sm text-on-surface-dim">{pp?.preco_final ? brl(pp.preco_final) : '—'}</p>
                       </div>
                     </div>
                     <PrecoDecomposicao pp={view} />

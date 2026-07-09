@@ -12,7 +12,7 @@ export default function FormField({ label, error, children }) {
     <div className="mb-4">
       {label && <label htmlFor={unico ? id : undefined} className="label">{label}</label>}
       {filhos}
-      {error && <p className="mt-1 text-xs font-mono text-rust">{error}</p>}
+      {error && <p className="mt-1 text-sm font-sans text-danger">{error}</p>}
     </div>
   )
 }

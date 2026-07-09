@@ -26,23 +26,23 @@ export default function EsqueciSenha() {
   }
 
   return (
-    <div className="min-h-screen bg-ink flex items-end sm:items-center justify-center">
-      <div className="bg-bone w-full max-w-sm p-6 rounded-none">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-ink font-sans">Quantum</h1>
-          <p className="font-mono text-xs uppercase tracking-widest text-mute mt-1">
+    <div className="min-h-screen bg-surface flex items-end sm:items-center justify-center p-4">
+      <div className="card w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <h1 className="title-serif text-4xl">Quantum</h1>
+          <p className="eyebrow mt-2">
             Esqueci minha senha
           </p>
         </div>
 
         {enviado ? (
           <div>
-            <div className="border border-ink bg-receipt px-4 py-3 mb-6">
-              <p className="text-sm text-ink">
+            <div className="bg-positive-bg text-positive rounded-xl px-4 py-3 mb-6">
+              <p className="text-sm">
                 Pronto! Se este e-mail tiver conta, você vai receber uma mensagem
                 com o botão <strong>Criar senha nova</strong>.
               </p>
-              <p className="text-sm text-ink mt-2">
+              <p className="text-sm mt-2">
                 Não achou? Olhe na caixa de <strong>spam</strong>.
               </p>
             </div>
@@ -52,7 +52,7 @@ export default function EsqueciSenha() {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <p className="text-sm text-mute mb-2">
+            <p className="text-sm text-on-surface-dim mb-2">
               Sem problema! Escreva seu e-mail que a gente manda um link
               pra você criar uma senha nova.
             </p>
@@ -67,12 +67,12 @@ export default function EsqueciSenha() {
                 autoComplete="email"
                 {...register('email', { required: 'Escreva seu e-mail' })}
               />
-              {errors.email && <p className="text-xs font-sans text-rust mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-sm font-sans text-danger mt-1">{errors.email.message}</p>}
             </div>
 
             {erro && (
-              <div className="bg-rust/10 border border-rust px-4 py-3">
-                <p className="text-sm font-sans text-rust">{erro}</p>
+              <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+                <p className="text-sm font-sans">{erro}</p>
               </div>
             )}
 
@@ -80,7 +80,7 @@ export default function EsqueciSenha() {
               {loading ? 'Enviando...' : 'Me manda o link'}
             </button>
 
-            <Link to="/login" className="block text-center text-sm font-sans text-mute underline mt-4">
+            <Link to="/login" className="block text-center text-sm font-sans text-primary mt-4">
               Voltar para entrar
             </Link>
           </form>

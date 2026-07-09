@@ -97,43 +97,49 @@ export default function IngredienteForm() {
   return (
     <Layout title={isEdit ? 'Editar ingrediente' : 'Novo ingrediente'} onBack={voltar}>
       <div className="px-4 pt-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
-          <FormField label="Nome" error={errors.nome?.message}>
-            <input className="input" placeholder="Ex: Farinha de trigo" {...register('nome', { required: 'Obrigatório' })} />
-          </FormField>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="card space-y-1">
+            <FormField label="Nome" error={errors.nome?.message}>
+              <input className="input" placeholder="Ex: Farinha de trigo" {...register('nome', { required: 'Obrigatório' })} />
+            </FormField>
 
-          <FormField label="Marca (opcional)">
-            <input className="input" placeholder="Ex: Fleischmann" {...register('marca')} />
-          </FormField>
+            <FormField label="Marca (opcional)">
+              <input className="input" placeholder="Ex: Fleischmann" {...register('marca')} />
+            </FormField>
 
-          <FormField label="Unidade" error={errors.unidade?.message}>
-            <select className="input" {...register('unidade', { required: 'Obrigatório' })}>
-              <option value="">Selecione</option>
-              {unidades.map((u) => <option key={u} value={u}>{u}</option>)}
-            </select>
-          </FormField>
+            <FormField label="Unidade" error={errors.unidade?.message}>
+              <select className="input" {...register('unidade', { required: 'Obrigatório' })}>
+                <option value="">Selecione</option>
+                {unidades.map((u) => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </FormField>
 
-          <FormField label="Fator de correção" error={errors.fator_correcao?.message}>
-            <input className="input" type="number" step="0.01" placeholder="1.0"
-              {...register('fator_correcao', { required: 'Obrigatório', min: { value: 0, message: 'Não pode ser negativo' } })} />
-            <p className="font-mono text-xs text-mute mt-1">Percentual aproveitável. Ex: 0.85 para 85% de aproveitamento. 0 = sem correção</p>
-          </FormField>
+            <FormField label="Fator de correção" error={errors.fator_correcao?.message}>
+              <input className="input" type="number" step="0.01" placeholder="1.0"
+                {...register('fator_correcao', { required: 'Obrigatório', min: { value: 0, message: 'Não pode ser negativo' } })} />
+              <p className="font-sans text-xs text-on-surface-dim mt-1">Percentual aproveitável. Ex: 0.85 para 85% de aproveitamento. 0 = sem correção</p>
+            </FormField>
+          </div>
 
           {!isEdit && (
-            <>
-              <p className="label pt-2">Preço de compra (opcional)</p>
+            <div className="card space-y-1">
+              <p className="label">Preço de compra (opcional)</p>
               <FormField label="Preço pago (R$)">
                 <input className="input" type="number" step="0.01" placeholder="Ex: 4.50" {...register('preco')} />
               </FormField>
               <FormField label="Quantidade na embalagem">
                 <input className="input" type="number" step="0.001" placeholder="Ex: 1000 (g)" {...register('quantidade_embalagem')} />
               </FormField>
-            </>
+            </div>
           )}
 
-          {erro && <p className="font-sans text-sm text-rust">{erro}</p>}
+          {erro && (
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+              <p className="font-sans text-sm">{erro}</p>
+            </div>
+          )}
 
-          <div className="pt-2">
+          <div>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar'}
             </button>
@@ -143,10 +149,10 @@ export default function IngredienteForm() {
         {isEdit && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="label">Histórico de preços</p>
+              <p className="label mb-0">Histórico de preços</p>
               <button
                 onClick={() => setShowPreco(!showPreco)}
-                className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+                className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1"
               >
                 + Adicionar
               </button>
@@ -164,20 +170,22 @@ export default function IngredienteForm() {
               </form>
             )}
 
-            <div>
-              {historico.map((p) => (
-                <div key={p.id} className="flex justify-between border-b border-line py-3 last:border-b-0">
-                  <div>
-                    <p className="qtm-num text-sm text-ink">{brl(p.preco)} / {p.quantidade_embalagem} un</p>
-                    <p className="font-mono text-xs text-mute">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
+            {historico.length > 0 && (
+              <div className="card py-0">
+                {historico.map((p) => (
+                  <div key={p.id} className="flex justify-between border-b border-outline py-3 last:border-b-0">
+                    <div>
+                      <p className="qtm-num text-sm text-on-surface">{brl(p.preco)} / {p.quantidade_embalagem} un</p>
+                      <p className="font-mono text-xs text-on-surface-dim">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="qtm-num text-sm font-bold text-on-surface">{brl4(p.custo_unitario)}/un</p>
+                      <p className="font-mono text-xs text-on-surface-dim">{p.origem}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="qtm-num text-sm font-bold text-ink">{brl4(p.custo_unitario)}/un</p>
-                    <p className="font-mono text-xs text-mute">{p.origem}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Reclassificação: cadastrou como ingrediente mas é embalagem (caixa, saco...) */}
             <button

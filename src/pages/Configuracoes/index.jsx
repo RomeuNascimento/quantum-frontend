@@ -112,8 +112,8 @@ export default function Configuracoes() {
         <section>
           <p className="label mb-2">Conta</p>
           <div className="card space-y-0.5">
-            <p className="text-sm text-ink font-semibold">{conta?.nome || '—'}</p>
-            <p className="text-sm text-mute break-all">{conta?.email || '—'}</p>
+            <p className="text-sm text-on-surface font-semibold">{conta?.nome || '—'}</p>
+            <p className="text-sm text-on-surface-dim break-all">{conta?.email || '—'}</p>
           </div>
         </section>
 
@@ -121,13 +121,13 @@ export default function Configuracoes() {
         <section>
           <p className="label mb-2">Mão de obra</p>
           <div className="card space-y-2">
-            <label htmlFor="vh" className="text-sm text-ink block">Valor da sua hora de trabalho (R$)</label>
+            <label htmlFor="vh" className="text-sm text-on-surface block">Valor da sua hora de trabalho (R$)</label>
             <input id="vh" className="input qtm-num" inputMode="decimal" value={valorHora}
               onChange={(e) => { setValorHora(e.target.value); setVhMsg(null) }} placeholder="Ex.: 20" />
-            <p className="text-xs text-mute">
+            <p className="text-xs text-on-surface-dim">
               Usado pra calcular o custo de mão de obra nas receitas e produtos.
             </p>
-            {vhMsg && <p className={`text-sm ${vhMsg.tipo === 'ok' ? 'text-ink' : 'text-rust'}`}>{vhMsg.texto}</p>}
+            {vhMsg && <p className={`text-sm ${vhMsg.tipo === 'ok' ? 'text-positive' : 'text-danger'}`}>{vhMsg.texto}</p>}
             <button onClick={salvarValorHora} disabled={vhSalvando} className="btn-primary">
               {vhSalvando ? 'Salvando...' : 'Salvar'}
             </button>
@@ -150,7 +150,7 @@ export default function Configuracoes() {
               <input className="input" type="password" autoComplete="new-password"
                 value={senhaConf} onChange={(e) => setSenhaConf(e.target.value)} required />
             </FormField>
-            {senhaMsg && <p className={`text-sm ${senhaMsg.tipo === 'ok' ? 'text-ink' : 'text-rust'}`}>{senhaMsg.texto}</p>}
+            {senhaMsg && <p className={`text-sm ${senhaMsg.tipo === 'ok' ? 'text-positive' : 'text-danger'}`}>{senhaMsg.texto}</p>}
             <button type="submit" disabled={senhaSalvando} className="btn-primary">
               {senhaSalvando ? 'Alterando...' : 'Alterar senha'}
             </button>
@@ -160,10 +160,10 @@ export default function Configuracoes() {
         {/* Assinatura */}
         <section>
           <p className="label mb-2">Assinatura</p>
-          <Link to="/assinatura" className="card flex items-center justify-between active:bg-line/40">
-            <span className="text-sm text-ink">Gerenciar assinatura</span>
-            <svg className="w-4 h-4 text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+          <Link to="/assinatura" className="card flex items-center justify-between active:bg-surface-1">
+            <span className="text-sm text-on-surface">Gerenciar assinatura</span>
+            <svg className="w-4 h-4 text-on-surface-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 5l7 7-7 7" />
             </svg>
           </Link>
@@ -173,12 +173,12 @@ export default function Configuracoes() {
         <section>
           <p className="label mb-2">Sessões</p>
           <div className="space-y-2">
-            <button onClick={logout} className="btn-ghost w-full">Sair deste dispositivo</button>
+            <button onClick={logout} className="btn-secondary w-full">Sair deste dispositivo</button>
             <button onClick={() => setConfirmLogoutAll(true)}
-              className="w-full font-mono text-xs uppercase tracking-widest text-rust border border-rust py-2.5 active:bg-rust active:text-bone">
+              className="w-full font-sans font-semibold text-sm text-danger border border-danger rounded-full py-3 active:bg-danger-bg transition-colors">
               Sair de todos os dispositivos
             </button>
-            <p className="text-xs text-mute">
+            <p className="text-xs text-on-surface-dim">
               Use "todos os dispositivos" se achar que alguém entrou na sua conta — desconecta tudo, inclusive este aparelho.
             </p>
           </div>

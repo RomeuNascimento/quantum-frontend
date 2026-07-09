@@ -56,40 +56,47 @@ export default function Assinatura() {
     <Layout title="Assinatura" onBack={() => navigate('/assistente')}>
       <div className="px-4 pt-6 space-y-4">
         {erro && (
-          <div className="bg-rust/10 border border-rust px-3 py-2">
-            <p className="font-sans text-sm text-rust">{erro}</p>
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
+            <p className="font-sans text-sm">{erro}</p>
           </div>
         )}
 
         {sucesso && !pago && (
-          <div className="border border-lime bg-lime/10 px-4 py-3">
-            <p className="font-sans text-sm text-ink">Pagamento recebido — liberando seu acesso...</p>
+          <div className="bg-positive-bg text-positive rounded-xl px-4 py-3">
+            <p className="font-sans text-sm">Pagamento recebido — liberando seu acesso...</p>
           </div>
         )}
 
         {/* Situação atual — em palavras simples */}
-        <div className="card space-y-2">
-          <p className="label">Seu plano hoje</p>
+        <div className="card space-y-3">
           {pago ? (
             <>
-              <p className="text-ink font-bold">✓ Quantum completo</p>
-              <p className="font-sans text-sm text-ink">
+              <p className="label text-primary">Plano completo</p>
+              <p className="text-on-surface font-serif font-bold text-lg">✓ Quantum completo</p>
+              <p className="font-sans text-sm text-on-surface">
                 Produtos sem limite{data?.validade ? ` — vale até ${dataBR(data.validade)}` : ''}
               </p>
             </>
           ) : (
             <>
-              <p className="text-ink font-bold">Grátis</p>
-              <p className="font-sans text-sm text-ink">
+              <p className="label text-primary">Plano grátis</p>
+              <p className="font-sans text-sm text-on-surface">
                 Você usou <strong className="qtm-num">{usados}</strong> de{' '}
                 <strong className="qtm-num">{limite}</strong> produtos grátis.
               </p>
+              {/* Barra de progresso de uso */}
+              <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${Math.min(100, (usados / limite) * 100)}%` }}
+                />
+              </div>
               {noLimite ? (
-                <p className="font-sans text-sm text-rust">
+                <p className="font-sans text-sm text-danger">
                   Você chegou no limite. Assine para criar quantos produtos quiser.
                 </p>
               ) : (
-                <p className="font-sans text-xs text-mute">
+                <p className="font-sans text-xs text-on-surface-dim">
                   Sem prazo pra acabar — o grátis é seu pra sempre, até {limite} produtos.
                 </p>
               )}
@@ -103,8 +110,8 @@ export default function Assinatura() {
             <div className="card space-y-1.5">
               <p className="label">Assinando você ganha</p>
               {['Produtos sem limite', 'Leitura de nota fiscal por foto', 'Preço certo em todos os canais'].map((t) => (
-                <p key={t} className="font-sans text-sm text-ink flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />{t}
+                <p key={t} className="font-sans text-sm text-on-surface flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />{t}
                 </p>
               ))}
             </div>
@@ -120,13 +127,13 @@ export default function Assinatura() {
               <button
                 onClick={() => redirecionar(() => criarCheckout('mensal'))}
                 disabled={carregandoAcao}
-                className="btn-ghost w-full"
+                className="btn-secondary w-full"
               >
                 {carregandoAcao ? 'Abrindo...' : `Ou ${brl(mensal.preco)} por mês`}
               </button>
             )}
             {mensal && (
-              <p className="font-sans text-xs text-mute text-center">
+              <p className="font-sans text-xs text-on-surface-dim text-center">
                 No anual você economiza {brl(mensal.preco * 12 - (anual?.preco ?? 147))} por ano.
               </p>
             )}
@@ -137,13 +144,13 @@ export default function Assinatura() {
           <button
             onClick={() => redirecionar(abrirPortal)}
             disabled={carregandoAcao}
-            className="btn-ghost w-full"
+            className="btn-secondary w-full"
           >
             Gerenciar assinatura
           </button>
         )}
 
-        <p className="font-sans text-xs text-mute">
+        <p className="font-sans text-xs text-on-surface-dim">
           Pagamento seguro pelo Stripe. Pode cancelar quando quiser.
         </p>
       </div>

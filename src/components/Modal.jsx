@@ -45,25 +45,25 @@ export default function Modal({ isOpen, onClose, title, children }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onKeyDown={onKeyDown}>
-      <div className="absolute inset-0 bg-ink/60" onClick={onClose} />
+      <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={tituloId}
         tabIndex={-1}
-        className="relative bg-bone w-full sm:max-w-md rounded-none max-h-[90vh] overflow-y-auto"
+        className="relative bg-card w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-outline shadow-lg max-h-[90vh] overflow-y-auto"
       >
-        <div className="flex items-center justify-between p-4 border-b border-line">
-          <h2 id={tituloId} className="text-base font-sans font-semibold text-ink">{title}</h2>
-          <button onClick={onClose} aria-label="Fechar" className="p-1 text-mute active:text-ink">
+        <div className="flex items-center justify-between p-5 border-b border-outline">
+          <h2 id={tituloId} className="text-lg font-serif font-semibold text-on-surface">{title}</h2>
+          <button onClick={onClose} aria-label="Fechar" className="p-1 text-on-surface-dim active:text-on-surface">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <div className="p-4">{children}</div>
+        <div className="p-5">{children}</div>
       </div>
     </div>
   )

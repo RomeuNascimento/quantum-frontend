@@ -95,29 +95,35 @@ export default function EmbalagemForm() {
   return (
     <Layout title={isEdit ? 'Editar embalagem' : 'Nova embalagem'} onBack={voltar}>
       <div className="px-4 pt-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
-          <FormField label="Nome" error={errors.nome?.message}>
-            <input className="input" placeholder="Ex: Caixa kraft 15cm" {...register('nome', { required: 'Obrigatório' })} />
-          </FormField>
-          {/* Embalagem nova é sempre 'unid'; em edição a unidade legada só é exibida */}
-          {isEdit && detalheQ.data?.unidade && detalheQ.data.unidade !== 'unid' && (
-            <FormField label="Unidade (legado)">
-              <p className="qtm-num text-sm text-mute py-2">{detalheQ.data.unidade}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="card space-y-1">
+            <FormField label="Nome" error={errors.nome?.message}>
+              <input className="input" placeholder="Ex: Caixa kraft 15cm" {...register('nome', { required: 'Obrigatório' })} />
             </FormField>
-          )}
+            {/* Embalagem nova é sempre 'unid'; em edição a unidade legada só é exibida */}
+            {isEdit && detalheQ.data?.unidade && detalheQ.data.unidade !== 'unid' && (
+              <FormField label="Unidade (legado)">
+                <p className="qtm-num text-sm text-on-surface-dim py-2">{detalheQ.data.unidade}</p>
+              </FormField>
+            )}
+          </div>
           {!isEdit && (
-            <>
-              <p className="label pt-2">Preço de compra (opcional)</p>
+            <div className="card space-y-1">
+              <p className="label">Preço de compra (opcional)</p>
               <FormField label="Preço pago (R$)">
                 <input className="input" type="number" step="0.01" {...register('preco')} />
               </FormField>
               <FormField label="Quantidade na embalagem">
                 <input className="input" type="number" step="0.001" {...register('quantidade_embalagem')} />
               </FormField>
-            </>
+            </div>
           )}
-          {erro && <p className="font-sans text-sm text-rust">{erro}</p>}
-          <div className="pt-2">
+          {erro && (
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+              <p className="font-sans text-sm">{erro}</p>
+            </div>
+          )}
+          <div>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar'}
             </button>
