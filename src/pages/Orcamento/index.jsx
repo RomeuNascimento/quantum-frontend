@@ -89,6 +89,13 @@ export default function Orcamento() {
   return (
     <Layout title="Orçamento" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4 pb-8 space-y-5">
+        <div className="print:hidden">
+          <p className="eyebrow">Vendas</p>
+          <h1 className="title-serif text-3xl">Orçamento</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Monte a proposta e envie pronta pelo WhatsApp.
+          </p>
+        </div>
         {isLoading ? <LoadingSpinner /> : isError ? (
           <LoadError onRetry={refetch} />
         ) : produtos.length === 0 ? (
@@ -116,12 +123,12 @@ export default function Orcamento() {
                 <div className="flex items-center justify-between mb-2">
                   <p className="label mb-0">Itens</p>
                   <button type="button" onClick={addItem}
-                    className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+                    className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1 active:bg-surface-2">
                     + Item
                   </button>
                 </div>
                 {itens.length === 0 && (
-                  <p className="font-mono text-xs text-mute uppercase tracking-widest text-center py-4">
+                  <p className="font-mono text-xs text-on-surface-dim uppercase tracking-widest text-center py-4">
                     Adicione itens ao orçamento
                   </p>
                 )}
@@ -139,16 +146,16 @@ export default function Orcamento() {
                       <div className="flex gap-2 items-center">
                         <input className="input w-20 text-sm" type="number" min="1" step="1" aria-label="Quantidade"
                           value={it.qtd} onChange={(e) => atualizarItem(it._id, 'qtd', e.target.value)} />
-                        <span className="font-mono text-xs text-mute">×</span>
+                        <span className="font-mono text-xs text-on-surface-dim">×</span>
                         <div className="relative flex-1">
-                          <span className="absolute left-2 top-1/2 -translate-y-1/2 font-mono text-xs text-mute">R$</span>
+                          <span className="absolute left-2 top-1/2 -translate-y-1/2 font-mono text-xs text-on-surface-dim">R$</span>
                           <input className="input w-full pl-8 text-sm" type="number" min="0" step="0.01" aria-label="Preço unitário"
                             value={it.preco} onChange={(e) => atualizarItem(it._id, 'preco', e.target.value)} />
                         </div>
                         <button type="button" onClick={() => removerItem(it._id)} aria-label="Remover item"
-                          className="p-2 text-mute active:text-rust flex-shrink-0">
+                          className="p-2 text-on-surface-dim active:text-danger flex-shrink-0">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                            strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
@@ -176,7 +183,7 @@ export default function Orcamento() {
             {itensValidos.length > 0 && (
               <div className="card">
                 <p className="label mb-2 print:hidden">Pré-visualização</p>
-                <pre className="font-sans text-sm text-ink whitespace-pre-wrap">{texto.replace(/\*/g, '')}</pre>
+                <pre className="font-sans text-sm text-on-surface whitespace-pre-wrap">{texto.replace(/\*/g, '')}</pre>
               </div>
             )}
 

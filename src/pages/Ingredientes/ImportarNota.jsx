@@ -266,13 +266,13 @@ export default function ImportarNota() {
           <div className="space-y-3">
             {itens.map((item) => (
               <div key={item._id}
-                className={`border p-3 ${item.selecionado ? 'border-ink bg-receipt' : 'border-line bg-bone opacity-50'}`}>
+                className={`border rounded-xl p-3 ${item.selecionado ? 'border-outline-strong bg-card' : 'border-outline bg-surface-1 opacity-50'}`}>
                 {/* Linha 1: checkbox + nome */}
                 <div className="flex items-start gap-3">
                   <input type="checkbox" checked={item.selecionado}
                     onChange={(e) => atualizarItem(item._id, 'selecionado', e.target.checked)}
                     aria-label={`Incluir ${item.nome || 'item'}`}
-                    className="mt-1 flex-shrink-0 w-4 h-4 accent-lime" />
+                    className="mt-1 flex-shrink-0 w-4 h-4 accent-primary" />
                   <div className="flex-1 min-w-0">
                     <input
                       className="input w-full text-sm"
@@ -281,7 +281,7 @@ export default function ImportarNota() {
                       onChange={(e) => atualizarItem(item._id, 'nome', e.target.value)}
                     />
                     {item.nome_original && (
-                      <p className="font-mono text-[10px] text-mute mt-0.5 truncate">{item.nome_original}</p>
+                      <p className="font-mono text-[10px] text-on-surface-dim mt-0.5 truncate">{item.nome_original}</p>
                     )}
                   </div>
                 </div>
@@ -310,7 +310,7 @@ export default function ImportarNota() {
                     {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                   </select>
                   <div className="relative flex-1">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 font-mono text-xs text-mute">R$</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 font-mono text-xs text-on-surface-dim">R$</span>
                     <input type="number" step="0.01" className="input w-full pl-8 text-sm"
                       aria-label="Preço (R$)"
                       value={item.preco_total}
@@ -354,18 +354,18 @@ export default function ImportarNota() {
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         {item.sugeridoPelaIA && vinculo && (
-                          <span className="font-mono text-[10px] bg-lime text-ink px-2 py-0.5 uppercase tracking-widest flex-shrink-0">
+                          <span className="font-mono text-[10px] bg-info text-on-info rounded-full px-2 py-0.5 uppercase tracking-widest flex-shrink-0">
                             Sugerido pela IA
                           </span>
                         )}
                         {!ehEmb && vinculo && vinculo.unidade !== item.unidade && (
                           ['g', 'kg'].includes(item.unidade) === ['g', 'kg'].includes(vinculo.unidade) &&
                           ['ml', 'L'].includes(item.unidade) === ['ml', 'L'].includes(vinculo.unidade) ? (
-                            <span className="font-mono text-[10px] text-mute flex-shrink-0">
+                            <span className="font-mono text-[10px] text-on-surface-dim flex-shrink-0">
                               → {vinculo.unidade}
                             </span>
                           ) : (
-                            <span className="font-mono text-[10px] text-rust flex-shrink-0">
+                            <span className="font-mono text-[10px] text-danger flex-shrink-0">
                               ⚠ {item.unidade}≠{vinculo.unidade}
                             </span>
                           )
@@ -380,7 +380,7 @@ export default function ImportarNota() {
         </div>
 
         {/* Botão fixo */}
-        <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <div className="fixed bottom-16 left-0 right-0 bg-surface/95 backdrop-blur border-t border-outline px-4 py-3 z-30">
           <button onClick={salvar} disabled={selecionados.length === 0} className="btn-primary w-full max-w-xl mx-auto block">
             Salvar {selecionados.length} item{selecionados.length !== 1 ? 'ns' : ''}
           </button>
@@ -406,16 +406,16 @@ export default function ImportarNota() {
   return (
     <Layout title="Importação concluída" onBack={() => navigate('/ingredientes')}>
       <div className="px-4 pt-6 space-y-4">
-        <div className="border border-lime bg-lime/10 px-4 py-3">
-          <p className="font-sans text-sm text-ink">
+        <div className="border border-positive bg-positive-bg rounded-xl px-4 py-3">
+          <p className="font-sans text-sm text-on-surface">
             {resultados.filter((r) => r.ok).length} ingrediente(s) cadastrado(s) com sucesso.
           </p>
         </div>
         {erros.length > 0 && (
-          <div className="border border-rust bg-rust/10 px-4 py-3 space-y-1">
-            <p className="font-mono text-xs text-rust uppercase tracking-widest mb-1">Erros</p>
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3 space-y-1">
+            <p className="font-mono text-xs uppercase tracking-widest mb-1">Erros</p>
             {erros.map((r, i) => (
-              <p key={i} className="font-sans text-sm text-rust">{r.nome}: {r.msg}</p>
+              <p key={i} className="font-sans text-sm">{r.nome}: {r.msg}</p>
             ))}
           </div>
         )}
