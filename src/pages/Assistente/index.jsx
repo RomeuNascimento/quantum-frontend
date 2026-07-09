@@ -47,7 +47,7 @@ export default function Assistente() {
         <div className="max-w-xl mx-auto px-5 pt-5 pb-7">
           {/* topo: wordmark + config */}
           <div className="flex items-center justify-between mb-7">
-            <span className="font-mono text-sm uppercase tracking-[0.3em] text-on-primary">Quantum</span>
+            <span className="font-serif text-xl font-bold text-on-primary">Quantum</span>
             <Link to="/configuracoes" aria-label="Configurações" className="p-1 -mr-1 text-on-primary/60 active:text-on-primary">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">

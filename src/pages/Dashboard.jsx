@@ -15,6 +15,8 @@ const ferramentas = [
     icon: <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /> },
   { to: '/relatorio', label: 'Relatório', sub: 'Margem por produto',
     icon: <path d="M7 16V9m5 7V5m5 11v-4M4 20h16" /> },
+  { to: '/relatorio-insumos', label: 'Preços dos insumos', sub: 'Histórico de compras',
+    icon: <path d="M3 3v18h18M7 14l3-3 3 3 4-5" /> },
   { to: '/lista-compras', label: 'Lista de compras', sub: 'Do que comprar',
     icon: <path d="M5 8h14M5 8a2 2 0 100-4 2 2 0 000 4zm0 0v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12l2 2 4-4" /> },
   { to: '/ponto-equilibrio', label: 'Ponto de equilíbrio', sub: 'Quanto faturar',

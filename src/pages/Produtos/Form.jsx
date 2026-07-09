@@ -11,6 +11,7 @@ import { criarProduto, detalharProduto, atualizarProduto, historicoCustoProduto 
 import { listarReceitas } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
 import { listarEmbalagens } from '../../api/embalagens'
+import { comprimirImagem } from '../../utils/image'
 
 export default function ProdutoForm() {
   const { id } = useParams()
@@ -20,6 +21,16 @@ export default function ProdutoForm() {
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [foto, setFoto] = useState(null)
+  const fotoRef = useRef()
+
+  const onFoto = async (e) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    try { setFoto(await comprimirImagem(f)) }
+    catch (err) { setErro(err.message) }
+  }
+  const removerFoto = () => { setFoto(null); if (fotoRef.current) fotoRef.current.value = '' }
 
   const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm({
     defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
@@ -68,6 +79,7 @@ export default function ProdutoForm() {
         embalagens: d.embalagens.map((m) => ({ embalagem_id: m.embalagem_id, quantidade: m.quantidade })),
         mo_montagem: d.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: m.tempo_min })),
       })
+      setFoto(d.foto || null)
       formPreenchido.current = true
     }
   }, [detalheQ.data, reset])
@@ -81,6 +93,7 @@ export default function ProdutoForm() {
       // vazio vira NaN no payload e o backend rejeita o produto inteiro
       const payload = {
         nome: dados.nome,
+        foto: foto ?? null, // sempre enviado: data URL ou null (limpa)
         preparacoes: dados.preparacoes
           .filter((m) => m.receita_id)
           .map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
@@ -111,15 +124,16 @@ export default function ProdutoForm() {
     }
   }
 
-  const Section = ({ title, onAdd, children }) => (
+  const Section = ({ title, hint, onAdd, children }) => (
     <div className="card mt-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <p className="label mb-0">{title}</p>
         <button type="button" onClick={onAdd}
           className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1">
           + Adicionar
         </button>
       </div>
+      {hint && <p className="font-sans text-xs text-on-surface-dim mb-2">{hint}</p>}
       <div className="space-y-2">{children}</div>
     </div>
   )
@@ -138,29 +152,79 @@ export default function ProdutoForm() {
           </button>
         )}
 
+        {!isEdit && (
+          <div className="bg-primary/5 border border-outline rounded-xl px-4 py-3 mb-4">
+            <p className="font-sans text-sm text-on-surface">
+              <strong>Produto</strong> é o que você vende. Junte aqui as <strong>receitas</strong> que
+              você já fez (ex.: massa + cobertura) e a embalagem — o app soma o custo e sugere o preço.
+              Pra vender por sabor, crie um produto por sabor reaproveitando a mesma massa.
+            </p>
+          </div>
+        )}
+
         <div className="card">
           <FormField label="Nome do produto" error={errors.nome?.message}>
-            <input className="input" placeholder="Ex: Bolo de chocolate 1kg"
+            <input className="input" placeholder="Ex: Bolo de chocolate com morango"
               {...register('nome', { required: 'Obrigatório' })} />
           </FormField>
         </div>
 
-        <Section title="Preparações" onAdd={() => appendPrep({ receita_id: '', quantidade_g: '' })}>
+        <div className="card mt-4">
+          <p className="label">Foto (opcional)</p>
+          {foto ? (
+            <div className="relative">
+              <img src={foto} alt="Foto do produto" className="w-full h-44 object-cover rounded-xl border border-outline" />
+              <button type="button" onClick={removerFoto} aria-label="Remover foto"
+                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-primary/85 text-on-primary flex items-center justify-center active:brightness-125">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              <button type="button" onClick={() => fotoRef.current?.click()}
+                className="mt-2 font-mono text-[11px] uppercase tracking-widest text-primary">Trocar foto</button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => fotoRef.current?.click()}
+              className="w-full border-2 border-dashed border-outline rounded-xl py-8 flex flex-col items-center text-on-surface-dim active:bg-surface-1">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="font-sans text-sm mt-2">Adicionar foto</span>
+            </button>
+          )}
+          <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={onFoto} />
+        </div>
+
+        <Section title="Receitas que compõem"
+          hint="Combine receitas que você já fez — ex.: massa + cobertura — para vender por sabor. Diga quantos gramas de cada vão em 1 unidade do produto."
+          onAdd={() => appendPrep({ receita_id: '', quantidade_g: '' })}>
+          {prepFields.length === 0 && (
+            <p className="font-sans text-xs text-on-surface-dim">
+              Toque em <strong>+ Adicionar</strong> e escolha uma receita.
+            </p>
+          )}
           {prepFields.map((f, i) => (
             <div key={f.id} className="flex gap-2">
               <select className="input flex-1" {...register(`preparacoes.${i}.receita_id`)}>
-                <option value="">Receita</option>
+                <option value="">Escolha a receita</option>
                 {receitas.map((r) => <option key={r.id} value={r.id}>{r.nome}{r.tipo ? ` (${r.tipo})` : ''}</option>)}
               </select>
-              <input className="input w-24" type="number" step="0.1" placeholder="g"
-                {...register(`preparacoes.${i}.quantidade_g`)} />
+              <div className="relative w-24">
+                <input className="input w-full pr-6" type="number" step="0.1" placeholder="qto"
+                  aria-label="Gramas usadas por unidade"
+                  {...register(`preparacoes.${i}.quantidade_g`)} />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-on-surface-dim pointer-events-none">g</span>
+              </div>
               <button type="button" onClick={() => removePrep(i)}
                 className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
             </div>
           ))}
         </Section>
 
-        <Section title="Ingredientes avulsos" onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
+        <Section title="Ingredientes extras (opcional)"
+          hint="Coisas fora das receitas — ex.: um confeito ou uma fruta na decoração."
+          onAdd={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}>
           {ingFields.map((f, i) => {
             const selId = ingsWatch?.[i]?.ingrediente_id
             const unidadeSel = ingredientes.find((r) => String(r.id) === String(selId))?.unidade || ''

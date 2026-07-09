@@ -25,6 +25,22 @@ export default function Orcamento() {
   const [observacoes, setObservacoes] = useState('')
   const [itens, setItens] = useState([])
   const [copiado, setCopiado] = useState(false)
+  // Pix fica salvo no aparelho pra não redigitar a cada orçamento
+  const [pixChave, setPixChave] = useState(() => localStorage.getItem('quantum_pix_chave') || '')
+  const [pixNome, setPixNome] = useState(() => localStorage.getItem('quantum_pix_nome') || '')
+  const [pixCopiado, setPixCopiado] = useState(false)
+  const mudarPix = (setter, storageKey) => (e) => {
+    const v = e.target.value
+    setter(v)
+    try { localStorage.setItem(storageKey, v) } catch { /* modo privado */ }
+  }
+  const copiarPix = async () => {
+    try {
+      await navigator.clipboard.writeText(pixChave.trim())
+      setPixCopiado(true)
+      setTimeout(() => setPixCopiado(false), 2000)
+    } catch { /* clipboard indisponível */ }
+  }
 
   const { data: produtos = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['relatorio-margem'],
@@ -65,12 +81,18 @@ export default function Orcamento() {
     linhas.push('')
     linhas.push(`*Total: ${brl(total)}*`)
     linhas.push(`Válido até ${hojeMais(parseInt(validadeDias) || 7)}`)
+    if (pixChave.trim()) {
+      linhas.push('')
+      linhas.push('*Pagamento via Pix:*')
+      linhas.push(pixChave.trim()) // chave sozinha na linha → fácil copiar no WhatsApp
+      if (pixNome.trim()) linhas.push(`(em nome de ${pixNome.trim()})`)
+    }
     if (observacoes.trim()) {
       linhas.push('')
       linhas.push(observacoes.trim())
     }
     return linhas.join('\n')
-  }, [cliente, itensValidos, total, validadeDias, observacoes, produtos])
+  }, [cliente, itensValidos, total, validadeDias, observacoes, produtos, pixChave, pixNome])
 
   const linkWhatsApp = () => {
     const fone = whatsapp.replace(/\D/g, '')
@@ -176,6 +198,32 @@ export default function Orcamento() {
                   <input id="orc-obs" className="input" placeholder="Ex: entrega não inclusa"
                     value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
                 </div>
+              </div>
+
+              {/* Pix — vai no orçamento pra facilitar o pagamento */}
+              <div className="card space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="label mb-0">Pix para pagamento (opcional)</p>
+                  {pixChave.trim() && (
+                    <button type="button" onClick={copiarPix}
+                      className="font-mono text-[10px] uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1 active:bg-surface-2">
+                      {pixCopiado ? 'Copiado ✓' : 'Copiar chave'}
+                    </button>
+                  )}
+                </div>
+                <div>
+                  <label className="label" htmlFor="orc-pix-chave">Chave Pix</label>
+                  <input id="orc-pix-chave" className="input" placeholder="CPF, celular, e-mail ou aleatória"
+                    value={pixChave} onChange={mudarPix(setPixChave, 'quantum_pix_chave')} />
+                </div>
+                <div>
+                  <label className="label" htmlFor="orc-pix-nome">Nome de quem recebe (opcional)</label>
+                  <input id="orc-pix-nome" className="input" placeholder="Ex: Maria da Silva"
+                    value={pixNome} onChange={mudarPix(setPixNome, 'quantum_pix_nome')} />
+                </div>
+                <p className="font-sans text-[11px] text-on-surface-dim">
+                  Fica salvo neste aparelho e vai no orçamento — o cliente é só tocar e copiar no WhatsApp.
+                </p>
               </div>
             </div>
 

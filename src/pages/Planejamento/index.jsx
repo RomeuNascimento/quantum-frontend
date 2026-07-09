@@ -101,14 +101,14 @@ export default function Planejamento() {
   ].join('\n') : ''
 
   return (
-    <Layout title="Produção" onBack={() => navigate('/dashboard')}>
+    <Layout title="Calcular produção" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4 space-y-5 pb-6">
 
         <div>
           <p className="eyebrow">Planejamento</p>
-          <h1 className="title-serif text-3xl">Produção</h1>
+          <h1 className="title-serif text-3xl">Calcular produção</h1>
           <p className="text-sm text-on-surface-dim mt-1">
-            Escale a receita e veja ingredientes e custos.
+            Diga quanto vai fazer e eu calculo os ingredientes e o custo.
           </p>
         </div>
 
