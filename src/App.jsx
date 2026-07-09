@@ -29,7 +29,6 @@ import Orcamento from './pages/Orcamento/index'
 import PontoEquilibrio from './pages/PontoEquilibrio/index'
 import ListaCompras from './pages/ListaCompras/index'
 import Configuracoes from './pages/Configuracoes/index'
-import Assistente from './pages/Assistente/index'
 import AssistenteFluxo from './pages/Assistente/Fluxo'
 import Assinatura from './pages/Assinatura/index'
 
@@ -47,7 +46,7 @@ function PrivateRoute({ children }) {
 
 function PublicRoute({ children }) {
   const token = useAuthStore((s) => s.token)
-  return token ? <Navigate to="/assistente" replace /> : children
+  return token ? <Navigate to="/dashboard" replace /> : children
 }
 
 export default function App() {
@@ -58,12 +57,13 @@ export default function App() {
       <UpdatePrompt />
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Navigate to="/assistente" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/esqueci-senha" element={<PublicRoute><EsqueciSenha /></PublicRoute>} />
         {/* sem PublicRoute: quem clica no link do e-mail pode ter sessão velha aberta */}
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
-        <Route path="/assistente" element={<PrivateRoute><Assistente /></PrivateRoute>} />
+        {/* Hub antigo aposentado: /assistente cai na home; o fluxo vive em /assistente/novo */}
+        <Route path="/assistente" element={<Navigate to="/dashboard" replace />} />
         <Route path="/assistente/novo" element={<PrivateRoute><AssistenteFluxo /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 

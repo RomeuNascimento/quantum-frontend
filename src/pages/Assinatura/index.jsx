@@ -53,7 +53,7 @@ export default function Assinatura() {
   const noLimite = !pago && usados >= limite
 
   return (
-    <Layout title="Assinatura" onBack={() => navigate('/assistente')}>
+    <Layout title="Assinatura" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-6 space-y-4">
         {erro && (
           <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
