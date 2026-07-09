@@ -178,7 +178,7 @@ export default function Planejamento() {
                     placeholder={unidadePeso === 'kg' ? 'ex: 1' : 'ex: 1000'}
                     value={pesoTotal}
                     onChange={(e) => setPesoTotal(e.target.value)}
-                    className="input flex-1"
+                    className="input flex-1 rounded-r-none"
                   />
                   <button
                     onClick={() => setUnidadePeso((u) => (u === 'g' ? 'kg' : 'g'))}
@@ -217,15 +217,15 @@ export default function Planejamento() {
                       placeholder="ex: 200"
                       value={pesoPorcao}
                       onChange={(e) => setPesoPorcao(e.target.value)}
-                      className="input flex-1"
+                      className="input flex-1 rounded-r-none"
                     />
-                    <span className="bg-ink text-bone font-mono text-xs uppercase tracking-widest px-5 border border-l-0 border-ink flex-shrink-0 flex items-center">
+                    <span className="bg-primary text-on-primary font-mono text-xs uppercase tracking-widest px-5 rounded-r-xl border border-l-0 border-primary flex-shrink-0 flex items-center">
                       g
                     </span>
                   </div>
                 </div>
                 {totalPorcoesG > 0 && (
-                  <p className="font-mono text-[10px] text-mute uppercase tracking-widest">
+                  <p className="font-mono text-[10px] text-on-surface-dim uppercase tracking-widest">
                     Total: {numPorcoes} × {pesoPorcao}g = {fmtPeso(totalPorcoesG)}
                   </p>
                 )}
