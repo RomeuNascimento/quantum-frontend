@@ -81,60 +81,62 @@ export default function ProdutoFicha() {
     <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
       <div className="px-4 pt-4 max-w-lg mx-auto">
         {/* Cabeçalho da ficha */}
-        <div className="border-b-2 border-ink pb-3 mb-4">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-mute">Ficha técnica — Produto</p>
-          <h2 className="text-xl font-bold text-ink font-sans">{produto.nome}</h2>
+        <div className="mb-4">
+          <p className="eyebrow">Ficha técnica — Produto</p>
+          <h2 className="title-serif text-2xl">{produto.nome}</h2>
         </div>
 
-        <Tabela
-          titulo="Preparações"
-          colunas={['Receita', 'Qtd']}
-          linhas={produto.preparacoes.map((p) => ({ id: `p${p.id}`, nome: p.nome, qtd: `${p.quantidade}g`, custo: p.custo }))}
-        />
-        <Tabela
-          titulo="Ingredientes avulsos"
-          colunas={['Ingrediente', 'Qtd']}
-          linhas={produto.ingredientes_avulsos.map((i) => ({ id: `i${i.id}`, nome: i.nome, qtd: `${i.quantidade}g`, custo: i.custo }))}
-        />
-        <Tabela
-          titulo="Embalagens"
-          colunas={['Embalagem', 'Qtd']}
-          linhas={produto.embalagens.map((e) => ({ id: `e${e.id}`, nome: e.nome, qtd: e.quantidade, custo: e.custo }))}
-        />
+        <div className="card mb-4">
+          <Tabela
+            titulo="Preparações"
+            colunas={['Receita', 'Qtd']}
+            linhas={produto.preparacoes.map((p) => ({ id: `p${p.id}`, nome: p.nome, qtd: `${p.quantidade}g`, custo: p.custo }))}
+          />
+          <Tabela
+            titulo="Ingredientes avulsos"
+            colunas={['Ingrediente', 'Qtd']}
+            linhas={produto.ingredientes_avulsos.map((i) => ({ id: `i${i.id}`, nome: i.nome, qtd: `${i.quantidade}g`, custo: i.custo }))}
+          />
+          <Tabela
+            titulo="Embalagens"
+            colunas={['Embalagem', 'Qtd']}
+            linhas={produto.embalagens.map((e) => ({ id: `e${e.id}`, nome: e.nome, qtd: e.quantidade, custo: e.custo }))}
+          />
 
-        {/* Montagem */}
-        {produto.mo_montagem.length > 0 && (
-          <>
-            <p className="label mb-2">Montagem</p>
-            <ol className="mb-5">
-              {produto.mo_montagem.map((m, idx) => (
-                <li key={m.id} className="flex items-baseline gap-3 border-b border-line py-1.5 last:border-b-0">
-                  <span className="qtm-num text-xs text-mute flex-shrink-0">{String(idx + 1).padStart(2, '0')}</span>
-                  <span className="text-sm text-ink flex-1">{m.descricao}</span>
-                  <span className="qtm-num text-xs text-mute flex-shrink-0">{m.tempo_min} min</span>
-                </li>
-              ))}
-            </ol>
-          </>
-        )}
+          {/* Montagem */}
+          {produto.mo_montagem.length > 0 && (
+            <>
+              <p className="label mb-2">Montagem</p>
+              <ol>
+                {produto.mo_montagem.map((m, idx) => (
+                  <li key={m.id} className="flex items-baseline gap-3 border-b border-outline py-1.5 last:border-b-0">
+                    <span className="qtm-num text-xs text-on-surface-dim flex-shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+                    <span className="text-sm text-on-surface flex-1">{m.descricao}</span>
+                    <span className="qtm-num text-xs text-on-surface-dim flex-shrink-0">{m.tempo_min} min</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+        </div>
 
         {/* Totais */}
-        <div className="border-t-2 border-ink pt-3 mb-6">
+        <div className="card mb-6">
           <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">Matéria-prima</span>
-            <span className="qtm-num text-sm text-ink">{brl(produto.custo_mp_total)}</span>
+            <span className="label mb-0">Matéria-prima</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(produto.custo_mp_total)}</span>
           </div>
           <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">Mão de obra</span>
-            <span className="qtm-num text-sm text-ink">{brl(produto.custo_mo_total)}</span>
+            <span className="label mb-0">Mão de obra</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(produto.custo_mo_total)}</span>
           </div>
           <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">Embalagens</span>
-            <span className="qtm-num text-sm text-ink">{brl(produto.custo_embalagens_total)}</span>
+            <span className="label mb-0">Embalagens</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(produto.custo_embalagens_total)}</span>
           </div>
-          <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-ink font-bold">Custo total</span>
-            <span className="qtm-num text-sm font-bold text-ink">{brl(produto.custo_total)}</span>
+          <div className="flex justify-between py-1 mt-1 border-t border-outline-strong">
+            <span className="label mb-0 text-primary">Custo total</span>
+            <span className="qtm-num text-base font-bold text-primary">{brl(produto.custo_total)}</span>
           </div>
         </div>
 
