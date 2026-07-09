@@ -95,7 +95,7 @@ export default function Fluxo() {
   }
 
   const up = (campo, valor) => setReceita((r) => ({ ...r, [campo]: valor }))
-  const voltarHome = () => navigate('/assistente')
+  const voltarHome = () => navigate('/dashboard')
 
   // Grava tudo no backend (transacional). Chamado ao Finalizar a Etapa 4.
   const finalizar = async (resultado) => {

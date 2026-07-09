@@ -85,16 +85,25 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold text-on-surface leading-snug mb-4">
             Descubra quanto cobrar pela sua receita — é só mandar e eu faço as contas.
           </h3>
-          <Link to="/assistente" className="btn-primary flex items-center justify-center gap-2 mb-4">
+          <Link to="/assistente/novo" className="btn-primary flex items-center justify-center gap-2">
             Calcular meu preço
             <svg className="w-4 h-4" {...stroke}><path d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>
-          <div className="rounded-xl bg-surface-1 border border-outline flex items-center justify-center py-8 text-on-surface-dim">
-            <svg className="w-12 h-12" {...stroke}>
-              <rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2" />
-            </svg>
-          </div>
         </div>
+
+        {/* Atualizar preços — manda a nota, a IA cruza com o catálogo */}
+        <Link to="/ingredientes/importar-nota" className="card flex items-center gap-4 active:bg-surface-1">
+          <span className="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-full bg-surface-2 text-primary">
+            <svg className="w-5 h-5" {...stroke}>
+              <path d="M9 14l2 2 4-4m5 6V4a1 1 0 00-1-1H6a1 1 0 00-1 1v16l2.5-1.5L10 20l2.5-1.5L15 20l2.5-1.5L20 20z" />
+            </svg>
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-semibold text-on-surface">Atualizar preços</p>
+            <p className="text-sm text-on-surface-dim">Mande a notinha · a IA atualiza os preços</p>
+          </div>
+          <svg className="w-4 h-4 text-on-surface-dim flex-shrink-0" {...stroke}><path d="M9 5l7 7-7 7" /></svg>
+        </Link>
 
         {/* Alerta de margem corroída */}
         {margemAlerta.length > 0 && (

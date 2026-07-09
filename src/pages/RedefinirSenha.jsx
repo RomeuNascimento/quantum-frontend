@@ -27,7 +27,7 @@ export default function RedefinirSenha() {
       })
       // já sai logado — sem pedir pra digitar tudo de novo
       setToken(r.data.access_token)
-      navigate('/assistente', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (e) {
       setErro(e.message)
       setLoading(false)
