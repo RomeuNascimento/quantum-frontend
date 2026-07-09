@@ -13,8 +13,8 @@ import { normalizar, custoUnitario, quantidadeConsumida, converterEmbalagem } fr
 function Bolha({ children }) {
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 flex-shrink-0 bg-ink text-lime flex items-center justify-center font-mono text-sm font-bold">Q</div>
-      <div className="flex-1 bg-receipt border border-line px-4 py-3">{children}</div>
+      <div className="w-8 h-8 flex-shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-serif text-sm font-bold">Q</div>
+      <div className="flex-1 bg-card border border-outline rounded-2xl px-4 py-3">{children}</div>
     </div>
   )
 }
@@ -205,36 +205,35 @@ export default function Etapa2Precos({ receita, onConcluir }) {
     setDigitando(null)
   }
 
+  const SeloEst = () => <span className="badge bg-warm text-on-warm">EST</span>
+
   // ── REVISÃO (custos) ───────────────────────────────────────────────────────
   if (revisando) {
-    const porPorcao = receita.rendimento_g ? totalReceita / (receita.rendimento_g / 100) : 0
     return (
       <div className="px-4 pt-5 pb-28 space-y-4">
         <Bolha>
-          <p className="font-sans text-sm text-ink">
+          <p className="font-sans text-sm text-on-surface">
             Fechei o custo de matéria-prima da receita 👇 Os marcados como{' '}
-            <span className="text-rust font-medium">estimativa</span> valem conferir depois.
+            <span className="text-on-warm font-medium">estimativa</span> valem conferir depois.
           </p>
         </Bolha>
 
-        <div className="border border-ink bg-bone">
+        <div className="border border-outline-strong rounded-xl bg-card overflow-hidden">
           {itens.map((i) => (
-            <div key={i.chave} className="flex items-center gap-2 px-3 py-2.5 border-b border-line last:border-b-0">
-              <span className="font-sans text-sm text-ink flex-1 truncate">{i.nome}</span>
-              {i.fonte === 'estimativa' && (
-                <span className="font-mono text-[9px] uppercase tracking-wide text-rust border border-rust px-1">est</span>
-              )}
-              <span className="qtm-num text-xs text-mute w-12 text-right">{i.rotuloQtd}</span>
-              <span className="qtm-num text-sm text-ink w-16 text-right">{brl(i.custoReceita)}</span>
+            <div key={i.chave} className="flex items-center gap-2 px-3 py-2.5 border-b border-outline last:border-b-0">
+              <span className="font-sans text-sm text-on-surface flex-1 truncate">{i.nome}</span>
+              {i.fonte === 'estimativa' && <SeloEst />}
+              <span className="qtm-num text-xs text-on-surface-dim w-12 text-right">{i.rotuloQtd}</span>
+              <span className="qtm-num text-sm text-on-surface w-16 text-right">{brl(i.custoReceita)}</span>
             </div>
           ))}
-          <div className="flex items-center justify-between px-3 py-3 bg-ink text-bone">
+          <div className="flex items-center justify-between px-4 py-3 bg-primary text-on-primary">
             <span className="font-mono text-xs uppercase tracking-widest">Custo da receita</span>
-            <span className="qtm-num text-base font-bold text-lime">{brl(totalReceita)}</span>
+            <span className="qtm-num text-base font-bold text-accent-soft">{brl(totalReceita)}</span>
           </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
           <div className="max-w-xl mx-auto flex gap-2">
             <button onClick={() => setRevisando(false)} className="btn-ghost flex-1">Voltar</button>
             <button onClick={() => onConcluir({ totalReceita, ingredientesPayload: construirPayload(), embalagens })} className="btn-primary flex-1">
@@ -251,18 +250,18 @@ export default function Etapa2Precos({ receita, onConcluir }) {
     <div className="px-4 pt-5 pb-28 space-y-4">
       <Bolha>
         {ingredientesQ.isLoading ? (
-          <p className="font-sans text-sm text-ink">Conferindo o que você já tem cadastrado…</p>
+          <p className="font-sans text-sm text-on-surface">Conferindo o que você já tem cadastrado…</p>
         ) : faltantes.length === 0 ? (
-          <p className="font-sans text-sm text-ink">
+          <p className="font-sans text-sm text-on-surface">
             Boa notícia: <strong>já tenho o preço de todos</strong> os ingredientes! Pode seguir. ✅
           </p>
         ) : (
           <>
-            <p className="font-sans text-sm text-ink">
+            <p className="font-sans text-sm text-on-surface">
               {prontos.length > 0 && <>Já sei o preço de <strong>{prontos.length}</strong>. </>}
               Faltam <strong>{faltantes.length}</strong>: {faltantes.map((f) => f.nome).join(', ')}.
             </p>
-            <p className="font-sans text-sm text-ink mt-2">
+            <p className="font-sans text-sm text-on-surface mt-2">
               Manda a <strong>foto da nota</strong> que eu pego tudo de uma vez. 📸
             </p>
           </>
@@ -270,16 +269,16 @@ export default function Etapa2Precos({ receita, onConcluir }) {
       </Bolha>
 
       {erro && (
-        <div className="bg-rust/10 border border-rust px-3 py-2">
-          <p className="font-sans text-sm text-rust">{erro}</p>
+        <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
+          <p className="font-sans text-sm">{erro}</p>
         </div>
       )}
 
       {processando && (
         <Bolha>
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 border-2 border-lime/30 border-t-lime rounded-full animate-spin flex-shrink-0" />
-            <p className="font-sans text-sm text-ink">Trabalhando nos preços…</p>
+            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin flex-shrink-0" />
+            <p className="font-sans text-sm text-on-surface">Trabalhando nos preços…</p>
           </div>
         </Bolha>
       )}
@@ -287,16 +286,16 @@ export default function Etapa2Precos({ receita, onConcluir }) {
       {faltantes.length > 0 && !processando && (
         <>
           {/* CTA: foto da nota */}
-          <label className="block w-full bg-ink text-bone border border-ink px-4 py-4 active:opacity-80 cursor-pointer">
+          <label className="block w-full bg-primary text-on-primary rounded-2xl px-4 py-4 active:brightness-125 cursor-pointer">
             <div className="flex items-center gap-3">
-              <svg className="w-6 h-6 flex-shrink-0 text-lime" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              <svg className="w-6 h-6 flex-shrink-0 text-accent-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               <div className="flex-1">
-                <p className="font-mono text-xs font-bold uppercase tracking-widest text-lime">Foto da nota fiscal</p>
-                <p className="font-mono text-[10px] text-bone/70">Pego os preços de vários de uma vez</p>
+                <p className="font-sans text-base font-semibold text-on-primary">Foto da nota fiscal</p>
+                <p className="font-sans text-xs text-on-primary/70">Pego os preços de vários de uma vez</p>
               </div>
             </div>
             <input type="file" accept="image/*,application/pdf" className="hidden"
@@ -305,13 +304,13 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 
           {/* Estimar tudo */}
           <button onClick={estimarFaltantes}
-            className="w-full border border-ink bg-bone px-4 py-3 active:bg-ink active:text-bone group flex items-center gap-3">
+            className="w-full border border-outline bg-card rounded-2xl px-4 py-3 active:bg-primary active:text-on-primary group flex items-center gap-3">
             <span className="text-lg">🤖</span>
             <div className="flex-1 text-left">
-              <p className="font-mono text-xs font-bold uppercase tracking-widest text-ink group-active:text-bone">
+              <p className="font-sans text-base font-semibold text-on-surface group-active:text-on-primary">
                 Não tenho as notas — estime pra mim
               </p>
-              <p className="font-mono text-[10px] text-mute group-active:text-bone/70">
+              <p className="font-sans text-xs text-on-surface-dim group-active:text-on-primary/70">
                 A IA sugere preço de mercado · você confirma
               </p>
             </div>
@@ -321,23 +320,21 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 
       {/* Lista de ingredientes */}
       {itens.length > 0 && (
-        <div className="border border-line">
+        <div className="border border-outline rounded-xl bg-card overflow-hidden">
           {itens.map((i) => (
-            <div key={i.chave} className="border-b border-line last:border-b-0">
+            <div key={i.chave} className="border-b border-outline last:border-b-0">
               <div className="flex items-center gap-2 px-3 py-2.5">
-                <span className={`w-2 h-2 flex-shrink-0 ${i.resolvido ? 'bg-lime' : 'bg-rust'}`} />
-                <span className="font-sans text-sm text-ink flex-1 truncate">{i.nome}</span>
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${i.resolvido ? 'bg-positive' : 'bg-warm'}`} />
+                <span className="font-sans text-sm text-on-surface flex-1 truncate">{i.nome}</span>
                 {i.resolvido ? (
                   <>
-                    {i.fonte === 'estimativa' && (
-                      <span className="font-mono text-[9px] uppercase tracking-wide text-rust border border-rust px-1">est</span>
-                    )}
-                    <span className="qtm-num text-xs text-mute">{brl4(i.custoUnit)}{i.rotuloCustoUnit}</span>
+                    {i.fonte === 'estimativa' && <SeloEst />}
+                    <span className="qtm-num text-xs text-on-surface-dim">{brl4(i.custoUnit)}{i.rotuloCustoUnit}</span>
                   </>
                 ) : (
                   <div className="flex gap-1">
                     <button onClick={() => setDigitando(digitando === i.chave ? null : i.chave)}
-                      className="font-mono text-[10px] uppercase tracking-wide border border-ink px-2 py-1 active:bg-ink active:text-bone">
+                      className="font-mono text-[10px] uppercase tracking-wide border border-outline-strong rounded-full px-3 py-1 active:bg-primary active:text-on-primary">
                       Digitar
                     </button>
                   </div>
@@ -357,32 +354,32 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 
       {/* Embalagem (opcional) — IA sugere por produto */}
       {faltantes.length === 0 && (
-        <div className="border border-line p-3 space-y-2">
+        <div className="border border-outline rounded-xl bg-card p-3 space-y-2">
           <p className="label mb-0">Embalagem (opcional)</p>
           {embalagens.map((e, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />
-              <span className="font-sans text-sm text-ink flex-1 truncate">{e.nome}</span>
-              <span className="qtm-num text-xs text-mute">{brl4(e.preco / e.quantidade_embalagem * e.quantidade_usada)}/un</span>
-              <button onClick={() => removerEmb(i)} aria-label="Remover" className="text-mute px-1">✕</button>
+              <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
+              <span className="font-sans text-sm text-on-surface flex-1 truncate">{e.nome}</span>
+              <span className="qtm-num text-xs text-on-surface-dim">{brl4(e.preco / e.quantidade_embalagem * e.quantidade_usada)}/un</span>
+              <button onClick={() => removerEmb(i)} aria-label="Remover" className="text-on-surface-dim px-1">✕</button>
             </div>
           ))}
           {embLoading ? (
-            <p className="font-mono text-xs text-mute">Pensando na embalagem…</p>
+            <p className="font-sans text-sm text-on-surface-dim">Pensando na embalagem…</p>
           ) : !embConsultado ? (
             <button onClick={sugerirEmb}
-              className="w-full border border-ink bg-bone px-3 py-2 active:bg-ink active:text-bone font-mono text-[11px] uppercase tracking-widest">
+              className="w-full border border-outline-strong rounded-full px-3 py-2 active:bg-primary active:text-on-primary font-mono text-[11px] uppercase tracking-widest">
               🤖 Esse produto vai embalado? Sugerir
             </button>
           ) : embalagens.length === 0 ? (
-            <p className="font-mono text-[11px] text-mute">Sem embalagem (você pode adicionar depois).</p>
+            <p className="font-sans text-sm text-on-surface-dim">Sem embalagem (você pode adicionar depois).</p>
           ) : null}
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
         <button onClick={() => setRevisando(true)} disabled={faltantes.length > 0}
-          className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40">
+          className="btn-primary max-w-xl mx-auto block">
           {faltantes.length > 0 ? `Faltam ${faltantes.length} preço(s)` : 'Ver custo da receita →'}
         </button>
       </div>
@@ -396,10 +393,10 @@ function ManualForm({ unidadePadrao, onSalvar, onCancelar }) {
   const [unidade, setUnidade] = useState(unidadePadrao || 'g')
   const valido = parseDecimal(preco) > 0 && parseDecimal(qtd) > 0
   return (
-    <div className="px-3 pb-3 pt-1 bg-receipt border-t border-line space-y-2">
-      <p className="font-sans text-xs text-mute">
-        Quanto você pagou? Ex.: pacote de <strong className="text-ink">1 kg</strong> por{' '}
-        <strong className="text-ink">R$ 5,99</strong>
+    <div className="px-3 pb-3 pt-2 bg-surface-1 border-t border-outline space-y-2">
+      <p className="font-sans text-xs text-on-surface-dim">
+        Quanto você pagou? Ex.: pacote de <strong className="text-on-surface">1 kg</strong> por{' '}
+        <strong className="text-on-surface">R$ 5,99</strong>
       </p>
       <div className="flex gap-2">
         <div className="flex-1">
@@ -423,7 +420,7 @@ function ManualForm({ unidadePadrao, onSalvar, onCancelar }) {
       <div className="flex gap-2">
         <button onClick={onCancelar} className="btn-ghost flex-1 py-2">Cancelar</button>
         <button onClick={() => onSalvar({ preco, quantidade_embalagem: qtd, unidade })}
-          disabled={!valido} className="btn-primary flex-1 py-2 disabled:opacity-40">Salvar</button>
+          disabled={!valido} className="btn-primary flex-1 py-2">Salvar</button>
       </div>
     </div>
   )

@@ -234,21 +234,21 @@ export default function Planejamento() {
 
             {/* Resultado */}
             {resultado && (
-              <div className="space-y-4 border-t-2 border-ink pt-4">
+              <div className="space-y-4 border-t border-outline-strong pt-4">
 
                 {/* Cabeçalho do resultado */}
                 <div className="flex items-baseline gap-3">
-                  <span className="qtm-num text-4xl font-bold text-ink">
+                  <span className="qtm-num text-4xl font-bold text-primary">
                     ×{resultado.fator % 1 === 0
                       ? resultado.fator.toString()
                       : resultado.fator.toFixed(2).replace('.', ',')}
                   </span>
                   <div>
-                    <p className="font-mono text-xs uppercase tracking-widest text-mute">
+                    <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">
                       {fmtPeso(resultado.targetG)}
                     </p>
                     {modo === 'porcoes' && (
-                      <p className="font-mono text-[10px] text-mute">
+                      <p className="font-mono text-[10px] text-on-surface-dim">
                         {numPorcoes} porções de {pesoPorcao}g
                       </p>
                     )}
@@ -258,16 +258,16 @@ export default function Planejamento() {
                 {/* Ingredientes escalados */}
                 <div>
                   <p className="label mb-2">Ingredientes necessários</p>
-                  <div className="border border-line">
+                  <div className="border border-outline rounded-xl overflow-hidden">
                     {resultado.ingredientes.map((ing, i) => (
                       <div
                         key={i}
-                        className="flex items-center justify-between px-3 py-2.5 border-b border-line last:border-b-0"
+                        className="flex items-center justify-between px-3 py-2.5 border-b border-outline last:border-b-0"
                       >
-                        <span className="text-sm text-ink font-medium flex-1 min-w-0 truncate pr-3">
+                        <span className="text-sm text-on-surface font-medium flex-1 min-w-0 truncate pr-3">
                           {ing.nome}
                         </span>
-                        <span className="qtm-num text-sm text-ink font-mono flex-shrink-0">
+                        <span className="qtm-num text-sm text-on-surface flex-shrink-0">
                           {fmtQtd(ing.quantidade)} {ing.unidade}
                         </span>
                       </div>
@@ -278,25 +278,25 @@ export default function Planejamento() {
                 {/* Custos escalados */}
                 <div>
                   <p className="label mb-2">Custo de produção</p>
-                  <div className="border border-line">
-                    <div className="flex items-center justify-between px-3 py-2.5 border-b border-line">
-                      <span className="font-mono text-xs uppercase tracking-widest text-mute">Matéria-prima</span>
-                      <span className="qtm-num text-sm text-ink">{brl(resultado.custo_mp)}</span>
+                  <div className="border border-outline rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2.5 border-b border-outline">
+                      <span className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Matéria-prima</span>
+                      <span className="qtm-num text-sm text-on-surface">{brl(resultado.custo_mp)}</span>
                     </div>
                     {resultado.custo_mo > 0 && (
-                      <div className="flex items-center justify-between px-3 py-2.5 border-b border-line">
-                        <span className="font-mono text-xs uppercase tracking-widest text-mute">Mão de obra</span>
-                        <span className="qtm-num text-sm text-ink">{brl(resultado.custo_mo)}</span>
+                      <div className="flex items-center justify-between px-3 py-2.5 border-b border-outline">
+                        <span className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Mão de obra</span>
+                        <span className="qtm-num text-sm text-on-surface">{brl(resultado.custo_mo)}</span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between px-3 py-2.5 bg-lime">
-                      <span className="font-mono text-xs uppercase tracking-widest text-ink font-bold">Total</span>
-                      <span className="qtm-num text-sm text-ink font-bold">{brl(resultado.custo_total)}</span>
+                    <div className="flex items-center justify-between px-3 py-2.5 bg-primary">
+                      <span className="font-mono text-xs uppercase tracking-widest text-on-primary font-bold">Total</span>
+                      <span className="qtm-num text-sm text-on-primary font-bold">{brl(resultado.custo_total)}</span>
                     </div>
                     {resultado.custo_porcao !== null && (
-                      <div className="flex items-center justify-between px-3 py-2.5 bg-receipt border-t border-line">
-                        <span className="font-mono text-xs uppercase tracking-widest text-mute">Por porção</span>
-                        <span className="qtm-num text-sm text-ink">{brl(resultado.custo_porcao)}</span>
+                      <div className="flex items-center justify-between px-3 py-2.5 bg-surface-1 border-t border-outline">
+                        <span className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Por porção</span>
+                        <span className="qtm-num text-sm text-on-surface">{brl(resultado.custo_porcao)}</span>
                       </div>
                     )}
                   </div>

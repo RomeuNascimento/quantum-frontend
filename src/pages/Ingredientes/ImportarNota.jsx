@@ -199,23 +199,23 @@ export default function ImportarNota() {
       <Layout title="Importar Nota Fiscal" onBack={() => navigate('/ingredientes')}>
         <div className="px-4 pt-6 space-y-6">
           {erro && (
-            <div className="bg-rust/10 border border-rust px-3 py-2">
-              <p className="font-sans text-sm text-rust">{erro}</p>
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+              <p className="font-sans text-sm">{erro}</p>
             </div>
           )}
 
           <div
             onClick={() => inputRef.current?.click()}
-            className="border-2 border-dashed border-line bg-receipt flex flex-col items-center justify-center py-12 cursor-pointer active:bg-line"
+            className="border-2 border-dashed border-outline-strong rounded-xl bg-card flex flex-col items-center justify-center py-12 cursor-pointer active:bg-surface-1"
           >
-            <svg className="w-10 h-10 text-mute mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+            <svg className="w-10 h-10 text-on-surface-dim mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
-            <p className="font-mono text-xs uppercase tracking-widest text-mute">
+            <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">
               {arquivo ? arquivo.name : 'Toque para selecionar'}
             </p>
-            <p className="font-mono text-[10px] text-mute mt-1">Foto, PDF — qualquer formato de nota</p>
+            <p className="font-mono text-[10px] text-on-surface-dim mt-1">Foto, PDF — qualquer formato de nota</p>
           </div>
 
           <input
@@ -242,8 +242,8 @@ export default function ImportarNota() {
     return (
       <Layout title="Importar Nota Fiscal" onBack={() => navigate('/ingredientes')}>
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-8 h-8 border-2 border-lime/30 border-t-lime rounded-full animate-spin" />
-          <p className="font-mono text-xs uppercase tracking-widest text-mute">Analisando nota...</p>
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Analisando nota...</p>
         </div>
       </Layout>
     )
@@ -394,8 +394,8 @@ export default function ImportarNota() {
     return (
       <Layout title="Salvando...">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-8 h-8 border-2 border-lime/30 border-t-lime rounded-full animate-spin" />
-          <p className="font-mono text-xs uppercase tracking-widest text-mute">Cadastrando ingredientes...</p>
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Cadastrando ingredientes...</p>
         </div>
       </Layout>
     )
