@@ -11,6 +11,23 @@ import { brl, brl4 } from '../../utils/format'
 
 const unidades = ['g', 'ml', 'unid', 'kg', 'L']
 
+// Trava do bug kg/L: em kg/L a quantidade é o peso NA UNIDADE (pacote de 1kg = 1).
+// Número alto (≥100) quase sempre é gramas digitadas por engano → custo ~1000× baixo.
+const SUSPEITO_KGL = 100
+const ehKgL = (u) => u === 'kg' || u === 'L'
+const numero = (v) => parseFloat(String(v ?? '').replace(',', '.'))
+const placeholderQtd = (u) => {
+  if (u === 'kg') return 'Ex: 1 (pacote de 1 kg)'
+  if (u === 'L') return 'Ex: 1 (garrafa de 1 L)'
+  if (u === 'unid') return 'Ex: 12 (cartela com 12)'
+  return 'Ex: 1000'
+}
+const dicaQtd = (u) => {
+  if (ehKgL(u)) return `Peso da embalagem em ${u} — pacote de 1 ${u} = 1 (não 1000).`
+  if (u === 'unid') return 'Quantas unidades vêm na embalagem.'
+  return 'Peso/volume total da embalagem (ex: pacote de 1 kg = 1000 g).'
+}
+
 export default function IngredienteForm() {
   const { id } = useParams()
   const isEdit = !!id
@@ -22,10 +39,10 @@ export default function IngredienteForm() {
   const [showPreco, setShowPreco] = useState(false)
   const [confirmConverter, setConfirmConverter] = useState(false)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({
     defaultValues: { fator_correcao: 1 },
   })
-  const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco, formState: { errors: errPreco } } = useForm()
+  const { register: regPreco, handleSubmit: submitPreco, reset: resetPreco, watch: watchPreco, formState: { errors: errPreco } } = useForm()
 
   const detalheQ = useQuery({
     queryKey: ['ingrediente', id],
@@ -94,6 +111,12 @@ export default function IngredienteForm() {
     }
   }
 
+  // Aviso do bug kg/L (create form e "adicionar preço")
+  const unidadeSel = watch('unidade')
+  const alertaKgL = ehKgL(unidadeSel) && numero(watch('quantidade_embalagem')) >= SUSPEITO_KGL
+  const unidadeIng = detalheQ.data?.unidade
+  const alertaPreco = ehKgL(unidadeIng) && numero(watchPreco('quantidade_embalagem')) >= SUSPEITO_KGL
+
   return (
     <Layout title={isEdit ? 'Editar ingrediente' : 'Novo ingrediente'} onBack={voltar}>
       <div className="px-4 pt-4">
@@ -127,8 +150,14 @@ export default function IngredienteForm() {
               <FormField label="Preço pago (R$)">
                 <input className="input" type="number" step="0.01" placeholder="Ex: 4.50" {...register('preco')} />
               </FormField>
-              <FormField label="Quantidade na embalagem">
-                <input className="input" type="number" step="0.001" placeholder="Ex: 1000 (g)" {...register('quantidade_embalagem')} />
+              <FormField label={`Quantidade na embalagem${unidadeSel ? ` (em ${unidadeSel})` : ''}`}>
+                <input className="input" type="number" step="0.001" placeholder={placeholderQtd(unidadeSel)} {...register('quantidade_embalagem')} />
+                <p className="font-sans text-xs text-on-surface-dim mt-1">{dicaQtd(unidadeSel)}</p>
+                {alertaKgL && (
+                  <p className="font-sans text-xs text-on-danger-bg bg-danger-bg rounded-lg px-3 py-2 mt-2">
+                    ⚠️ Confira: em <b>{unidadeSel}</b>, um pacote de 1 {unidadeSel} = <b>1</b> (não 1000). Número tão alto costuma ser gramas por engano — deixaria o custo ~1000× baixo.
+                  </p>
+                )}
               </FormField>
             </div>
           )}
@@ -163,8 +192,16 @@ export default function IngredienteForm() {
                 <FormField label="Preço (R$)" error={errPreco.preco?.message}>
                   <input className="input" type="number" step="0.01" {...regPreco('preco', { required: true })} />
                 </FormField>
-                <FormField label="Qtd embalagem" error={errPreco.quantidade_embalagem?.message}>
-                  <input className="input" type="number" step="0.001" {...regPreco('quantidade_embalagem', { required: true })} />
+                <FormField label={`Qtd embalagem${unidadeIng ? ` (em ${unidadeIng})` : ''}`} error={errPreco.quantidade_embalagem?.message}>
+                  <input className="input" type="number" step="0.001" placeholder={placeholderQtd(unidadeIng)} {...regPreco('quantidade_embalagem', { required: true })} />
+                  {ehKgL(unidadeIng) && (
+                    <p className="font-sans text-xs text-on-surface-dim mt-1">Em {unidadeIng}: pacote de 1 {unidadeIng} = 1.</p>
+                  )}
+                  {alertaPreco && (
+                    <p className="font-sans text-xs text-on-danger-bg bg-danger-bg rounded-lg px-3 py-2 mt-2">
+                      ⚠️ Confira: 1 {unidadeIng} = 1 (não 1000). Número alto costuma ser gramas por engano.
+                    </p>
+                  )}
                 </FormField>
                 <button type="submit" className="btn-primary">Registrar preço</button>
               </form>
