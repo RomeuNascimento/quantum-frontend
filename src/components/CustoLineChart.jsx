@@ -31,36 +31,36 @@ export default function CustoLineChart({ pontos }) {
       role="img" aria-label="Evolução do custo do produto ao longo do tempo">
       {/* Valores em destaque: início (esquerda) e atual (direita) */}
       <text x={PL} y={14} textAnchor="start" fontSize="10" fontFamily="'JetBrains Mono',monospace"
-        fill="#5A584F" letterSpacing="0.5">INÍCIO</text>
+        fill="#45474D" letterSpacing="0.5">INÍCIO</text>
       <text x={PL} y={30} textAnchor="start" fontSize="15" fontFamily="'JetBrains Mono',monospace"
-        fill="#0B0B0F" fontWeight="600">{brlShort(first.custo)}</text>
+        fill="#191C1D" fontWeight="600">{brlShort(first.custo)}</text>
       <text x={W - PR} y={14} textAnchor="end" fontSize="10" fontFamily="'JetBrains Mono',monospace"
-        fill="#5A584F" letterSpacing="0.5">ATUAL</text>
+        fill="#45474D" letterSpacing="0.5">ATUAL</text>
       <text x={W - PR} y={30} textAnchor="end" fontSize="15" fontFamily="'JetBrains Mono',monospace"
-        fill="#0B0B0F" fontWeight="600">{brlShort(last.custo)}</text>
+        fill="#191C1D" fontWeight="600">{brlShort(last.custo)}</text>
 
       {/* Gridlines suaves */}
       {[0, 0.5, 1].map((t) => {
         const yy = PT + cH * (1 - t)
-        return <line key={t} x1={PL} y1={yy} x2={W - PR} y2={yy} stroke="#D9D2BF"
+        return <line key={t} x1={PL} y1={yy} x2={W - PR} y2={yy} stroke="#DEE2E6"
           strokeWidth="0.75" strokeDasharray={t === 0 ? '' : '2 3'} />
       })}
 
       {/* Área + linha */}
-      {n > 1 && <path d={areaD} fill="#D6FF3F" fillOpacity="0.2" stroke="none" />}
-      {n > 1 && <path d={pathD} fill="none" stroke="#0B0B0F" strokeWidth="2.5"
+      {n > 1 && <path d={areaD} fill="#051125" fillOpacity="0.1" stroke="none" />}
+      {n > 1 && <path d={pathD} fill="none" stroke="#051125" strokeWidth="2.5"
         strokeLinecap="round" strokeLinejoin="round" />}
 
       {/* Apenas os pontos de início e fim (sem poluir com todos) */}
       {[0, n - 1].map((i) => (
-        <circle key={i} cx={x(i)} cy={y(pontos[i].custo)} r="5" fill="#D6FF3F" stroke="#0B0B0F" strokeWidth="2" />
+        <circle key={i} cx={x(i)} cy={y(pontos[i].custo)} r="5" fill="#051125" stroke="#FFFFFF" strokeWidth="2" />
       ))}
 
       {/* Datas no eixo X */}
       {xIdxs.map((i) => (
         <text key={i} x={x(i)} y={H - 6}
           textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}
-          fontSize="11" fontFamily="'JetBrains Mono',monospace" fill="#5A584F">
+          fontSize="11" fontFamily="'JetBrains Mono',monospace" fill="#45474D">
           {fmtDate(pontos[i].data)}
         </text>
       ))}

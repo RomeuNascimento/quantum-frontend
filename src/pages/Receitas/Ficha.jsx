@@ -22,7 +22,11 @@ export default function ReceitaFicha() {
   if (erro) {
     return (
       <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
-        <p className="font-sans text-sm text-rust px-4 pt-4">{erro}</p>
+        <div className="px-4 pt-4">
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+            <p className="font-sans text-sm">{erro}</p>
+          </div>
+        </div>
       </Layout>
     )
   }
@@ -55,73 +59,75 @@ export default function ReceitaFicha() {
     <Layout title="Ficha técnica" onBack={() => navigate(-1)}>
       <div className="px-4 pt-4 max-w-lg mx-auto">
         {/* Cabeçalho da ficha */}
-        <div className="border-b-2 border-ink pb-3 mb-4">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-mute">Ficha técnica</p>
-          <h2 className="text-xl font-bold text-ink font-sans">{receita.nome}</h2>
+        <div className="mb-4">
+          <p className="eyebrow">Ficha técnica</p>
+          <h2 className="title-serif text-2xl">{receita.nome}</h2>
           <div className="flex gap-4 mt-1">
             {receita.tipo && (
-              <span className="font-mono text-[10px] uppercase tracking-widest text-mute">{receita.tipo}</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface-dim">{receita.tipo}</span>
             )}
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">
-              Rendimento: <span className="qtm-num text-ink">{receita.rendimento_g}g</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface-dim">
+              Rendimento: <span className="qtm-num text-on-surface">{receita.rendimento_g}g</span>
             </span>
           </div>
         </div>
 
         {/* Ingredientes */}
-        <p className="label mb-2">Ingredientes</p>
-        <table className="w-full mb-5">
-          <thead>
-            <tr className="border-b border-ink">
-              <th className="text-left font-mono text-[9px] uppercase tracking-widest text-mute py-1">Ingrediente</th>
-              <th className="text-right font-mono text-[9px] uppercase tracking-widest text-mute py-1">Qtd</th>
-              <th className="text-right font-mono text-[9px] uppercase tracking-widest text-mute py-1">Custo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {receita.ingredientes.map((i) => (
-              <tr key={i.id} className="border-b border-line">
-                <td className="text-sm text-ink py-1.5">{i.ingrediente_nome}</td>
-                <td className="qtm-num text-sm text-ink text-right py-1.5">{i.quantidade_g}g</td>
-                <td className="qtm-num text-sm text-mute text-right py-1.5">{brl(i.custo)}</td>
+        <div className="card mb-4">
+          <p className="label mb-2">Ingredientes</p>
+          <table className="w-full mb-5">
+            <thead>
+              <tr className="border-b border-outline-strong">
+                <th className="text-left font-mono text-[9px] uppercase tracking-widest text-on-surface-dim py-1">Ingrediente</th>
+                <th className="text-right font-mono text-[9px] uppercase tracking-widest text-on-surface-dim py-1">Qtd</th>
+                <th className="text-right font-mono text-[9px] uppercase tracking-widest text-on-surface-dim py-1">Custo</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Etapas */}
-        {receita.etapas_mo.length > 0 && (
-          <>
-            <p className="label mb-2">Modo de preparo / etapas</p>
-            <ol className="mb-5">
-              {receita.etapas_mo.map((e, idx) => (
-                <li key={e.id} className="flex items-baseline gap-3 border-b border-line py-1.5 last:border-b-0">
-                  <span className="qtm-num text-xs text-mute flex-shrink-0">{String(idx + 1).padStart(2, '0')}</span>
-                  <span className="text-sm text-ink flex-1">{e.descricao}</span>
-                  <span className="qtm-num text-xs text-mute flex-shrink-0">{e.tempo_min} min</span>
-                </li>
+            </thead>
+            <tbody>
+              {receita.ingredientes.map((i) => (
+                <tr key={i.id} className="border-b border-outline">
+                  <td className="text-sm text-on-surface py-1.5">{i.ingrediente_nome}</td>
+                  <td className="qtm-num text-sm text-on-surface text-right py-1.5">{i.quantidade_g}g</td>
+                  <td className="qtm-num text-sm text-on-surface-dim text-right py-1.5">{brl(i.custo)}</td>
+                </tr>
               ))}
-            </ol>
-          </>
-        )}
+            </tbody>
+          </table>
+
+          {/* Etapas */}
+          {receita.etapas_mo.length > 0 && (
+            <>
+              <p className="label mb-2">Modo de preparo / etapas</p>
+              <ol>
+                {receita.etapas_mo.map((e, idx) => (
+                  <li key={e.id} className="flex items-baseline gap-3 border-b border-outline py-1.5 last:border-b-0">
+                    <span className="qtm-num text-xs text-on-surface-dim flex-shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+                    <span className="text-sm text-on-surface flex-1">{e.descricao}</span>
+                    <span className="qtm-num text-xs text-on-surface-dim flex-shrink-0">{e.tempo_min} min</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+        </div>
 
         {/* Totais */}
-        <div className="border-t-2 border-ink pt-3 mb-6">
+        <div className="card mb-6">
           <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">Custo matéria-prima</span>
-            <span className="qtm-num text-sm text-ink">{brl(receita.custo_mp_total)}</span>
+            <span className="label mb-0">Custo matéria-prima</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(receita.custo_mp_total)}</span>
           </div>
           <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">Custo mão de obra ({tempoTotal} min)</span>
-            <span className="qtm-num text-sm text-ink">{brl(receita.custo_mo_total)}</span>
+            <span className="label mb-0">Custo mão de obra ({tempoTotal} min)</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(receita.custo_mo_total)}</span>
           </div>
-          <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-ink font-bold">Custo total</span>
-            <span className="qtm-num text-sm font-bold text-ink">{brl(receita.custo_total)}</span>
+          <div className="flex justify-between py-1 mt-1 border-t border-outline-strong">
+            <span className="label mb-0 text-primary">Custo total</span>
+            <span className="qtm-num text-base font-bold text-primary">{brl(receita.custo_total)}</span>
           </div>
-          <div className="flex justify-between py-0.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">Custo por grama</span>
-            <span className="qtm-num text-sm text-ink">{brl(receita.custo_por_grama)}</span>
+          <div className="flex justify-between py-0.5 mt-1">
+            <span className="label mb-0">Custo por grama</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(receita.custo_por_grama)}</span>
           </div>
         </div>
 

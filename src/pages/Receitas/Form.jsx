@@ -103,38 +103,40 @@ export default function ReceitaForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24 space-y-4">
         {isEdit && (
           <button type="button" onClick={() => navigate(`/receitas/${id}/ficha`)}
-            className="w-full flex items-center justify-between bg-ink text-bone border border-ink px-4 py-3 active:opacity-80">
+            className="w-full flex items-center justify-between bg-primary text-on-primary rounded-xl px-4 py-3 active:brightness-125">
             <span className="font-mono text-xs uppercase tracking-widest">Ficha técnica (PDF)</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 5l7 7-7 7" />
             </svg>
           </button>
         )}
 
-        <FormField label="Nome da receita" error={errors.nome?.message}>
-          <input className="input" {...register('nome', { required: 'Obrigatório' })} />
-        </FormField>
+        <div className="card space-y-1">
+          <FormField label="Nome da receita" error={errors.nome?.message}>
+            <input className="input" {...register('nome', { required: 'Obrigatório' })} />
+          </FormField>
 
-        <FormField label="Tipo / Categoria (opcional)">
-          <input className="input" placeholder="ex: Base, Recheio, Guarnição, Proteína…"
-            {...register('tipo')} />
-        </FormField>
+          <FormField label="Tipo / Categoria (opcional)">
+            <input className="input" placeholder="ex: Base, Recheio, Guarnição, Proteína…"
+              {...register('tipo')} />
+          </FormField>
 
-        <FormField label="Rendimento (g)" error={errors.rendimento_g?.message}>
-          <input className="input" type="number" step="0.1"
-            {...register('rendimento_g', {
-              required: 'Obrigatório',
-              validate: (v) => parseFloat(v) > 0 || 'Deve ser maior que zero',
-            })} />
-        </FormField>
+          <FormField label="Rendimento (g)" error={errors.rendimento_g?.message}>
+            <input className="input" type="number" step="0.1"
+              {...register('rendimento_g', {
+                required: 'Obrigatório',
+                validate: (v) => parseFloat(v) > 0 || 'Deve ser maior que zero',
+              })} />
+          </FormField>
+        </div>
 
         {/* Ingredientes */}
-        <div>
+        <div className="card">
           <div className="flex items-center justify-between mb-2">
-            <p className="label">Ingredientes</p>
+            <p className="label mb-0">Ingredientes</p>
             <button type="button" onClick={() => appendIng({ ingrediente_id: '', quantidade_g: '' })}
-              className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+              className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1">
               + Adicionar
             </button>
           </div>
@@ -152,13 +154,13 @@ export default function ReceitaForm() {
                   <input className="input w-full pr-9" type="number" step="0.1" placeholder={unidadeSel || 'qtd'}
                     {...register(`ingredientes.${idx}.quantidade_g`, { required: true })} />
                   {unidadeSel && (
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute pointer-events-none">
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-on-surface-dim pointer-events-none">
                       {unidadeSel}
                     </span>
                   )}
                 </div>
                 <button type="button" onClick={() => removeIng(idx)}
-                  className="p-3 font-mono text-mute active:text-rust">✕</button>
+                  className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
               </div>
               )
             })}
@@ -166,11 +168,11 @@ export default function ReceitaForm() {
         </div>
 
         {/* Etapas MO */}
-        <div>
+        <div className="card">
           <div className="flex items-center justify-between mb-2">
-            <p className="label">Mão de obra</p>
+            <p className="label mb-0">Mão de obra</p>
             <button type="button" onClick={() => appendMo({ descricao: '', tempo_min: '' })}
-              className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+              className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1">
               + Adicionar
             </button>
           </div>
@@ -182,15 +184,19 @@ export default function ReceitaForm() {
                 <input className="input w-24" type="number" step="1" placeholder="min"
                   {...register(`etapas_mo.${idx}.tempo_min`, { required: true })} />
                 <button type="button" onClick={() => removeMo(idx)}
-                  className="p-3 font-mono text-mute active:text-rust">✕</button>
+                  className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
               </div>
             ))}
           </div>
         </div>
 
-        {erro && <p className="font-sans text-sm text-rust">{erro}</p>}
+        {erro && (
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+            <p className="font-sans text-sm">{erro}</p>
+          </div>
+        )}
       </form>
-      <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+      <div className="fixed bottom-16 left-0 right-0 bg-surface/95 backdrop-blur border-t border-outline px-4 py-3 z-30">
         <button
           type="button"
           onClick={handleSubmit(onSubmit)}

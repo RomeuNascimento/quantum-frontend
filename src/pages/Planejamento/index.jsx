@@ -104,6 +104,14 @@ export default function Planejamento() {
     <Layout title="Produção" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4 space-y-5 pb-6">
 
+        <div>
+          <p className="eyebrow">Planejamento</p>
+          <h1 className="title-serif text-3xl">Produção</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Escale a receita e veja ingredientes e custos.
+          </p>
+        </div>
+
         {/* Selecionar receita */}
         <div>
           <p className="label">Receita</p>
@@ -120,7 +128,7 @@ export default function Planejamento() {
             ))}
           </select>
           {detalhe && !loadingDetalhe && (
-            <p className="font-mono text-[10px] text-mute mt-1 uppercase tracking-widest">
+            <p className="font-mono text-[10px] text-on-surface-dim mt-1 uppercase tracking-widest">
               Rendimento base: {fmtPeso(detalhe.rendimento_g)}
             </p>
           )}
@@ -133,23 +141,23 @@ export default function Planejamento() {
             {/* Modo */}
             <div>
               <p className="label">Calcular por</p>
-              <div className="flex">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setModo('peso')}
-                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest border ${
+                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest rounded-full border ${
                     modo === 'peso'
-                      ? 'bg-ink text-bone border-ink'
-                      : 'bg-bone text-mute border-line'
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-card text-on-surface-dim border-outline'
                   }`}
                 >
                   Peso total
                 </button>
                 <button
                   onClick={() => setModo('porcoes')}
-                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest border-t border-b border-r ${
+                  className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-widest rounded-full border ${
                     modo === 'porcoes'
-                      ? 'bg-ink text-bone border-ink'
-                      : 'bg-bone text-mute border-line'
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-card text-on-surface-dim border-outline'
                   }`}
                 >
                   Por porções
@@ -170,11 +178,11 @@ export default function Planejamento() {
                     placeholder={unidadePeso === 'kg' ? 'ex: 1' : 'ex: 1000'}
                     value={pesoTotal}
                     onChange={(e) => setPesoTotal(e.target.value)}
-                    className="input flex-1"
+                    className="input flex-1 rounded-r-none"
                   />
                   <button
                     onClick={() => setUnidadePeso((u) => (u === 'g' ? 'kg' : 'g'))}
-                    className="bg-ink text-bone font-mono text-xs uppercase tracking-widest px-5 border border-l-0 border-ink flex-shrink-0 active:opacity-80"
+                    className="bg-primary text-on-primary font-mono text-xs uppercase tracking-widest px-5 rounded-r-xl border border-l-0 border-primary flex-shrink-0 active:brightness-125"
                   >
                     {unidadePeso}
                   </button>
@@ -209,15 +217,15 @@ export default function Planejamento() {
                       placeholder="ex: 200"
                       value={pesoPorcao}
                       onChange={(e) => setPesoPorcao(e.target.value)}
-                      className="input flex-1"
+                      className="input flex-1 rounded-r-none"
                     />
-                    <span className="bg-ink text-bone font-mono text-xs uppercase tracking-widest px-5 border border-l-0 border-ink flex-shrink-0 flex items-center">
+                    <span className="bg-primary text-on-primary font-mono text-xs uppercase tracking-widest px-5 rounded-r-xl border border-l-0 border-primary flex-shrink-0 flex items-center">
                       g
                     </span>
                   </div>
                 </div>
                 {totalPorcoesG > 0 && (
-                  <p className="font-mono text-[10px] text-mute uppercase tracking-widest">
+                  <p className="font-mono text-[10px] text-on-surface-dim uppercase tracking-widest">
                     Total: {numPorcoes} × {pesoPorcao}g = {fmtPeso(totalPorcoesG)}
                   </p>
                 )}
@@ -226,21 +234,21 @@ export default function Planejamento() {
 
             {/* Resultado */}
             {resultado && (
-              <div className="space-y-4 border-t-2 border-ink pt-4">
+              <div className="space-y-4 border-t border-outline-strong pt-4">
 
                 {/* Cabeçalho do resultado */}
                 <div className="flex items-baseline gap-3">
-                  <span className="qtm-num text-4xl font-bold text-ink">
+                  <span className="qtm-num text-4xl font-bold text-primary">
                     ×{resultado.fator % 1 === 0
                       ? resultado.fator.toString()
                       : resultado.fator.toFixed(2).replace('.', ',')}
                   </span>
                   <div>
-                    <p className="font-mono text-xs uppercase tracking-widest text-mute">
+                    <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">
                       {fmtPeso(resultado.targetG)}
                     </p>
                     {modo === 'porcoes' && (
-                      <p className="font-mono text-[10px] text-mute">
+                      <p className="font-mono text-[10px] text-on-surface-dim">
                         {numPorcoes} porções de {pesoPorcao}g
                       </p>
                     )}
@@ -250,16 +258,16 @@ export default function Planejamento() {
                 {/* Ingredientes escalados */}
                 <div>
                   <p className="label mb-2">Ingredientes necessários</p>
-                  <div className="border border-line">
+                  <div className="border border-outline rounded-xl overflow-hidden">
                     {resultado.ingredientes.map((ing, i) => (
                       <div
                         key={i}
-                        className="flex items-center justify-between px-3 py-2.5 border-b border-line last:border-b-0"
+                        className="flex items-center justify-between px-3 py-2.5 border-b border-outline last:border-b-0"
                       >
-                        <span className="text-sm text-ink font-medium flex-1 min-w-0 truncate pr-3">
+                        <span className="text-sm text-on-surface font-medium flex-1 min-w-0 truncate pr-3">
                           {ing.nome}
                         </span>
-                        <span className="qtm-num text-sm text-ink font-mono flex-shrink-0">
+                        <span className="qtm-num text-sm text-on-surface flex-shrink-0">
                           {fmtQtd(ing.quantidade)} {ing.unidade}
                         </span>
                       </div>
@@ -270,25 +278,25 @@ export default function Planejamento() {
                 {/* Custos escalados */}
                 <div>
                   <p className="label mb-2">Custo de produção</p>
-                  <div className="border border-line">
-                    <div className="flex items-center justify-between px-3 py-2.5 border-b border-line">
-                      <span className="font-mono text-xs uppercase tracking-widest text-mute">Matéria-prima</span>
-                      <span className="qtm-num text-sm text-ink">{brl(resultado.custo_mp)}</span>
+                  <div className="border border-outline rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2.5 border-b border-outline">
+                      <span className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Matéria-prima</span>
+                      <span className="qtm-num text-sm text-on-surface">{brl(resultado.custo_mp)}</span>
                     </div>
                     {resultado.custo_mo > 0 && (
-                      <div className="flex items-center justify-between px-3 py-2.5 border-b border-line">
-                        <span className="font-mono text-xs uppercase tracking-widest text-mute">Mão de obra</span>
-                        <span className="qtm-num text-sm text-ink">{brl(resultado.custo_mo)}</span>
+                      <div className="flex items-center justify-between px-3 py-2.5 border-b border-outline">
+                        <span className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Mão de obra</span>
+                        <span className="qtm-num text-sm text-on-surface">{brl(resultado.custo_mo)}</span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between px-3 py-2.5 bg-lime">
-                      <span className="font-mono text-xs uppercase tracking-widest text-ink font-bold">Total</span>
-                      <span className="qtm-num text-sm text-ink font-bold">{brl(resultado.custo_total)}</span>
+                    <div className="flex items-center justify-between px-3 py-2.5 bg-primary">
+                      <span className="font-mono text-xs uppercase tracking-widest text-on-primary font-bold">Total</span>
+                      <span className="qtm-num text-sm text-on-primary font-bold">{brl(resultado.custo_total)}</span>
                     </div>
                     {resultado.custo_porcao !== null && (
-                      <div className="flex items-center justify-between px-3 py-2.5 bg-receipt border-t border-line">
-                        <span className="font-mono text-xs uppercase tracking-widest text-mute">Por porção</span>
-                        <span className="qtm-num text-sm text-ink">{brl(resultado.custo_porcao)}</span>
+                      <div className="flex items-center justify-between px-3 py-2.5 bg-surface-1 border-t border-outline">
+                        <span className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Por porção</span>
+                        <span className="qtm-num text-sm text-on-surface">{brl(resultado.custo_porcao)}</span>
                       </div>
                     )}
                   </div>

@@ -4,16 +4,16 @@ import Modal from './Modal'
 export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Confirmar', message, confirmLabel = 'Remover', loading = false }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p className="text-sm text-ink mb-4">{message}</p>
+      <p className="text-sm text-on-surface-dim mb-5">{message}</p>
       <div className="flex gap-3">
-        <button type="button" onClick={onClose} className="btn-ghost flex-1 py-2 text-xs">
+        <button type="button" onClick={onClose} className="btn-secondary flex-1">
           Cancelar
         </button>
         <button
           type="button"
           onClick={onConfirm}
           disabled={loading}
-          className="flex-1 bg-rust text-bone font-mono font-bold py-2 px-4 rounded-none uppercase tracking-widest text-xs active:opacity-80 disabled:opacity-40"
+          className="flex-1 bg-danger text-white font-medium py-2.5 px-4 rounded-full active:opacity-80 disabled:opacity-40"
         >
           {loading ? 'Aguarde…' : confirmLabel}
         </button>

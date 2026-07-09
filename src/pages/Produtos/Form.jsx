@@ -112,11 +112,11 @@ export default function ProdutoForm() {
   }
 
   const Section = ({ title, onAdd, children }) => (
-    <div className="mt-4">
+    <div className="card mt-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="label">{title}</p>
+        <p className="label mb-0">{title}</p>
         <button type="button" onClick={onAdd}
-          className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1">
+          className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1">
           + Adicionar
         </button>
       </div>
@@ -129,19 +129,21 @@ export default function ProdutoForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="px-4 pt-4 pb-24">
         {isEdit && (
           <button type="button" onClick={() => navigate(`/produtos/${id}/ficha`)}
-            className="w-full flex items-center justify-between bg-ink text-bone border border-ink px-4 py-3 mb-4 active:opacity-80">
+            className="w-full flex items-center justify-between bg-primary text-on-primary rounded-xl px-4 py-3 mb-4 active:brightness-125">
             <span className="font-mono text-xs uppercase tracking-widest">Ficha técnica (PDF)</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 5l7 7-7 7" />
             </svg>
           </button>
         )}
 
-        <FormField label="Nome do produto" error={errors.nome?.message}>
-          <input className="input" placeholder="Ex: Bolo de chocolate 1kg"
-            {...register('nome', { required: 'Obrigatório' })} />
-        </FormField>
+        <div className="card">
+          <FormField label="Nome do produto" error={errors.nome?.message}>
+            <input className="input" placeholder="Ex: Bolo de chocolate 1kg"
+              {...register('nome', { required: 'Obrigatório' })} />
+          </FormField>
+        </div>
 
         <Section title="Preparações" onAdd={() => appendPrep({ receita_id: '', quantidade_g: '' })}>
           {prepFields.map((f, i) => (
@@ -153,7 +155,7 @@ export default function ProdutoForm() {
               <input className="input w-24" type="number" step="0.1" placeholder="g"
                 {...register(`preparacoes.${i}.quantidade_g`)} />
               <button type="button" onClick={() => removePrep(i)}
-                className="p-3 font-mono text-mute active:text-rust">✕</button>
+                className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
             </div>
           ))}
         </Section>
@@ -172,13 +174,13 @@ export default function ProdutoForm() {
                 <input className="input w-full pr-9" type="number" step="0.1" placeholder={unidadeSel || 'qtd'}
                   {...register(`ingredientes.${i}.quantidade_g`)} />
                 {unidadeSel && (
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute pointer-events-none">
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-on-surface-dim pointer-events-none">
                     {unidadeSel}
                   </span>
                 )}
               </div>
               <button type="button" onClick={() => removeIng(i)}
-                className="p-3 font-mono text-mute active:text-rust">✕</button>
+                className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
             </div>
             )
           })}
@@ -194,7 +196,7 @@ export default function ProdutoForm() {
               <input className="input w-24" type="number" step="0.001" placeholder="qtd"
                 {...register(`embalagens.${i}.quantidade`)} />
               <button type="button" onClick={() => removeEmb(i)}
-                className="p-3 font-mono text-mute active:text-rust">✕</button>
+                className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
             </div>
           ))}
         </Section>
@@ -206,7 +208,7 @@ export default function ProdutoForm() {
               <input className="input w-24" type="number" step="1" placeholder="min"
                 {...register(`mo_montagem.${i}.tempo_min`)} />
               <button type="button" onClick={() => removeMo(i)}
-                className="p-3 font-mono text-mute active:text-rust">✕</button>
+                className="p-3 font-mono text-on-surface-dim active:text-danger">✕</button>
             </div>
           ))}
         </Section>
@@ -219,12 +221,18 @@ export default function ProdutoForm() {
         )}
 
         {isEdit && custoTotal != null && custoTotal > 0 && (
-          <SimuladorPreco custo={custoTotal} />
+          <div className="card mt-4">
+            <SimuladorPreco custo={custoTotal} />
+          </div>
         )}
 
-        {erro && <p className="font-sans text-sm text-rust mt-4">{erro}</p>}
+        {erro && (
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3 mt-4">
+            <p className="font-sans text-sm">{erro}</p>
+          </div>
+        )}
       </form>
-      <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+      <div className="fixed bottom-16 left-0 right-0 bg-surface/95 backdrop-blur border-t border-outline px-4 py-3 z-30">
         <button
           type="button"
           onClick={handleSubmit(onSubmit)}

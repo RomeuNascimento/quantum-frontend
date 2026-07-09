@@ -91,6 +91,13 @@ export default function ListaCompras() {
   return (
     <Layout title="Lista de compras" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4 pb-8 space-y-5">
+        <div>
+          <p className="eyebrow">Planejamento</p>
+          <h1 className="title-serif text-3xl">Lista de Compras</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Some as receitas e monte a lista pra levar ao mercado.
+          </p>
+        </div>
         {receitas.length === 0 ? (
           <EmptyState
             title="Nenhuma receita"
@@ -125,14 +132,14 @@ export default function ListaCompras() {
             {linhas.length > 0 && (
               <div>
                 <p className="label mb-2">Vou produzir</p>
-                <div className="border border-line">
+                <div className="border border-outline rounded-xl overflow-hidden">
                   {linhas.map((l) => (
-                    <div key={l.key} className="flex items-center justify-between px-3 py-2 border-b border-line last:border-b-0">
-                      <span className="text-sm text-ink flex-1 min-w-0 truncate pr-2">
-                        {nomeReceita(l.receitaId)} <span className="qtm-num text-mute">× {fmtQtd(l.mult)}</span>
+                    <div key={l.key} className="flex items-center justify-between px-3 py-2 border-b border-outline last:border-b-0">
+                      <span className="text-sm text-on-surface flex-1 min-w-0 truncate pr-2">
+                        {nomeReceita(l.receitaId)} <span className="qtm-num text-on-surface-dim">× {fmtQtd(l.mult)}</span>
                       </span>
                       <button onClick={() => remover(l.key)} aria-label="Remover"
-                        className="font-mono text-xs text-rust flex-shrink-0 px-2">✕</button>
+                        className="font-mono text-xs text-danger flex-shrink-0 px-2">✕</button>
                     </div>
                   ))}
                 </div>
@@ -141,7 +148,7 @@ export default function ListaCompras() {
 
             {/* Lista agregada */}
             {linhas.length === 0 ? (
-              <p className="font-mono text-xs text-mute text-center py-6 uppercase tracking-widest">
+              <p className="font-mono text-xs text-on-surface-dim text-center py-6 uppercase tracking-widest">
                 Adicione receitas para montar a lista
               </p>
             ) : carregandoDetalhes && ingredientes.length === 0 ? (
@@ -150,27 +157,27 @@ export default function ListaCompras() {
               <>
                 <div>
                   <p className="label mb-2">Você vai precisar de</p>
-                  <div className="border border-line">
+                  <div className="border border-outline rounded-xl overflow-hidden">
                     {ingredientes.map((i) => {
                       const feito = !!comprados[i.key]
                       return (
                         <button key={i.key} type="button"
                           onClick={() => setComprados((c) => ({ ...c, [i.key]: !c[i.key] }))}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 border-b border-line last:border-b-0 text-left active:bg-line/30">
-                          <span className={`w-4 h-4 border border-ink flex-shrink-0 flex items-center justify-center ${feito ? 'bg-lime' : 'bg-white'}`}>
-                            {feito && <span className="text-ink text-[10px] leading-none">✓</span>}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 border-b border-outline last:border-b-0 text-left active:bg-surface-2">
+                          <span className={`w-4 h-4 rounded-md border flex-shrink-0 flex items-center justify-center ${feito ? 'bg-primary border-primary' : 'bg-card border-outline-strong'}`}>
+                            {feito && <span className="text-on-primary text-[10px] leading-none">✓</span>}
                           </span>
-                          <span className={`text-sm flex-1 min-w-0 truncate pr-2 ${feito ? 'line-through text-mute' : 'text-ink font-medium'}`}>
+                          <span className={`text-sm flex-1 min-w-0 truncate pr-2 ${feito ? 'line-through text-on-surface-dim' : 'text-on-surface font-medium'}`}>
                             {i.nome}
                           </span>
-                          <span className={`qtm-num text-sm flex-shrink-0 ${feito ? 'text-mute line-through' : 'text-ink'}`}>
+                          <span className={`qtm-num text-sm flex-shrink-0 ${feito ? 'text-on-surface-dim line-through' : 'text-on-surface'}`}>
                             {fmtMedida(i.qtd, i.unidade)}
                           </span>
                         </button>
                       )
                     })}
                   </div>
-                  <p className="font-mono text-[10px] text-mute mt-1 uppercase tracking-widest">
+                  <p className="font-mono text-[10px] text-on-surface-dim mt-1 uppercase tracking-widest">
                     Toque pra marcar o que já comprou
                   </p>
                 </div>

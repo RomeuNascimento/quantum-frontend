@@ -11,8 +11,8 @@ import { brl } from '../../utils/format'
 function Bolha({ children }) {
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 flex-shrink-0 bg-ink text-lime flex items-center justify-center font-mono text-sm font-bold">Q</div>
-      <div className="flex-1 bg-receipt border border-line px-4 py-3">{children}</div>
+      <div className="w-8 h-8 flex-shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-serif text-sm font-bold">Q</div>
+      <div className="flex-1 bg-card border border-outline rounded-2xl px-4 py-3">{children}</div>
     </div>
   )
 }
@@ -44,85 +44,85 @@ export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro
   return (
     <div className="px-4 pt-5 pb-28 space-y-4">
       <Bolha>
-        <p className="font-sans text-sm text-ink">
+        <p className="font-sans text-sm text-on-surface">
           Última etapa! Esse <strong>{receita?.nome || 'produto'}</strong> custou{' '}
           <strong>{brl(custoTotal)}</strong> pra fazer. Vamos achar o preço de venda. 💰
         </p>
       </Bolha>
 
       {/* Porções */}
-      <div className="border border-line bg-bone px-3 py-3">
+      <div className="border border-outline rounded-xl bg-card px-3 py-3">
         <p className="label">Rende quantas porções / unidades?</p>
         <div className="flex items-center gap-2">
           <input type="number" inputMode="numeric" className="input w-24 text-sm" value={porcoes}
             onChange={(e) => setPorcoes(e.target.value)} aria-label="Número de porções" />
-          <span className="font-mono text-xs text-mute">
+          <span className="font-mono text-xs text-on-surface-dim">
             {n === 1 ? 'vendo inteiro' : `→ ${brl(custoUnit)} de custo cada`}
           </span>
         </div>
       </div>
 
       {/* Preço recomendado (venda direta) */}
-      <div className="border border-ink bg-ink text-bone">
+      <div className="bg-primary text-on-primary rounded-2xl overflow-hidden">
         <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-mute">Preço recomendado</span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-mute">venda direta</span>
+          <span className="font-mono text-[11px] uppercase tracking-widest text-on-primary/60">Preço recomendado</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-on-primary/60">venda direta</span>
         </div>
-        <div className="px-4 pb-1">
-          <span className="qtm-num text-4xl font-bold text-lime">{brl(precoDireto)}</span>
-          {n > 1 && <span className="font-mono text-xs text-mute ml-2">por unidade</span>}
+        <div className="px-4 pb-1 flex items-baseline gap-2">
+          <span className="qtm-num text-4xl font-bold text-accent-soft">{brl(precoDireto)}</span>
+          {n > 1 && <span className="font-mono text-xs text-on-primary/60">por unidade</span>}
         </div>
         <div className="px-4 pb-3">
-          <span className="font-mono text-[11px] text-bone/70">
-            Lucro de <span className="qtm-num text-bone">{brl(lucroDireto)}</span> por {n > 1 ? 'unidade' : 'receita'}
+          <span className="font-mono text-[11px] text-on-primary/70">
+            Lucro de <span className="qtm-num text-on-primary">{brl(lucroDireto)}</span> por {n > 1 ? 'unidade' : 'receita'}
           </span>
         </div>
 
         {/* Slider de margem */}
-        <div className="px-4 pb-4 pt-1 border-t border-plasma">
+        <div className="px-4 pb-4 pt-1 border-t border-on-primary/15">
           <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[11px] uppercase tracking-widest text-mute">Margem</span>
-            <span className="qtm-num text-sm text-lime font-bold">{margem}%</span>
+            <span className="font-mono text-[11px] uppercase tracking-widest text-on-primary/60">Margem</span>
+            <span className="qtm-num text-sm text-accent-soft font-bold">{margem}%</span>
           </div>
           <input type="range" min="0" max="90" step="5" value={margem}
             onChange={(e) => setMargem(parseInt(e.target.value))}
-            aria-label="Margem de lucro" className="w-full accent-lime" />
-          <p className="font-sans text-[11px] text-bone/60 mt-1">
+            aria-label="Margem de lucro" className="w-full accent-accent-soft" />
+          <p className="font-sans text-[11px] text-on-primary/60 mt-1">
             Margem é o quanto sobra pra você. Arraste e veja o preço mudar.
           </p>
         </div>
       </div>
 
       {/* Canais opcionais */}
-      <div className="border border-line">
+      <div className="border border-outline rounded-xl bg-card overflow-hidden">
         <button onClick={() => setVerCanais((v) => !v)}
-          className="w-full flex items-center justify-between px-4 py-3 active:bg-line/40">
-          <span className="font-mono text-xs uppercase tracking-widest text-ink">
+          className="w-full flex items-center justify-between px-4 py-3 active:bg-surface-1">
+          <span className="font-mono text-xs uppercase tracking-widest text-on-surface">
             Vende em iFood, etc.? Ver preço por canal
           </span>
-          <svg className={`w-4 h-4 text-mute transition-transform ${verCanais ? 'rotate-180' : ''}`}
+          <svg className={`w-4 h-4 text-on-surface-dim transition-transform ${verCanais ? 'rotate-180' : ''}`}
             fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+            strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
 
         {verCanais && (
-          <div className="border-t border-line">
+          <div className="border-t border-outline">
             {canais.length === 0 ? (
-              <p className="px-4 py-3 font-sans text-sm text-mute">
+              <p className="px-4 py-3 font-sans text-sm text-on-surface-dim">
                 Nenhum canal cadastrado. Você pode adicionar depois em Preços.
               </p>
             ) : (
               canais.map((c) => {
                 const preco = precoCom(custoUnit, margem, taxasCanal(c))
                 return (
-                  <div key={c.id} className="flex items-center justify-between px-4 py-2.5 border-b border-line last:border-b-0">
+                  <div key={c.id} className="flex items-center justify-between px-4 py-2.5 border-b border-outline last:border-b-0">
                     <div>
-                      <p className="font-sans text-sm text-ink">{c.nome}</p>
-                      <p className="font-mono text-[10px] text-mute">taxas {taxasCanal(c).toFixed(1)}%</p>
+                      <p className="font-sans text-sm text-on-surface">{c.nome}</p>
+                      <p className="font-mono text-[10px] text-on-surface-dim">taxas {taxasCanal(c).toFixed(1)}%</p>
                     </div>
-                    <span className="qtm-num text-sm text-ink">{brl(preco)}</span>
+                    <span className="qtm-num text-sm text-on-surface">{brl(preco)}</span>
                   </div>
                 )
               })
@@ -132,15 +132,15 @@ export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro
       </div>
 
       {erro && (
-        <div className="bg-rust/10 border border-rust px-3 py-2">
-          <p className="font-sans text-sm text-rust">Não consegui salvar: {erro}</p>
+        <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
+          <p className="font-sans text-sm">Não consegui salvar: {erro}</p>
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
         <button
           onClick={() => onConcluir({ porcoes: n, margem, custoUnit, precoDireto, lucroDireto })}
-          className="btn-primary w-full max-w-xl mx-auto block">
+          className="btn-primary max-w-xl mx-auto block">
           Finalizar e salvar →
         </button>
       </div>

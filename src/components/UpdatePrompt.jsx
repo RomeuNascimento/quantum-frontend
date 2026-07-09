@@ -9,19 +9,20 @@ export default function UpdatePrompt() {
   if (!needRefresh) return null
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-40 bg-ink border border-lime px-4 py-3 flex items-center gap-3 max-w-xl mx-auto">
-      <p className="font-mono text-xs text-bone flex-1">
+    <div className="fixed bottom-20 left-4 right-4 z-40 bg-primary rounded-xl border border-outline-strong px-4 py-3 flex items-center gap-3 max-w-xl mx-auto shadow-lg">
+      <p className="font-sans text-sm text-on-primary flex-1">
         Nova versão disponível
       </p>
       <button
         onClick={() => updateServiceWorker(true)}
-        className="bg-lime text-ink font-mono font-bold text-xs uppercase tracking-widest px-3 py-2 active:bg-lime-dim"
+        className="bg-card text-primary font-medium text-sm px-3 py-1.5 rounded-full active:opacity-80"
       >
         Atualizar
       </button>
       <button
         onClick={() => setNeedRefresh(false)}
-        className="font-mono text-xs text-mute px-1"
+        className="font-sans text-sm text-on-primary/60 px-1"
+        aria-label="Dispensar"
       >
         ✕
       </button>

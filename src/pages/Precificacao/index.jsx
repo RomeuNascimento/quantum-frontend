@@ -32,24 +32,24 @@ function PrecoDecomposicao({ pp }) {
   const taxasR = Math.max(0, preco - custoR - margemR)
   const pct = (v) => `${Math.max(0, (v / preco) * 100).toFixed(1)}%`
   return (
-    <div className="mt-3 pt-3 border-t border-line">
-      <div className="flex h-2.5 w-full overflow-hidden border border-ink/15">
-        <div style={{ width: pct(custoR) }} className="bg-ink flex-shrink-0" />
-        <div style={{ width: pct(margemR) }} className="bg-lime flex-shrink-0" />
-        <div style={{ width: pct(taxasR) }} className="bg-line flex-shrink-0" />
+    <div className="mt-3 pt-3 border-t border-outline">
+      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-surface-2">
+        <div style={{ width: pct(custoR) }} className="bg-primary flex-shrink-0" />
+        <div style={{ width: pct(margemR) }} className="bg-positive flex-shrink-0" />
+        <div style={{ width: pct(taxasR) }} className="bg-outline-strong flex-shrink-0" />
       </div>
       <div className="flex gap-3 mt-1.5 flex-wrap">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-ink inline-block flex-shrink-0" />
-          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Custo {pctStr((custoR / preco) * 100)}</span>
+          <span className="w-2 h-2 rounded-full bg-primary inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest">Custo {pctStr((custoR / preco) * 100)}</span>
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-lime inline-block flex-shrink-0" />
-          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Margem {pctStr(pp.margem_pct)}</span>
+          <span className="w-2 h-2 rounded-full bg-positive inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest">Margem {pctStr(pp.margem_pct)}</span>
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-line border border-ink/20 inline-block flex-shrink-0" />
-          <span className="font-mono text-[9px] text-mute uppercase tracking-widest">Taxas {pctStr((taxasR / preco) * 100)}</span>
+          <span className="w-2 h-2 rounded-full bg-outline-strong inline-block flex-shrink-0" />
+          <span className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest">Taxas {pctStr((taxasR / preco) * 100)}</span>
         </span>
       </div>
     </div>
@@ -204,10 +204,18 @@ export default function Precificacao() {
   return (
     <Layout title="Precificação" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4">
+        <div className="mb-5">
+          <p className="eyebrow">Preço de venda</p>
+          <h1 className="title-serif text-3xl">Precificação</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Escolha o produto e ajuste a margem por canal.
+          </p>
+        </div>
+
         {erro && (
-          <div className="bg-rust/10 border border-rust px-3 py-2 mb-4 flex items-center justify-between gap-2">
-            <p className="font-sans text-sm text-rust flex-1">{erro}</p>
-            <button onClick={() => setErro('')} className="font-mono text-xs text-rust">✕</button>
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2 mb-4 flex items-center justify-between gap-2">
+            <p className="font-sans text-sm flex-1">{erro}</p>
+            <button onClick={() => setErro('')} className="font-mono text-xs">✕</button>
           </div>
         )}
         {loading ? <LoadingSpinner /> : produtos.length === 0 ? (
@@ -231,7 +239,7 @@ export default function Precificacao() {
                 <p className="label mb-2">Evolução do custo</p>
                 <CustoLineChart pontos={historico} />
                 {historico.length === 1 && (
-                  <p className="font-mono text-[10px] text-mute mt-1 text-center uppercase tracking-widest">
+                  <p className="font-mono text-[10px] text-on-surface-dim mt-1 text-center uppercase tracking-widest">
                     Adicione mais preços aos ingredientes para ver a evolução
                   </p>
                 )}
@@ -240,15 +248,15 @@ export default function Precificacao() {
 
             {/* Preço de venda por canal */}
             <p className="label mt-4 mb-1">Preço de venda</p>
-            <p className="text-xs text-mute mb-3">
+            <p className="text-xs text-on-surface-dim mb-3">
               Toque num canal pra ajustar a margem. O preço sugerido já desconta as taxas de cada lugar.
             </p>
 
             {precosQ.isLoading ? (
               <div className="py-6"><LoadingSpinner /></div>
             ) : custoProduto == null ? (
-              <div className="border border-line py-8 px-4 text-center">
-                <p className="font-mono text-xs uppercase tracking-widest text-mute mb-3">
+              <div className="border border-outline rounded-xl py-8 px-4 text-center">
+                <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim mb-3">
                   Este produto ainda não tem custo
                 </p>
                 <Link to={`/produtos/${produtoSelecionado}`} className="btn-ghost w-auto inline-block px-6 py-2 text-xs">
@@ -264,23 +272,23 @@ export default function Precificacao() {
                 return (
                   <button key={canal.id} onClick={() => abrirPreco(canal, pp)} className="card w-full text-left mb-2">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-sans font-semibold text-ink text-sm">{canal.nome}</span>
+                      <span className="font-serif font-bold text-primary text-base">{canal.nome}</span>
                       {pp
                         ? <MargemBadge margem={margem} />
-                        : <span className="font-mono text-[9px] uppercase tracking-widest text-mute border border-line px-1.5 py-0.5">Prévia · margem {margem}%</span>}
+                        : <span className="font-mono text-[9px] uppercase tracking-widest text-on-surface-dim border border-outline rounded-full px-2 py-0.5">Prévia · margem {margem}%</span>}
                     </div>
                     <div className="flex justify-between">
                       <div>
                         <p className="label">Custo total</p>
-                        <p className="qtm-num text-sm text-ink">{brl(view.custo_total)}</p>
+                        <p className="qtm-num text-sm text-on-surface">{brl(view.custo_total)}</p>
                       </div>
                       <div className="text-center">
                         <p className="label">Sugerido</p>
-                        <p className="qtm-num text-base font-bold text-ink bg-lime px-2">{brl(sugerido)}</p>
+                        <p className="qtm-num text-base font-bold text-on-primary bg-primary px-2 rounded-md">{brl(sugerido)}</p>
                       </div>
                       <div className="text-right">
                         <p className="label">Manual</p>
-                        <p className="qtm-num text-sm text-mute">{pp?.preco_final ? brl(pp.preco_final) : '—'}</p>
+                        <p className="qtm-num text-sm text-on-surface-dim">{pp?.preco_final ? brl(pp.preco_final) : '—'}</p>
                       </div>
                     </div>
                     <PrecoDecomposicao pp={view} />
@@ -290,28 +298,28 @@ export default function Precificacao() {
             )}
 
             {/* Onde você vende (taxas) — secundário */}
-            <div className="mt-8 pt-4 border-t border-line">
+            <div className="mt-8 pt-4 border-t border-outline">
               <div className="flex items-center justify-between mb-1">
                 <p className="label">Onde você vende</p>
                 <button
                   onClick={abrirNovoCanal}
-                  className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+                  className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1 active:bg-surface-2"
                 >
                   + Novo canal
                 </button>
               </div>
-              <p className="text-xs text-mute mb-3">
+              <p className="text-xs text-on-surface-dim mb-3">
                 Cada lugar cobra taxas diferentes (sua loja, iFood...). Toque pra editar as taxas.
               </p>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {canais.map((c) => (
                   <button key={c.id} onClick={() => abrirEditarCanal(c)}
-                    className="flex-shrink-0 card text-left px-3 py-2 min-w-[140px] active:bg-line/40">
-                    <p className="font-sans font-semibold text-ink text-sm">{c.nome}</p>
-                    <p className="qtm-num text-xs text-mute">Plataforma: {c.taxa_plataforma_pct}%</p>
-                    <p className="qtm-num text-xs text-mute">Cartão: {c.taxa_cartao_pct}%</p>
-                    <p className="qtm-num text-xs text-mute">Imposto: {c.imposto_pct}%</p>
-                    <p className="font-mono text-[9px] text-mute uppercase tracking-widest mt-1">Toque p/ editar</p>
+                    className="flex-shrink-0 card text-left px-3 py-2 min-w-[140px] active:bg-surface-2">
+                    <p className="font-serif font-bold text-primary text-sm">{c.nome}</p>
+                    <p className="qtm-num text-xs text-on-surface-dim">Plataforma: {c.taxa_plataforma_pct}%</p>
+                    <p className="qtm-num text-xs text-on-surface-dim">Cartão: {c.taxa_cartao_pct}%</p>
+                    <p className="qtm-num text-xs text-on-surface-dim">Imposto: {c.imposto_pct}%</p>
+                    <p className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest mt-1">Toque p/ editar</p>
                   </button>
                 ))}
               </div>
@@ -334,7 +342,7 @@ export default function Precificacao() {
           {editCanal && (
             <button type="button"
               onClick={() => { setConfirmCanal(editCanal); setShowModalCanal(false) }}
-              className="w-full font-mono text-xs uppercase tracking-widest text-rust border border-rust py-2"
+              className="w-full font-mono text-xs uppercase tracking-widest text-danger border border-danger rounded-full py-2"
               disabled={deletarCanalM.isPending}>
               Excluir canal
             </button>
@@ -347,7 +355,7 @@ export default function Precificacao() {
         title={canalModal ? `Preço — ${canalModal.nome}` : 'Preço'}>
         <form onSubmit={submitPreco(onSalvarPreco)} className="space-y-3">
           {canalModal && custoProduto != null && (
-            <p className="text-xs text-mute -mt-1">
+            <p className="text-xs text-on-surface-dim -mt-1">
               Custo do produto: <span className="qtm-num">{brl(custoProduto)}</span> · Taxas deste canal:{' '}
               <span className="qtm-num">{taxasCanal(canalModal)}%</span>
             </p>

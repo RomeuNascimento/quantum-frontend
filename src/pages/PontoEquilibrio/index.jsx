@@ -44,19 +44,27 @@ export default function PontoEquilibrio() {
     <Layout title="Ponto de equilíbrio" onBack={() => navigate('/dashboard')}>
       <div className="px-4 pt-4 space-y-4 pb-8">
 
+        <div>
+          <p className="eyebrow">Planejamento</p>
+          <h1 className="title-serif text-3xl">Ponto de Equilíbrio</h1>
+          <p className="text-sm text-on-surface-dim mt-1">
+            Quanto você precisa faturar pra cobrir os custos fixos.
+          </p>
+        </div>
+
         {/* Custos fixos do mês */}
         <div className="card">
           <p className="label">Custos fixos do mês</p>
-          <p className="text-3xl qtm-num text-ink">{brl(cf)}</p>
-          <Link to="/custos-fixos" className="inline-flex items-center gap-1 mt-2 font-mono text-[11px] uppercase tracking-widest text-mute">
+          <p className="text-3xl qtm-num font-bold text-primary">{brl(cf)}</p>
+          <Link to="/custos-fixos" className="inline-flex items-center gap-1 mt-2 font-mono text-[11px] uppercase tracking-widest text-on-surface-dim">
             Gerenciar custos fixos
             <span aria-hidden>→</span>
           </Link>
         </div>
 
         {cf <= 0 ? (
-          <div className="border border-line py-8 px-4 text-center">
-            <p className="font-mono text-xs uppercase tracking-widest text-mute mb-4">
+          <div className="border border-outline rounded-xl py-8 px-4 text-center">
+            <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim mb-4">
               Cadastre seus custos fixos primeiro
             </p>
             <Link to="/custos-fixos" className="btn-primary w-auto inline-block px-6">
@@ -69,32 +77,32 @@ export default function PontoEquilibrio() {
             <div className="card">
               <div className="flex justify-between items-end mb-1">
                 <span className="label mb-0">Margem (%)</span>
-                <span className="qtm-num text-lg text-ink">{margem}%</span>
+                <span className="qtm-num text-lg font-bold text-primary">{margem}%</span>
               </div>
               <input
                 type="range" min="5" max="90" step="1" value={margem}
                 onChange={(e) => setMargem(parseInt(e.target.value))}
-                className="w-full accent-lime"
+                className="w-full accent-primary"
                 aria-label="Margem de contribuição em porcentagem"
               />
-              <p className="text-xs text-mute mt-2">
+              <p className="text-xs text-on-surface-dim mt-2">
                 Margem = o que sobra de cada venda <strong>depois</strong> de pagar
                 ingredientes, embalagem e taxas. Arraste pra simular.
               </p>
             </div>
 
             {/* Resultado: faturamento de equilíbrio */}
-            <div className="card bg-ink border-ink">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-bone/60 mb-1">
+            <div className="card bg-primary border-primary">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-on-primary/60 mb-1">
                 Você precisa faturar
               </p>
-              <p className="qtm-num text-3xl text-lime">
+              <p className="qtm-num text-3xl font-bold text-on-primary">
                 {brl(breakeven)}
-                <span className="text-base text-bone/60"> /mês</span>
+                <span className="text-base font-normal text-on-primary/60"> /mês</span>
               </p>
-              <p className="text-sm text-bone/80 mt-2">
+              <p className="text-sm text-on-primary/80 mt-2">
                 só pra cobrir os custos fixos (lucro zero). Isso dá cerca de{' '}
-                <span className="qtm-num text-bone">{brl(breakeven / 30)}</span> por dia.
+                <span className="qtm-num text-on-primary">{brl(breakeven / 30)}</span> por dia.
               </p>
             </div>
 
@@ -108,7 +116,7 @@ export default function PontoEquilibrio() {
                 className="input"
               />
               {lucroNum > 0 && (
-                <p className="text-sm text-ink mt-2">
+                <p className="text-sm text-on-surface mt-2">
                   Pra lucrar <span className="qtm-num">{brl(lucroNum)}</span>, você precisa
                   faturar <span className="qtm-num font-semibold">{brl(comLucro)}</span>/mês.
                 </p>

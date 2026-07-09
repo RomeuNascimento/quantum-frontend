@@ -121,23 +121,23 @@ export default function ImportarReceitas() {
       <Layout title="Importar Receitas" onBack={() => navigate('/receitas')}>
         <div className="px-4 pt-6 space-y-6">
           {erro && (
-            <div className="bg-rust/10 border border-rust px-3 py-2">
-              <p className="font-sans text-sm text-rust">{erro}</p>
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3">
+              <p className="font-sans text-sm">{erro}</p>
             </div>
           )}
 
           <div
             onClick={() => inputRef.current?.click()}
-            className="border-2 border-dashed border-line bg-receipt flex flex-col items-center justify-center py-12 cursor-pointer active:bg-line"
+            className="border-2 border-dashed border-outline-strong rounded-xl bg-card flex flex-col items-center justify-center py-12 cursor-pointer active:bg-surface-1"
           >
-            <svg className="w-10 h-10 text-mute mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+            <svg className="w-10 h-10 text-on-surface-dim mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="font-mono text-xs uppercase tracking-widest text-mute">
+            <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">
               {arquivo ? arquivo.name : 'Toque para selecionar'}
             </p>
-            <p className="font-mono text-[10px] text-mute mt-1">Foto, PDF, Excel, CSV — qualquer formato</p>
+            <p className="font-mono text-[10px] text-on-surface-dim mt-1">Foto, PDF, Excel, CSV — qualquer formato</p>
           </div>
 
           <input
@@ -163,8 +163,8 @@ export default function ImportarReceitas() {
     return (
       <Layout title="Importar Receitas" onBack={() => navigate('/receitas')}>
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-8 h-8 border-2 border-lime/30 border-t-lime rounded-full animate-spin" />
-          <p className="font-mono text-xs uppercase tracking-widest text-mute">Analisando receitas...</p>
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Analisando receitas...</p>
         </div>
       </Layout>
     )
@@ -179,13 +179,13 @@ export default function ImportarReceitas() {
 
           {receitas.map((rec) => (
             <div key={rec._id}
-              className={`border ${rec.selecionada ? 'border-ink bg-receipt' : 'border-line bg-bone opacity-50'}`}>
+              className={`border rounded-xl ${rec.selecionada ? 'border-outline-strong bg-card' : 'border-outline bg-surface-1 opacity-50'}`}>
               {/* Header do card */}
               <div className="flex items-start gap-3 p-3">
                 <input type="checkbox" checked={rec.selecionada}
                   onChange={(e) => atualizarReceita(rec._id, 'selecionada', e.target.checked)}
                   aria-label={`Incluir ${rec.nome || 'receita'}`}
-                  className="mt-1 flex-shrink-0 w-4 h-4 accent-lime" />
+                  className="mt-1 flex-shrink-0 w-4 h-4 accent-primary" />
                 <div className="flex-1 min-w-0">
                   <input className="input w-full text-sm font-medium" value={rec.nome}
                     aria-label="Nome da receita"
@@ -200,16 +200,16 @@ export default function ImportarReceitas() {
                         aria-label="Rendimento em gramas"
                         value={rec.rendimento_g}
                         onChange={(e) => atualizarReceita(rec._id, 'rendimento_g', e.target.value)} />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute">g</span>
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-on-surface-dim">g</span>
                     </div>
                   </div>
                 </div>
                 <button onClick={() => toggleExpand(rec._id)}
                   aria-label={expandidos[rec._id] ? 'Recolher detalhes' : 'Ver detalhes'}
-                  className="p-1 text-mute flex-shrink-0">
+                  className="p-1 text-on-surface-dim flex-shrink-0">
                   <svg className={`w-4 h-4 transition-transform ${expandidos[rec._id] ? 'rotate-180' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+                    strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -217,21 +217,21 @@ export default function ImportarReceitas() {
 
               {/* Ingredientes e etapas */}
               {expandidos[rec._id] && (
-                <div className="border-t border-line px-3 pb-3 pt-2 space-y-3">
+                <div className="border-t border-outline px-3 pb-3 pt-2 space-y-3">
                   {/* Ingredientes */}
                   <div>
                     <p className="label mb-1">Ingredientes ({rec.ingredientes.length})</p>
                     <div className="space-y-1">
                       {rec.ingredientes.map((ing, ii) => (
                         <div key={ii} className="flex items-center gap-2">
-                          <span className={`w-2 h-2 flex-shrink-0 ${ing.match ? 'bg-lime' : 'bg-rust'}`} />
-                          <span className="font-mono text-xs text-ink flex-1 truncate">{ing.nome}</span>
-                          <span className="font-mono text-xs text-mute qtm-num">{ing.quantidade_g}g</span>
+                          <span className={`w-2 h-2 flex-shrink-0 ${ing.match ? 'bg-positive' : 'bg-danger'}`} />
+                          <span className="font-mono text-xs text-on-surface flex-1 truncate">{ing.nome}</span>
+                          <span className="font-mono text-xs text-on-surface-dim qtm-num">{ing.quantidade_g}g</span>
                         </div>
                       ))}
                     </div>
                     {rec.ingredientes.some((i) => !i.match) && (
-                      <p className="font-mono text-[10px] text-rust mt-1">
+                      <p className="font-mono text-[10px] text-danger mt-1">
                         Ingredientes em vermelho serão criados automaticamente (sem preço cadastrado).
                       </p>
                     )}
@@ -244,8 +244,8 @@ export default function ImportarReceitas() {
                       <div className="space-y-1">
                         {rec.etapas_mo.map((e, ei) => (
                           <div key={ei} className="flex gap-2 items-start">
-                            <span className="font-mono text-xs text-mute qtm-num w-10 flex-shrink-0">{e.tempo_min}min</span>
-                            <span className="font-mono text-xs text-ink">{e.descricao}</span>
+                            <span className="font-mono text-xs text-on-surface-dim qtm-num w-10 flex-shrink-0">{e.tempo_min}min</span>
+                            <span className="font-mono text-xs text-on-surface">{e.descricao}</span>
                           </div>
                         ))}
                       </div>
@@ -257,7 +257,7 @@ export default function ImportarReceitas() {
           ))}
         </div>
 
-        <div className="fixed bottom-16 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <div className="fixed bottom-16 left-0 right-0 bg-surface/95 backdrop-blur border-t border-outline px-4 py-3 z-30">
           <button onClick={salvar} disabled={selecionadas.length === 0} className="btn-primary w-full max-w-xl mx-auto block">
             Salvar {selecionadas.length} receita{selecionadas.length !== 1 ? 's' : ''}
           </button>
@@ -271,8 +271,8 @@ export default function ImportarReceitas() {
     return (
       <Layout title="Salvando...">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-8 h-8 border-2 border-lime/30 border-t-lime rounded-full animate-spin" />
-          <p className="font-mono text-xs uppercase tracking-widest text-mute">Cadastrando receitas...</p>
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="font-mono text-xs uppercase tracking-widest text-on-surface-dim">Cadastrando receitas...</p>
         </div>
       </Layout>
     )
@@ -283,16 +283,16 @@ export default function ImportarReceitas() {
   return (
     <Layout title="Importação concluída" onBack={() => navigate('/receitas')}>
       <div className="px-4 pt-6 space-y-4">
-        <div className="border border-lime bg-lime/10 px-4 py-3">
-          <p className="font-sans text-sm text-ink">
+        <div className="border border-positive bg-positive-bg rounded-xl px-4 py-3">
+          <p className="font-sans text-sm text-on-surface">
             {resultados.filter((r) => r.ok).length} receita(s) cadastrada(s) com sucesso.
           </p>
         </div>
         {erros.length > 0 && (
-          <div className="border border-rust bg-rust/10 px-4 py-3 space-y-1">
-            <p className="font-mono text-xs text-rust uppercase tracking-widest mb-1">Erros</p>
+          <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3 space-y-1">
+            <p className="font-mono text-xs uppercase tracking-widest mb-1">Erros</p>
             {erros.map((r, i) => (
-              <p key={i} className="font-sans text-sm text-rust">{r.nome}: {r.msg}</p>
+              <p key={i} className="font-sans text-sm">{r.nome}: {r.msg}</p>
             ))}
           </div>
         )}

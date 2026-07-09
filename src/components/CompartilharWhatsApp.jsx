@@ -20,8 +20,8 @@ export default function CompartilharWhatsApp({ texto, label = 'Enviar por WhatsA
 
   return (
     <div className={`flex gap-2 print:hidden ${className}`}>
-      <button type="button" onClick={enviar} className="btn-primary flex-1">{label}</button>
-      <button type="button" onClick={copiar} className="btn-ghost w-auto px-4 whitespace-nowrap">
+      <button type="button" onClick={enviar} className="flex-1 bg-positive text-white font-medium py-2.5 px-4 rounded-full active:opacity-80">{label}</button>
+      <button type="button" onClick={copiar} className="btn-secondary w-auto px-4 whitespace-nowrap">
         {copiado ? 'Copiado ✓' : 'Copiar'}
       </button>
     </div>

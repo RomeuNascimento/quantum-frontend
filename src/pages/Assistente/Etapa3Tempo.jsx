@@ -11,8 +11,8 @@ import { brl, parseDecimal } from '../../utils/format'
 function Bolha({ children }) {
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 flex-shrink-0 bg-ink text-lime flex items-center justify-center font-mono text-sm font-bold">Q</div>
-      <div className="flex-1 bg-receipt border border-line px-4 py-3">{children}</div>
+      <div className="w-8 h-8 flex-shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-serif text-sm font-bold">Q</div>
+      <div className="flex-1 bg-card border border-outline rounded-2xl px-4 py-3">{children}</div>
     </div>
   )
 }
@@ -80,19 +80,19 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
   return (
     <div className="px-4 pt-5 pb-28 space-y-4">
       <Bolha>
-        <p className="font-sans text-sm text-ink">
+        <p className="font-sans text-sm text-on-surface">
           Peguei <strong>~{tempoExtraido}min</strong> de preparo na receita. Confere e me diz como
           você quer contar o <strong>seu trabalho</strong>. 👇
         </p>
       </Bolha>
 
       {/* Tempo editável */}
-      <div className="border border-line bg-bone px-3 py-3">
+      <div className="border border-outline rounded-xl bg-card px-3 py-3">
         <p className="label">Tempo de preparo</p>
         <div className="flex items-center gap-2">
           <input type="number" inputMode="numeric" className="input w-24 text-sm" value={tempoMin}
             onChange={(e) => setTempoMin(e.target.value)} aria-label="Tempo em minutos" />
-          <span className="font-mono text-xs text-mute">minutos</span>
+          <span className="font-mono text-xs text-on-surface-dim">minutos</span>
         </div>
       </div>
 
@@ -100,45 +100,45 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
       <div className="grid grid-cols-3 gap-2">
         {MODOS.map((m) => (
           <button key={m.id} onClick={() => setModo(m.id)}
-            className={`border px-2 py-2.5 text-left ${modo === m.id ? 'border-ink bg-ink text-bone' : 'border-line bg-bone text-ink'}`}>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-wide leading-tight">{m.titulo}</p>
-            <p className={`font-mono text-[9px] mt-0.5 leading-tight ${modo === m.id ? 'text-bone/70' : 'text-mute'}`}>{m.sub}</p>
+            className={`border rounded-xl px-2 py-2.5 text-left transition-colors ${modo === m.id ? 'border-primary bg-primary text-on-primary' : 'border-outline bg-card text-on-surface'}`}>
+            <p className="font-sans text-[13px] font-semibold leading-tight">{m.titulo}</p>
+            <p className={`font-sans text-[10px] mt-0.5 leading-tight ${modo === m.id ? 'text-on-primary/70' : 'text-on-surface-dim'}`}>{m.sub}</p>
           </button>
         ))}
       </div>
 
       {/* Campos por modo */}
       {modo === 'hora' && (
-        <div className="border border-line bg-receipt px-3 py-3">
+        <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3">
           <p className="label">Quanto vale 1 hora do seu trabalho?</p>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-sm text-mute">R$</span>
+            <span className="font-mono text-sm text-on-surface-dim">R$</span>
             <input type="text" inputMode="decimal" className="input w-28 text-sm" value={valorHora}
               onChange={(e) => setValorHora(e.target.value)} placeholder="20,00" aria-label="Valor da hora" />
-            <span className="font-mono text-xs text-mute">/hora</span>
+            <span className="font-mono text-xs text-on-surface-dim">/hora</span>
           </div>
         </div>
       )}
 
       {modo === 'salario' && (
-        <div className="border border-line bg-receipt px-3 py-3 space-y-2">
+        <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3 space-y-2">
           <p className="label">Quanto você quer ganhar por mês?</p>
           <div className="flex gap-3">
             <div className="flex-1">
               <div className="flex items-center gap-1">
-                <span className="font-mono text-sm text-mute">R$</span>
+                <span className="font-mono text-sm text-on-surface-dim">R$</span>
                 <input type="text" inputMode="decimal" className="input w-full text-sm" value={salario}
                   onChange={(e) => setSalario(e.target.value)} placeholder="2000" aria-label="Salário mensal desejado" />
               </div>
             </div>
             <div className="w-28">
-              <p className="font-mono text-[10px] text-mute mb-1">horas/mês</p>
+              <p className="font-mono text-[10px] text-on-surface-dim mb-1">horas/mês</p>
               <input type="number" inputMode="numeric" className="input w-full text-sm" value={horasMes}
                 onChange={(e) => setHorasMes(e.target.value)} placeholder="160" aria-label="Horas trabalhadas no mês" />
             </div>
           </div>
           {vh > 0 && (
-            <p className="font-mono text-[11px] text-ink">
+            <p className="font-sans text-[13px] text-on-surface">
               → sua hora vale <strong className="qtm-num">{brl(vh)}</strong>
             </p>
           )}
@@ -146,31 +146,31 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
       )}
 
       {modo === 'nao' && (
-        <div className="border border-line bg-receipt px-3 py-3">
-          <p className="font-sans text-sm text-mute">
-            Beleza, não vou contar mão de obra agora. Só lembre que sua <strong className="text-ink">margem</strong>{' '}
+        <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3">
+          <p className="font-sans text-sm text-on-surface-dim">
+            Beleza, não vou contar mão de obra agora. Só lembre que sua <strong className="text-on-surface">margem</strong>{' '}
             precisa cobrir o seu tempo. Dá pra incluir depois.
           </p>
         </div>
       )}
 
       {erro && (
-        <div className="bg-rust/10 border border-rust px-3 py-2">
-          <p className="font-sans text-sm text-rust">{erro}</p>
+        <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
+          <p className="font-sans text-sm">{erro}</p>
         </div>
       )}
 
       {/* Resumo da MO */}
       {modo !== 'nao' && vh > 0 && (
-        <div className="flex items-center justify-between border border-ink bg-ink text-bone px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl bg-primary text-on-primary px-4 py-3">
           <span className="font-mono text-xs uppercase tracking-widest">Custo de mão de obra</span>
-          <span className="qtm-num text-base font-bold text-lime">{brl(custoMO)}</span>
+          <span className="qtm-num text-base font-bold text-accent-soft">{brl(custoMO)}</span>
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
         <button onClick={avancar} disabled={!podeAvancar || salvando}
-          className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40">
+          className="btn-primary max-w-xl mx-auto block">
           {salvando ? 'Salvando…' : 'Continuar →'}
         </button>
       </div>

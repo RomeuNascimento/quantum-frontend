@@ -10,17 +10,17 @@ import Etapa4Preco from './Etapa4Preco'
 import { brl } from '../../utils/format'
 
 // ── Fluxo guiado do Assistente — ETAPA 1 (Receita) ─────────────────────────────
-// Layout do zero: barra fixa com etapas no topo, conversa do assistente no corpo,
-// usuário anexa/digita e a IA devolve pronto pra confirmar. Reusa /ia/receitas
-// (sem mudança no backend). Etapas 2-4 entram depois.
+// Barra fixa com etapas no topo, conversa do assistente no corpo, usuário
+// anexa/digita e a IA devolve pronto pra confirmar. Reusa /ia/receitas (sem
+// mudança no backend). Design system Kitchen Metrics · Soft Minimalist.
 
 function Bolha({ children }) {
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 flex-shrink-0 bg-ink text-lime flex items-center justify-center font-mono text-sm font-bold">
+      <div className="w-8 h-8 flex-shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-serif text-sm font-bold">
         Q
       </div>
-      <div className="flex-1 bg-receipt border border-line px-4 py-3">{children}</div>
+      <div className="flex-1 bg-card border border-outline rounded-2xl px-4 py-3">{children}</div>
     </div>
   )
 }
@@ -28,11 +28,11 @@ function Bolha({ children }) {
 // Cabeçalho fixo com voltar + barra de etapas
 function Topo({ atual, onBack }) {
   return (
-    <header className="sticky top-0 z-10 bg-bone border-b border-line print:hidden">
+    <header className="sticky top-0 z-10 bg-surface border-b border-outline print:hidden">
       <div className="max-w-xl mx-auto px-4 py-3 flex items-center gap-3">
         <button onClick={onBack} aria-label="Voltar" className="p-1 -ml-1">
-          <svg className="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+          <svg className="w-5 h-5 text-on-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -132,36 +132,36 @@ export default function Fluxo() {
   // ── INTRO ────────────────────────────────────────────────────────────────
   if (fase === 'intro') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={1} onBack={voltarHome} />
         <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
           <Bolha>
-            <p className="font-sans text-sm text-ink">
+            <p className="font-sans text-sm text-on-surface">
               Vamos lá! Primeiro me mostra a <strong>receita</strong> do que você quer
               vender. Pode mandar uma foto, um print, um PDF — ou escrever aqui.
             </p>
-            <p className="font-sans text-sm text-ink mt-2">Eu leio e organizo tudo. 📸</p>
+            <p className="font-sans text-sm text-on-surface mt-2">Eu leio e organizo tudo. 📸</p>
           </Bolha>
 
           {erro && (
-            <div className="bg-rust/10 border border-rust px-3 py-2">
-              <p className="font-sans text-sm text-rust">{erro}</p>
+            <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
+              <p className="font-sans text-sm">{erro}</p>
             </div>
           )}
 
           <button
             onClick={() => inputRef.current?.click()}
-            className="w-full border-2 border-dashed border-line bg-receipt flex flex-col items-center justify-center py-10 active:bg-line"
+            className="w-full border-2 border-dashed border-outline bg-surface-1 rounded-2xl flex flex-col items-center justify-center py-10 active:bg-surface-2"
           >
-            <svg className="w-9 h-9 text-mute mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              strokeWidth={1.75} strokeLinecap="square" strokeLinejoin="miter">
+            <svg className="w-9 h-9 text-secondary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <p className="font-mono text-xs uppercase tracking-widest text-mute">
+            <p className="font-sans text-sm font-semibold text-on-surface-dim">
               {arquivo ? arquivo.name : 'Tirar foto ou anexar'}
             </p>
-            <p className="font-mono text-[10px] text-mute mt-1">Foto, PDF, Excel, CSV</p>
+            <p className="font-mono text-[10px] text-on-surface-dim mt-1">Foto, PDF, Excel, CSV</p>
           </button>
 
           <input ref={inputRef} type="file"
@@ -170,9 +170,9 @@ export default function Fluxo() {
             onChange={(e) => setArquivo(e.target.files[0] || null)} />
 
           <div className="flex items-center gap-3">
-            <div className="flex-1 border-t border-line" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-mute">ou escreva</span>
-            <div className="flex-1 border-t border-line" />
+            <div className="flex-1 border-t border-outline" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface-dim">ou escreva</span>
+            <div className="flex-1 border-t border-outline" />
           </div>
 
           <textarea className="input w-full h-28 text-sm"
@@ -180,9 +180,9 @@ export default function Fluxo() {
             value={texto} onChange={(e) => setTexto(e.target.value)} />
         </main>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
           <button onClick={processar} disabled={!arquivo && !texto.trim()}
-            className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40">
+            className="btn-primary max-w-xl mx-auto block">
             Ler minha receita
           </button>
         </div>
@@ -193,13 +193,13 @@ export default function Fluxo() {
   // ── PROCESSANDO ──────────────────────────────────────────────────────────
   if (fase === 'processando') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={1} onBack={voltarHome} />
         <main className="max-w-xl mx-auto px-4 pt-5 space-y-4">
           <Bolha>
             <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-lime/30 border-t-lime rounded-full animate-spin flex-shrink-0" />
-              <p className="font-sans text-sm text-ink">Tô lendo e organizando os ingredientes...</p>
+              <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin flex-shrink-0" />
+              <p className="font-sans text-sm text-on-surface">Tô lendo e organizando os ingredientes...</p>
             </div>
           </Bolha>
         </main>
@@ -210,17 +210,17 @@ export default function Fluxo() {
   // ── REVISÃO ──────────────────────────────────────────────────────────────
   if (fase === 'revisao') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={1} onBack={() => setFase('intro')} />
         <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
           <Bolha>
-            <p className="font-sans text-sm text-ink">
+            <p className="font-sans text-sm text-on-surface">
               Pronto! Entendi assim 👇 Confere e ajusta o que precisar — depois é só confirmar.
             </p>
           </Bolha>
 
-          <div className="border border-ink bg-bone">
-            <div className="p-3 border-b border-line space-y-2">
+          <div className="border border-outline-strong rounded-xl bg-card overflow-hidden">
+            <div className="p-3 border-b border-outline space-y-2">
               <div>
                 <p className="label">Nome</p>
                 <input className="input w-full text-sm font-medium" value={receita.nome}
@@ -237,20 +237,20 @@ export default function Fluxo() {
                   <div className="relative">
                     <input type="number" className="input w-full text-xs pr-5" value={receita.rendimento_g}
                       aria-label="Rendimento em gramas" onChange={(e) => up('rendimento_g', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-mute">g</span>
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-on-surface-dim">g</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 border-b border-line">
+            <div className="p-3 border-b border-outline">
               <p className="label mb-2">Ingredientes ({receita.ingredientes.length})</p>
               <div className="space-y-1.5">
                 {receita.ingredientes.map((ing, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-lime flex-shrink-0" />
-                    <span className="font-sans text-sm text-ink flex-1 truncate">{ing.nome}</span>
-                    <span className="qtm-num text-xs text-mute">{ing.unidade_original || `${ing.quantidade_g}g`}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
+                    <span className="font-sans text-sm text-on-surface flex-1 truncate">{ing.nome}</span>
+                    <span className="qtm-num text-xs text-on-surface-dim">{ing.unidade_original || `${ing.quantidade_g}g`}</span>
                   </div>
                 ))}
               </div>
@@ -260,13 +260,13 @@ export default function Fluxo() {
               <div className="p-3">
                 <div className="flex items-center justify-between mb-2">
                   <p className="label">Modo de preparo ({receita.etapas_mo.length} etapas)</p>
-                  <span className="qtm-num text-xs text-ink">~{totalTempo(receita)}min</span>
+                  <span className="qtm-num text-xs text-on-surface">~{totalTempo(receita)}min</span>
                 </div>
                 <div className="space-y-1.5">
                   {receita.etapas_mo.map((e, i) => (
                     <div key={i} className="flex gap-2 items-start">
-                      <span className="qtm-num text-[11px] text-mute w-9 flex-shrink-0">{e.tempo_min}min</span>
-                      <span className="font-sans text-xs text-ink">{e.descricao}</span>
+                      <span className="qtm-num text-[11px] text-on-surface-dim w-9 flex-shrink-0">{e.tempo_min}min</span>
+                      <span className="font-sans text-xs text-on-surface">{e.descricao}</span>
                     </div>
                   ))}
                 </div>
@@ -275,9 +275,9 @@ export default function Fluxo() {
           </div>
         </main>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-bone border-t border-line px-4 py-3 z-30">
+        <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
           <button onClick={() => setFase('precos')} disabled={!receita.nome}
-            className="btn-primary w-full max-w-xl mx-auto block disabled:opacity-40">
+            className="btn-primary max-w-xl mx-auto block">
             Confirmar receita →
           </button>
         </div>
@@ -288,7 +288,7 @@ export default function Fluxo() {
   // ── ETAPA 2 — PREÇOS ───────────────────────────────────────────────────────
   if (fase === 'precos') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={2} onBack={() => setFase('revisao')} />
         <Etapa2Precos
           receita={receita}
@@ -301,7 +301,7 @@ export default function Fluxo() {
   // ── ETAPA 3 — TEMPO / MÃO DE OBRA ──────────────────────────────────────────
   if (fase === 'tempo') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={3} onBack={() => setFase('precos')} />
         <Etapa3Tempo
           receita={receita}
@@ -314,7 +314,7 @@ export default function Fluxo() {
   // ── ETAPA 4 — PREÇO FINAL ──────────────────────────────────────────────────
   if (fase === 'preco') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={4} onBack={() => setFase('tempo')} />
         <Etapa4Preco
           receita={receita}
@@ -330,13 +330,13 @@ export default function Fluxo() {
   // ── SALVANDO ───────────────────────────────────────────────────────────────
   if (fase === 'salvando') {
     return (
-      <div className="min-h-screen bg-bone">
+      <div className="min-h-screen bg-surface">
         <Topo atual={4} onBack={() => {}} />
         <main className="max-w-xl mx-auto px-4 pt-5">
           <Bolha>
             <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-lime/30 border-t-lime rounded-full animate-spin flex-shrink-0" />
-              <p className="font-sans text-sm text-ink">Gravando tudo: ingredientes, receita, produto e preço…</p>
+              <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin flex-shrink-0" />
+              <p className="font-sans text-sm text-on-surface">Gravando tudo: ingredientes, receita, produto e preço…</p>
             </div>
           </Bolha>
         </main>
@@ -350,47 +350,47 @@ export default function Fluxo() {
   const custoTotal = custoMP + custoMO
   const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null); setProdutoId(null); setErroSalvar('') }
   return (
-    <div className="min-h-screen bg-bone">
+    <div className="min-h-screen bg-surface">
       {/* voltar leva pro início — voltar à Etapa 4 permitiria salvar duplicado */}
       <Topo atual={4} onBack={voltarHome} />
       <main className="max-w-xl mx-auto px-4 pt-5 pb-28 space-y-4">
         <Bolha>
-          <p className="font-sans text-sm text-ink">
+          <p className="font-sans text-sm text-on-surface">
             Prontinho! 🎉 Salvei o <strong>{receita.nome}</strong> — já está no seu app com
             ingredientes, receita, produto e preço.
           </p>
         </Bolha>
 
         {/* Preço de venda em destaque */}
-        <div className="border border-ink bg-ink text-bone px-4 py-4 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-mute mb-1">
+        <div className="bg-primary text-on-primary rounded-2xl px-4 py-5 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-on-primary/60 mb-1">
             Preço de venda{preco?.porcoes > 1 ? ' (por unidade)' : ''}
           </p>
-          <p className="qtm-num text-4xl font-bold text-lime">{brl(preco?.precoDireto || 0)}</p>
-          <p className="font-mono text-[11px] text-bone/70 mt-1">
+          <p className="qtm-num text-4xl font-bold text-accent-soft">{brl(preco?.precoDireto || 0)}</p>
+          <p className="font-mono text-[11px] text-on-primary/70 mt-1">
             custo {brl(preco?.custoUnit || 0)} · lucro {brl(preco?.lucroDireto || 0)} · margem {preco?.margem}%
           </p>
         </div>
 
         {/* Resumo de custo */}
-        <div className="border border-line bg-bone">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-line">
-            <span className="font-sans text-sm text-ink">Matéria-prima</span>
-            <span className="qtm-num text-sm text-ink">{brl(custoMP)}</span>
+        <div className="border border-outline rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-outline">
+            <span className="font-sans text-sm text-on-surface">Matéria-prima</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(custoMP)}</span>
           </div>
-          <div className="flex items-center justify-between px-4 py-2">
-            <span className="font-sans text-sm text-ink">Mão de obra ({mo?.tempoMin || 0}min)</span>
-            <span className="qtm-num text-sm text-ink">{brl(custoMO)}</span>
+          <div className="flex items-center justify-between px-4 py-2.5">
+            <span className="font-sans text-sm text-on-surface">Mão de obra ({mo?.tempoMin || 0}min)</span>
+            <span className="qtm-num text-sm text-on-surface">{brl(custoMO)}</span>
           </div>
         </div>
 
         {produtoId && (
-          <button onClick={() => navigate(`/produtos/${produtoId}`)} className="btn-primary w-full">
+          <button onClick={() => navigate(`/produtos/${produtoId}`)} className="btn-primary">
             Ver produto no app →
           </button>
         )}
-        <button onClick={limpar} className="btn-ghost w-full">Montar outro produto</button>
-        <button onClick={voltarHome} className="btn-secondary w-full">Voltar ao início</button>
+        <button onClick={limpar} className="btn-ghost">Montar outro produto</button>
+        <button onClick={voltarHome} className="btn-secondary">Voltar ao início</button>
       </main>
     </div>
   )
