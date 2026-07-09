@@ -64,9 +64,21 @@ export default function Produtos() {
           <div className="space-y-3">
             {items.map((p) => (
               <div key={p.id} className="card flex items-center justify-between gap-3">
-                <Link to={`/produtos/${p.id}`} className="flex-1 min-w-0">
-                  <p className="font-serif font-semibold text-lg text-on-surface truncate">{p.nome}</p>
-                  <p className="text-sm text-secondary mt-0.5">Ver custo e preço →</p>
+                <Link to={`/produtos/${p.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-surface-2 border border-outline flex items-center justify-center">
+                    {p.foto ? (
+                      <img src={p.foto} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <svg className="w-6 h-6 text-on-surface-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-serif font-semibold text-lg text-on-surface truncate">{p.nome}</p>
+                    <p className="text-sm text-secondary mt-0.5">Ver custo e preço →</p>
+                  </div>
                 </Link>
                 <button onClick={() => handleDelete(p.id, p.nome)} aria-label={`Remover ${p.nome}`} className="p-2 text-on-surface-dim active:text-danger flex-shrink-0">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"

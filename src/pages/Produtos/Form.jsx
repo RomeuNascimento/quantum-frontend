@@ -11,6 +11,7 @@ import { criarProduto, detalharProduto, atualizarProduto, historicoCustoProduto 
 import { listarReceitas } from '../../api/receitas'
 import { listarIngredientes } from '../../api/ingredientes'
 import { listarEmbalagens } from '../../api/embalagens'
+import { comprimirImagem } from '../../utils/image'
 
 export default function ProdutoForm() {
   const { id } = useParams()
@@ -20,6 +21,16 @@ export default function ProdutoForm() {
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [foto, setFoto] = useState(null)
+  const fotoRef = useRef()
+
+  const onFoto = async (e) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    try { setFoto(await comprimirImagem(f)) }
+    catch (err) { setErro(err.message) }
+  }
+  const removerFoto = () => { setFoto(null); if (fotoRef.current) fotoRef.current.value = '' }
 
   const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm({
     defaultValues: { preparacoes: [], ingredientes: [], embalagens: [], mo_montagem: [] },
@@ -68,6 +79,7 @@ export default function ProdutoForm() {
         embalagens: d.embalagens.map((m) => ({ embalagem_id: m.embalagem_id, quantidade: m.quantidade })),
         mo_montagem: d.mo_montagem.map((m) => ({ descricao: m.descricao, tempo_min: m.tempo_min })),
       })
+      setFoto(d.foto || null)
       formPreenchido.current = true
     }
   }, [detalheQ.data, reset])
@@ -81,6 +93,7 @@ export default function ProdutoForm() {
       // vazio vira NaN no payload e o backend rejeita o produto inteiro
       const payload = {
         nome: dados.nome,
+        foto: foto ?? null, // sempre enviado: data URL ou null (limpa)
         preparacoes: dados.preparacoes
           .filter((m) => m.receita_id)
           .map((m) => ({ receita_id: parseInt(m.receita_id), quantidade_g: toFloat(m.quantidade_g) })),
@@ -154,6 +167,33 @@ export default function ProdutoForm() {
             <input className="input" placeholder="Ex: Bolo de chocolate com morango"
               {...register('nome', { required: 'Obrigatório' })} />
           </FormField>
+        </div>
+
+        <div className="card mt-4">
+          <p className="label">Foto (opcional)</p>
+          {foto ? (
+            <div className="relative">
+              <img src={foto} alt="Foto do produto" className="w-full h-44 object-cover rounded-xl border border-outline" />
+              <button type="button" onClick={removerFoto} aria-label="Remover foto"
+                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-primary/85 text-on-primary flex items-center justify-center active:brightness-125">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              <button type="button" onClick={() => fotoRef.current?.click()}
+                className="mt-2 font-mono text-[11px] uppercase tracking-widest text-primary">Trocar foto</button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => fotoRef.current?.click()}
+              className="w-full border-2 border-dashed border-outline rounded-xl py-8 flex flex-col items-center text-on-surface-dim active:bg-surface-1">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="font-sans text-sm mt-2">Adicionar foto</span>
+            </button>
+          )}
+          <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={onFoto} />
         </div>
 
         <Section title="Receitas que compõem"
