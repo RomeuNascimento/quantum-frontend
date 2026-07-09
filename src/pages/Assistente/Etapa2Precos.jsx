@@ -38,6 +38,7 @@ export default function Etapa2Precos({ receita, onConcluir }) {
   const [embalagens, setEmbalagens] = useState([])
   const [embConsultado, setEmbConsultado] = useState(false)
   const [embLoading, setEmbLoading] = useState(false)
+  const [addEmb, setAddEmb] = useState(false) // form manual de embalagem aberto
 
   const sugerirEmb = async () => {
     setEmbLoading(true)
@@ -352,30 +353,47 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         </div>
       )}
 
-      {/* Embalagem (opcional) — IA sugere por produto */}
-      {faltantes.length === 0 && (
-        <div className="border border-outline rounded-xl bg-card p-3 space-y-2">
-          <p className="label mb-0">Embalagem (opcional)</p>
-          {embalagens.map((e, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
-              <span className="font-sans text-sm text-on-surface flex-1 truncate">{e.nome}</span>
-              <span className="qtm-num text-xs text-on-surface-dim">{brl4(e.preco / e.quantidade_embalagem * e.quantidade_usada)}/un</span>
-              <button onClick={() => removerEmb(i)} aria-label="Remover" className="text-on-surface-dim px-1">✕</button>
-            </div>
-          ))}
-          {embLoading ? (
-            <p className="font-sans text-sm text-on-surface-dim">Pensando na embalagem…</p>
-          ) : !embConsultado ? (
-            <button onClick={sugerirEmb}
-              className="w-full border border-outline-strong rounded-full px-3 py-2 active:bg-primary active:text-on-primary font-mono text-[11px] uppercase tracking-widest">
-              🤖 Esse produto vai embalado? Sugerir
+      {/* Embalagem (opcional) — o que embrulha o produto pronto (caixa, saco…) */}
+      <div className="border border-outline rounded-xl bg-card p-3 space-y-2">
+        <p className="label mb-0">Embalagem (opcional)</p>
+        <p className="font-sans text-xs text-on-surface-dim -mt-1">
+          O que embrulha pra vender (caixa, saco, forminha). Conta <strong>por unidade</strong>,
+          não se divide entre as fatias.
+        </p>
+
+        {embalagens.map((e, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
+            <span className="font-sans text-sm text-on-surface flex-1 truncate">{e.nome}</span>
+            <span className="qtm-num text-xs text-on-surface-dim">{brl4(e.preco / e.quantidade_embalagem * e.quantidade_usada)}/un</span>
+            <button onClick={() => removerEmb(i)} aria-label="Remover" className="text-on-surface-dim px-1">✕</button>
+          </div>
+        ))}
+
+        {addEmb ? (
+          <EmbForm
+            onSalvar={(emb) => { setEmbalagens((p) => [...p, emb]); setAddEmb(false) }}
+            onCancelar={() => setAddEmb(false)} />
+        ) : embLoading ? (
+          <p className="font-sans text-sm text-on-surface-dim">Pensando na embalagem…</p>
+        ) : (
+          <div className="flex gap-2">
+            <button onClick={() => setAddEmb(true)}
+              className="flex-1 border border-outline-strong rounded-full px-3 py-2 active:bg-primary active:text-on-primary font-mono text-[11px] uppercase tracking-widest">
+              + Adicionar
             </button>
-          ) : embalagens.length === 0 ? (
-            <p className="font-sans text-sm text-on-surface-dim">Sem embalagem (você pode adicionar depois).</p>
-          ) : null}
-        </div>
-      )}
+            {!embConsultado && (
+              <button onClick={sugerirEmb}
+                className="flex-1 border border-outline-strong rounded-full px-3 py-2 active:bg-primary active:text-on-primary font-mono text-[11px] uppercase tracking-widest">
+                🤖 Sugerir
+              </button>
+            )}
+          </div>
+        )}
+        {embConsultado && embalagens.length === 0 && !addEmb && (
+          <p className="font-sans text-xs text-on-surface-dim">Sem sugestão — toque em “+ Adicionar” se for embalado.</p>
+        )}
+      </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
         <button onClick={() => setRevisando(true)} disabled={faltantes.length > 0}
@@ -421,6 +439,56 @@ function ManualForm({ unidadePadrao, onSalvar, onCancelar }) {
         <button onClick={onCancelar} className="btn-ghost flex-1 py-2">Cancelar</button>
         <button onClick={() => onSalvar({ preco, quantidade_embalagem: qtd, unidade })}
           disabled={!valido} className="btn-primary flex-1 py-2">Salvar</button>
+      </div>
+    </div>
+  )
+}
+
+// Entrada manual de embalagem: nome + quanto pagou + quantas vêm no pacote +
+// quantas usa por produto. Custo/un = preço / (vem no pacote) × (usa por produto).
+function EmbForm({ onSalvar, onCancelar }) {
+  const [nome, setNome] = useState('')
+  const [preco, setPreco] = useState('')
+  const [qtd, setQtd] = useState('')     // quantas vêm no pacote
+  const [usada, setUsada] = useState('1') // quantas usa por produto
+  const valido = nome.trim() && parseDecimal(preco) > 0 && parseDecimal(qtd) > 0
+  return (
+    <div className="bg-surface-1 border border-outline rounded-xl p-3 space-y-2">
+      <div>
+        <p className="label">O que é?</p>
+        <input className="input w-full text-sm" value={nome} aria-label="Nome da embalagem"
+          onChange={(e) => setNome(e.target.value)} placeholder="Ex.: caixa para bolo" />
+      </div>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <p className="label">Paguei (R$)</p>
+          <input type="text" inputMode="decimal" className="input w-full text-sm" value={preco}
+            aria-label="Preço do pacote" onChange={(e) => setPreco(e.target.value)} placeholder="25,00" />
+        </div>
+        <div className="w-20">
+          <p className="label">Vêm</p>
+          <input type="text" inputMode="decimal" className="input w-full text-sm" value={qtd}
+            aria-label="Quantas vêm no pacote" onChange={(e) => setQtd(e.target.value)} placeholder="10" />
+        </div>
+        <div className="w-20">
+          <p className="label">Uso</p>
+          <input type="text" inputMode="decimal" className="input w-full text-sm" value={usada}
+            aria-label="Quantas usa por produto" onChange={(e) => setUsada(e.target.value)} placeholder="1" />
+        </div>
+      </div>
+      <p className="font-sans text-[11px] text-on-surface-dim">
+        Ex.: pacote de <strong>10</strong> caixas por <strong>R$ 25</strong>, uso <strong>1</strong> por bolo.
+      </p>
+      <div className="flex gap-2">
+        <button onClick={onCancelar} className="btn-ghost flex-1 py-2">Cancelar</button>
+        <button
+          onClick={() => onSalvar({
+            nome: nome.trim(),
+            preco: parseDecimal(preco),
+            quantidade_embalagem: parseDecimal(qtd) || 1,
+            quantidade_usada: parseDecimal(usada) || 1,
+          })}
+          disabled={!valido} className="btn-primary flex-1 py-2">Adicionar</button>
       </div>
     </div>
   )

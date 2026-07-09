@@ -7,6 +7,7 @@ import EmptyState from '../../components/EmptyState'
 import LoadError from '../../components/LoadError'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { listarReceitas, deletarReceita } from '../../api/receitas'
+import { tagColor } from '../../utils/tagColor'
 
 export default function Receitas() {
   const navigate = useNavigate()
@@ -67,7 +68,7 @@ export default function Receitas() {
                 <Link to={`/receitas/${r.id}`} className="flex-1 min-w-0">
                   {r.tipo && (
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="badge bg-info text-on-info">
+                      <span className={`badge ${tagColor(r.tipo)}`}>
                         {r.tipo}
                       </span>
                     </div>
@@ -86,15 +87,6 @@ export default function Receitas() {
           </div>
         )}
       </div>
-
-      {/* FAB secundário — IA Import */}
-      <Link to="/receitas/importar" className="fab bottom-[140px] bg-card text-primary border border-outline-strong">
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z" />
-        </svg>
-        IA Import
-      </Link>
 
       {/* FAB principal — Nova receita */}
       <Link to="/receitas/novo" className="fab">
