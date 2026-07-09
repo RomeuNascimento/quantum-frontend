@@ -10,11 +10,19 @@ import { billingStatus } from '../api/billing'
 import useAuthStore from '../store/authStore'
 import { brl } from '../utils/format'
 
-const atalhos = [
-  { to: '/ingredientes/novo', label: 'Ingrediente' },
-  { to: '/embalagens/novo', label: 'Embalagem' },
-  { to: '/receitas/novo', label: 'Receita' },
-  { to: '/produtos/novo', label: 'Produto' },
+const ferramentas = [
+  { to: '/orcamento', label: 'Orçamento', sub: 'Enviar por WhatsApp',
+    icon: <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /> },
+  { to: '/relatorio', label: 'Relatório', sub: 'Margem por produto',
+    icon: <path d="M7 16V9m5 7V5m5 11v-4M4 20h16" /> },
+  { to: '/lista-compras', label: 'Lista de compras', sub: 'Do que comprar',
+    icon: <path d="M5 8h14M5 8a2 2 0 100-4 2 2 0 000 4zm0 0v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12l2 2 4-4" /> },
+  { to: '/ponto-equilibrio', label: 'Ponto de equilíbrio', sub: 'Quanto faturar',
+    icon: <path d="M3 17l6-6 4 4 8-8m0 0h-5m5 0v5" /> },
+  { to: '/embalagens', label: 'Embalagens', sub: 'Caixas e sacos',
+    icon: <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /> },
+  { to: '/custos-fixos', label: 'Custos fixos', sub: 'Aluguel, luz…',
+    icon: <path d="M3 10h18M7 15h1m4 0h1m-8 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v9a2 2 0 002 2z" /> },
 ]
 
 const stroke = { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }
@@ -175,34 +183,19 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Cadastrar */}
+        {/* Atalhos — ferramentas em cards com ícone */}
         <div>
-          <p className="label mb-3">Cadastrar</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {atalhos.map((a) => (
-              <Link key={a.to} to={a.to} className="rounded-xl border border-outline bg-card flex items-center gap-2 px-4 py-3.5 active:bg-surface-1 transition-colors">
-                <span className="font-mono text-base text-primary shrink-0 leading-none">+</span>
-                <span className="text-sm font-medium text-on-surface truncate">{a.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Gerenciar */}
-        <div>
-          <p className="label mb-3">Gerenciar</p>
-          <div className="card p-0 overflow-hidden">
-            {[
-              { to: '/orcamento', label: 'Criar orçamento (WhatsApp)' },
-              { to: '/lista-compras', label: 'Lista de compras' },
-              { to: '/relatorio', label: 'Relatório de margem' },
-              { to: '/ponto-equilibrio', label: 'Ponto de equilíbrio' },
-              { to: '/embalagens', label: 'Embalagens' },
-              { to: '/custos-fixos', label: 'Custos fixos' },
-            ].map((g) => (
-              <Link key={g.to} to={g.to} className="flex items-center justify-between border-b border-outline px-5 py-3.5 last:border-b-0 active:bg-surface-1">
-                <span className="text-sm font-medium text-on-surface">{g.label}</span>
-                <svg className="w-4 h-4 text-on-surface-dim" {...stroke}><path d="M9 5l7 7-7 7" /></svg>
+          <p className="label mb-3">Atalhos</p>
+          <div className="grid grid-cols-2 gap-3">
+            {ferramentas.map((f) => (
+              <Link key={f.to} to={f.to} className="card flex flex-col gap-2 active:bg-surface-1">
+                <span className="flex items-center justify-center w-10 h-10 rounded-full bg-surface-2 text-primary">
+                  <svg className="w-5 h-5" {...stroke}>{f.icon}</svg>
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-on-surface leading-tight">{f.label}</p>
+                  <p className="text-xs text-on-surface-dim leading-tight mt-0.5">{f.sub}</p>
+                </div>
               </Link>
             ))}
           </div>
