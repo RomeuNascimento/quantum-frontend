@@ -3,10 +3,53 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-07-03 (branch `claude/simplicidade-reset-senha` — **Simplicidade para usuário leigo/semianalfabeto**: linguagem sem jargão, vírgula decimal aceita em todo campo de dinheiro, `/assinatura` com cópia freemium, recuperação de senha (`/esqueci-senha` + `/redefinir-senha`), fixes de bugs no Assistente. ⚠️ DEPLOY pendente — junto do backend)
-**Penúltima:** 2026-06-21 — Assistente (cadastro guiado em 4 etapas) + Freemium
-**Próxima sessão:** DEPLOY frontend+backend; configurar SMTP no EasyPanel; app Android via TWA; testes Playwright
+**Última sessão:** 2026-07-09 (branch `claude/recipe-calculator-adjustments-x9emrf` — ajustes pedidos pelo dono: confirmação de preços da nota + vigia de discrepância no Assistente; combinar receitas no produto (mais óbvio); duplicar receita; tags de categoria coloridas; aba "Calcular produção"; relatório de preços dos insumos; Pix no orçamento; **foto do produto (migration 009)**. ⚠️ DEPLOY pendente — junto do backend)
+**Penúltima:** 2026-07-03 — Simplicidade (usuário leigo) + recuperação de senha
+**Próxima sessão:** DEPLOY frontend+backend; **rodar migration 009 (produtos.foto)**; configurar SMTP no EasyPanel; app Android via TWA; testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-07-09 — Ajustes do dono (nota, composição, relatórios, foto)
+
+> Branch `claude/recipe-calculator-adjustments-x9emrf` (mesma nos dois repos). Lote de
+> pedidos do dono. Build ✅; backend 58 testes passando. **DEPLOY pendente** (frontend +
+> backend juntos; backend precisa da **migration 009** — `produtos.foto`).
+
+### Confirmação de preços da nota + "vigia" de discrepância (Assistente Etapa 2)
+- Bug: preço vindo de nota/estimativa era aplicado **silenciosamente** — sal com preço
+  nulo virava R$ 0 "resolvido"; queijo com peso errado entrava sem conferência.
+- Agora preço de nota/estimativa entra como **sugestão** (`confirmado:false`) e **nada
+  conta no custo sem o usuário confirmar** (`Etapa2Precos.jsx`). Botões: confirmar item,
+  confirmar todos os ok em lote, editar/corrigir com prefill.
+- **Vigia determinístico** (sem custo de IA): sinaliza em vermelho preço não lido e custo
+  por g/ml fora do comum (`custoUnit > 0,5` ou `< 0,0005`). Pega o caso do queijo.
+- `ImportarNota.jsx`: destaca em vermelho preço zerado/não lido antes de salvar.
+- Camada 2 (cross-check com IA de mercado) proposta ao dono, **não implementada** (opcional).
+
+### Combinar receitas no produto (decisão do dono: "combinar no Produto")
+- `Produtos/Form.jsx`: seção "Preparações" → **"Receitas que compõem"** com explicação
+  (junte massa + cobertura, venda por sabor); intro no topo do produto novo; "Ingredientes
+  avulsos" → "Ingredientes extras (opcional)". Modelo já suportava — faltava ficar óbvio.
+
+### Outros
+- **Duplicar receita** (`Receitas/index.jsx`): botão copia (client-side: detalhe→criar) e
+  abre a cópia "(cópia)" pra ajustar/adicionar item.
+- **Tags de categoria coloridas** (`utils/tagColor.js`): cor determinística por `tipo` na
+  lista de Receitas. Removido o FAB "IA Import" de Receitas (basta a home).
+- Aba **"Produção" → "Calcular produção"** (BottomNav label "Produzir"; `Planejamento`).
+- Marca **"Quantum" em serif** no hub (`Assistente/index.jsx` — dead code, mas consistente).
+  ⚠️ App já usa Playfair em todo lugar; a fonte diferente que o dono viu é a **landing**
+  (asset `lp` separado, usa Space Grotesk) — alinhar lá se quiser.
+- **Relatório de preços dos insumos** (`/relatorio-insumos` + atalho no Dashboard): custo
+  atual + variação % (sobe=vermelho, cai=verde), expande p/ histórico. Consome novo
+  `GET /ingredientes/relatorio-precos`.
+- **Pix no Orçamento** (`Orcamento/index.jsx`): chave + nome salvos no aparelho
+  (`localStorage`), entram no texto com a chave numa linha isolada (copiar no WhatsApp) +
+  botão "copiar chave".
+- **Foto do produto** (`utils/image.js` comprime no cliente → data URL; `Produtos/Form`
+  upload/trocar/remover; `Produtos/index` thumbnail). Backend: `produtos.foto` +
+  **migration 009**.
 
 ---
 
