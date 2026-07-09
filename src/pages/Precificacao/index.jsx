@@ -239,7 +239,7 @@ export default function Precificacao() {
                 <p className="label mb-2">Evolução do custo</p>
                 <CustoLineChart pontos={historico} />
                 {historico.length === 1 && (
-                  <p className="font-mono text-[10px] text-mute mt-1 text-center uppercase tracking-widest">
+                  <p className="font-mono text-[10px] text-on-surface-dim mt-1 text-center uppercase tracking-widest">
                     Adicione mais preços aos ingredientes para ver a evolução
                   </p>
                 )}
@@ -298,28 +298,28 @@ export default function Precificacao() {
             )}
 
             {/* Onde você vende (taxas) — secundário */}
-            <div className="mt-8 pt-4 border-t border-line">
+            <div className="mt-8 pt-4 border-t border-outline">
               <div className="flex items-center justify-between mb-1">
                 <p className="label">Onde você vende</p>
                 <button
                   onClick={abrirNovoCanal}
-                  className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+                  className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1 active:bg-surface-2"
                 >
                   + Novo canal
                 </button>
               </div>
-              <p className="text-xs text-mute mb-3">
+              <p className="text-xs text-on-surface-dim mb-3">
                 Cada lugar cobra taxas diferentes (sua loja, iFood...). Toque pra editar as taxas.
               </p>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {canais.map((c) => (
                   <button key={c.id} onClick={() => abrirEditarCanal(c)}
-                    className="flex-shrink-0 card text-left px-3 py-2 min-w-[140px] active:bg-line/40">
-                    <p className="font-sans font-semibold text-ink text-sm">{c.nome}</p>
-                    <p className="qtm-num text-xs text-mute">Plataforma: {c.taxa_plataforma_pct}%</p>
-                    <p className="qtm-num text-xs text-mute">Cartão: {c.taxa_cartao_pct}%</p>
-                    <p className="qtm-num text-xs text-mute">Imposto: {c.imposto_pct}%</p>
-                    <p className="font-mono text-[9px] text-mute uppercase tracking-widest mt-1">Toque p/ editar</p>
+                    className="flex-shrink-0 card text-left px-3 py-2 min-w-[140px] active:bg-surface-2">
+                    <p className="font-serif font-bold text-primary text-sm">{c.nome}</p>
+                    <p className="qtm-num text-xs text-on-surface-dim">Plataforma: {c.taxa_plataforma_pct}%</p>
+                    <p className="qtm-num text-xs text-on-surface-dim">Cartão: {c.taxa_cartao_pct}%</p>
+                    <p className="qtm-num text-xs text-on-surface-dim">Imposto: {c.imposto_pct}%</p>
+                    <p className="font-mono text-[9px] text-on-surface-dim uppercase tracking-widest mt-1">Toque p/ editar</p>
                   </button>
                 ))}
               </div>
@@ -342,7 +342,7 @@ export default function Precificacao() {
           {editCanal && (
             <button type="button"
               onClick={() => { setConfirmCanal(editCanal); setShowModalCanal(false) }}
-              className="w-full font-mono text-xs uppercase tracking-widest text-rust border border-rust py-2"
+              className="w-full font-mono text-xs uppercase tracking-widest text-danger border border-danger rounded-full py-2"
               disabled={deletarCanalM.isPending}>
               Excluir canal
             </button>
@@ -355,7 +355,7 @@ export default function Precificacao() {
         title={canalModal ? `Preço — ${canalModal.nome}` : 'Preço'}>
         <form onSubmit={submitPreco(onSalvarPreco)} className="space-y-3">
           {canalModal && custoProduto != null && (
-            <p className="text-xs text-mute -mt-1">
+            <p className="text-xs text-on-surface-dim -mt-1">
               Custo do produto: <span className="qtm-num">{brl(custoProduto)}</span> · Taxas deste canal:{' '}
               <span className="qtm-num">{taxasCanal(canalModal)}%</span>
             </p>

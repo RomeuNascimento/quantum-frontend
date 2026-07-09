@@ -133,10 +133,10 @@ export default function EmbalagemForm() {
         {isEdit && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="label">Histórico de preços</p>
+              <p className="label mb-0">Histórico de preços</p>
               <button
                 onClick={() => setShowPreco(!showPreco)}
-                className="font-mono text-xs uppercase tracking-widest text-ink border border-ink px-3 py-1"
+                className="font-mono text-xs uppercase tracking-widest text-primary border border-outline-strong rounded-full px-3 py-1"
               >
                 + Adicionar
               </button>
@@ -152,17 +152,19 @@ export default function EmbalagemForm() {
                 <button type="submit" className="btn-primary">Registrar preço</button>
               </form>
             )}
-            <div>
-              {historico.map((p) => (
-                <div key={p.id} className="flex justify-between border-b border-line py-3 last:border-b-0">
-                  <div>
-                    <p className="qtm-num text-sm text-ink">{brl(p.preco)} / {p.quantidade_embalagem} un</p>
-                    <p className="font-mono text-xs text-mute">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
+            {historico.length > 0 && (
+              <div className="card py-0">
+                {historico.map((p) => (
+                  <div key={p.id} className="flex justify-between border-b border-outline py-3 last:border-b-0">
+                    <div>
+                      <p className="qtm-num text-sm text-on-surface">{brl(p.preco)} / {p.quantidade_embalagem} un</p>
+                      <p className="font-mono text-xs text-on-surface-dim">{new Date(p.data_compra).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <p className="qtm-num text-sm font-bold text-on-surface">{brl4(p.custo_unitario)}/un</p>
                   </div>
-                  <p className="qtm-num text-sm font-bold text-ink">{brl4(p.custo_unitario)}/un</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Reclassificação: cadastrou como embalagem mas é insumo de receita */}
             <button
