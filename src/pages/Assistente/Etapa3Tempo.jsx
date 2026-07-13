@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getConfiguracao, updateConfiguracao } from '../../api/auth'
+import { sugerirValorHora } from '../../api/ia'
 import { brl, parseDecimal } from '../../utils/format'
 
 // ── Etapa 3 do Assistente — TEMPO DE PREPARO → MÃO DE OBRA ──────────────────────
@@ -41,6 +42,25 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
   const [horasMes, setHorasMes] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
+
+  // Sugestão de valor-hora por IA (pra quem não faz ideia de quanto cobrar)
+  const [sugerindo, setSugerindo] = useState(false)
+  const [sugestao, setSugestao] = useState(null)
+  const [sugErro, setSugErro] = useState('')
+
+  const pedirSugestao = async () => {
+    setSugErro(''); setSugerindo(true)
+    try {
+      const atividade = receita?.nome ? `faz ${receita.nome} para vender` : 'doces e salgados caseiros para vender'
+      const r = await sugerirValorHora(atividade)
+      setValorHora(String(r.data.valor_hora).replace('.', ','))
+      setSugestao(r.data)
+    } catch (e) {
+      setSugErro(e.message)
+    } finally {
+      setSugerindo(false)
+    }
+  }
 
   // inicializa o modo uma vez quando a config chega
   if (modo === null && configQ.data) {
@@ -109,14 +129,26 @@ export default function Etapa3Tempo({ receita, onConcluir }) {
 
       {/* Campos por modo */}
       {modo === 'hora' && (
-        <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3">
+        <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3 space-y-2">
           <p className="label">Quanto vale 1 hora do seu trabalho?</p>
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm text-on-surface-dim">R$</span>
             <input type="text" inputMode="decimal" className="input w-28 text-sm" value={valorHora}
-              onChange={(e) => setValorHora(e.target.value)} placeholder="20,00" aria-label="Valor da hora" />
+              onChange={(e) => { setValorHora(e.target.value); setSugestao(null) }} placeholder="20,00" aria-label="Valor da hora" />
             <span className="font-mono text-xs text-on-surface-dim">/hora</span>
           </div>
+          {sugestao ? (
+            <p className="font-sans text-[13px] text-on-surface">
+              <span className="badge bg-warm text-on-warm mr-1.5">EST</span>
+              {sugestao.explicacao || 'Valor aproximado de mercado — ajuste se quiser.'}
+            </p>
+          ) : (
+            <button onClick={pedirSugestao} disabled={sugerindo}
+              className="font-sans text-[13px] font-semibold text-primary underline underline-offset-2 disabled:opacity-40">
+              {sugerindo ? 'Pensando…' : '🤖 Não sei quanto cobrar — me sugere um valor'}
+            </button>
+          )}
+          {sugErro && <p className="font-sans text-[13px] text-danger">{sugErro}</p>}
         </div>
       )}
 

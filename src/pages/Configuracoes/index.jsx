@@ -7,6 +7,8 @@ import FormField from '../../components/FormField'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import useAuthStore from '../../store/authStore'
 import { getMe, getConfiguracao, updateConfiguracao, alterarSenha, logoutAll } from '../../api/auth'
+import { sugerirValorHora } from '../../api/ia'
+import { brl, parseDecimal } from '../../utils/format'
 
 // Chaves cujos cálculos dependem do valor-hora (custo de mão de obra)
 const CHAVES_CUSTO = ['receitas', 'produtos', 'relatorio-margem', 'precos-produto', 'receita', 'produto', 'historico-custo-produto']
@@ -20,6 +22,15 @@ export default function Configuracoes() {
   const [vhPreenchido, setVhPreenchido] = useState(false)
   const [vhMsg, setVhMsg] = useState(null)
   const [vhSalvando, setVhSalvando] = useState(false)
+
+  // Ajudas pra quem não sabe o próprio valor-hora: calculadora por salário e sugestão da IA
+  const [ajuda, setAjuda] = useState(null) // null | 'salario' | 'ia'
+  const [salario, setSalario] = useState('')
+  const [horasMes, setHorasMes] = useState('')
+  const [atividade, setAtividade] = useState('')
+  const [sugerindo, setSugerindo] = useState(false)
+  const [sugestao, setSugestao] = useState(null)
+  const [sugErro, setSugErro] = useState('')
 
   const [senhaAtual, setSenhaAtual] = useState('')
   const [senhaNova, setSenhaNova] = useState('')
@@ -43,9 +54,39 @@ export default function Configuracoes() {
 
   const conta = meQ.data || user
 
+  // Calculadora "quanto quero ganhar por mês" → valor-hora (mesma conta da Etapa 3)
+  const vhCalculado = parseDecimal(salario) > 0 && parseDecimal(horasMes) > 0
+    ? parseDecimal(salario) / parseDecimal(horasMes)
+    : 0
+
+  const usarCalculado = () => {
+    setValorHora(vhCalculado.toFixed(2).replace('.', ','))
+    setSugestao(null); setVhMsg(null); setAjuda(null)
+  }
+
+  const pedirSugestao = async () => {
+    if (!atividade.trim()) {
+      setSugErro('Escreva o que você faz. Ex.: bolos e doces')
+      return
+    }
+    setSugErro(''); setSugerindo(true)
+    try {
+      const r = await sugerirValorHora(`faz ${atividade.trim()} para vender`)
+      setValorHora(String(r.data.valor_hora).replace('.', ','))
+      setSugestao(r.data)
+      setVhMsg(null); setAjuda(null)
+    } catch (e) {
+      setSugErro(e.message)
+    } finally {
+      setSugerindo(false)
+    }
+  }
+
   const salvarValorHora = async () => {
     const raw = String(valorHora).trim()
-    const v = raw === '' ? 0 : parseFloat(raw.replace(',', '.'))
+    // aceita vírgula decimal mas preserva a detecção de texto inválido (NaN)
+    const norm = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw
+    const v = raw === '' ? 0 : parseFloat(norm)
     if (isNaN(v) || v < 0) {
       setVhMsg({ tipo: 'erro', texto: 'Informe um valor válido (0 ou mais).' })
       return
@@ -123,10 +164,71 @@ export default function Configuracoes() {
           <div className="card space-y-2">
             <label htmlFor="vh" className="text-sm text-on-surface block">Valor da sua hora de trabalho (R$)</label>
             <input id="vh" className="input qtm-num" inputMode="decimal" value={valorHora}
-              onChange={(e) => { setValorHora(e.target.value); setVhMsg(null) }} placeholder="Ex.: 20" />
+              onChange={(e) => { setValorHora(e.target.value); setVhMsg(null); setSugestao(null) }} placeholder="Ex.: 20" />
+            {sugestao && (
+              <p className="text-sm text-on-surface">
+                <span className="badge bg-warm text-on-warm mr-1.5">EST</span>
+                {sugestao.explicacao || 'Valor aproximado de mercado — ajuste se quiser.'}
+              </p>
+            )}
             <p className="text-xs text-on-surface-dim">
               Usado pra calcular o custo de mão de obra nas receitas e produtos.
             </p>
+
+            {/* Ajudas pra quem não sabe o valor */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              <button type="button" onClick={() => setAjuda(ajuda === 'salario' ? null : 'salario')}
+                className="font-sans text-[13px] font-semibold text-primary underline underline-offset-2">
+                Calcular pelo que quero ganhar
+              </button>
+              <button type="button" onClick={() => setAjuda(ajuda === 'ia' ? null : 'ia')}
+                className="font-sans text-[13px] font-semibold text-primary underline underline-offset-2">
+                🤖 Não sei — me sugere
+              </button>
+            </div>
+
+            {ajuda === 'salario' && (
+              <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3 space-y-2">
+                <p className="text-sm text-on-surface">Quanto você quer ganhar por mês?</p>
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <p className="font-mono text-[10px] text-on-surface-dim mb-1">R$ por mês</p>
+                    <input className="input qtm-num text-sm" type="text" inputMode="decimal" value={salario}
+                      onChange={(e) => setSalario(e.target.value)} placeholder="2000" aria-label="Quanto quer ganhar por mês" />
+                  </div>
+                  <div className="w-28">
+                    <p className="font-mono text-[10px] text-on-surface-dim mb-1">horas/mês</p>
+                    <input className="input qtm-num text-sm" type="number" inputMode="numeric" value={horasMes}
+                      onChange={(e) => setHorasMes(e.target.value)} placeholder="160" aria-label="Horas trabalhadas no mês" />
+                  </div>
+                </div>
+                {vhCalculado > 0 && (
+                  <>
+                    <p className="text-sm text-on-surface">
+                      → sua hora vale <strong className="qtm-num">{brl(vhCalculado)}</strong>
+                    </p>
+                    <button type="button" onClick={usarCalculado} className="btn-secondary">Usar esse valor</button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {ajuda === 'ia' && (
+              <div className="border border-outline rounded-xl bg-surface-1 px-3 py-3 space-y-2">
+                <p className="text-sm text-on-surface">O que você faz pra vender?</p>
+                <input className="input text-sm" type="text" value={atividade}
+                  onChange={(e) => { setAtividade(e.target.value); setSugErro('') }}
+                  placeholder="Ex.: bolos e doces" aria-label="O que você faz pra vender" />
+                {sugErro && <p className="text-sm text-danger">{sugErro}</p>}
+                <button type="button" onClick={pedirSugestao} disabled={sugerindo} className="btn-secondary">
+                  {sugerindo ? 'Pensando…' : 'Sugerir um valor'}
+                </button>
+                <p className="text-xs text-on-surface-dim">
+                  É um valor aproximado de mercado — você pode ajustar antes de salvar.
+                </p>
+              </div>
+            )}
+
             {vhMsg && <p className={`text-sm ${vhMsg.tipo === 'ok' ? 'text-positive' : 'text-danger'}`}>{vhMsg.texto}</p>}
             <button onClick={salvarValorHora} disabled={vhSalvando} className="btn-primary">
               {vhSalvando ? 'Salvando...' : 'Salvar'}

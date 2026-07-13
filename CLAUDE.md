@@ -3,10 +3,33 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-07-03 (branch `claude/simplicidade-reset-senha` — **Simplicidade para usuário leigo/semianalfabeto**: linguagem sem jargão, vírgula decimal aceita em todo campo de dinheiro, `/assinatura` com cópia freemium, recuperação de senha (`/esqueci-senha` + `/redefinir-senha`), fixes de bugs no Assistente. ⚠️ DEPLOY pendente — junto do backend)
-**Penúltima:** 2026-06-21 — Assistente (cadastro guiado em 4 etapas) + Freemium
+**Última sessão:** 2026-07-13 (branch `claude/beautiful-hypatia-ljhmzm` — **Ajudas de valor-hora**: calculadora por salário em Configurações + sugestão de valor-hora por IA (selo EST) na Etapa 3 e em Configurações. Backend correspondente na mesma branch)
+**Penúltima:** 2026-07-03 — Simplicidade para usuário leigo + recuperação de senha (⚠️ DEPLOY pendente)
 **Próxima sessão:** DEPLOY frontend+backend; configurar SMTP no EasyPanel; app Android via TWA; testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+---
+
+## Sessão 2026-07-13 — Ajudas de valor-hora (calculadora + sugestão IA)
+
+> Branch `claude/beautiful-hypatia-ljhmzm`. Pedido do dono: assistente pra quem não sabe
+> calcular a hora trabalhada. Decisões: salário→hora é CONTA (client-side, sem IA); IA só
+> pra quem não faz ideia do valor (sugestão de mercado, selo EST); **pop-up de primeiro
+> acesso descartado** — a Etapa 3 já pergunta com contexto e persiste o valor na 1ª passada.
+
+- **Etapa 3 do Assistente** (`Etapa3Tempo.jsx`): no modo "Por hora", link
+  "🤖 Não sei quanto cobrar — me sugere um valor" → `POST /ia/sugerir-valor-hora`
+  (contexto = nome da receita) → preenche o campo + selo EST + explicação em 1 frase.
+  Editar o campo limpa o selo. (O modo "Por salário" já existia e ficou como estava.)
+- **Configurações › Mão de obra**: dois links de ajuda embaixo do campo —
+  **"Calcular pelo que quero ganhar"** (R$/mês + horas/mês → mostra "sua hora vale R$ X"
+  ao vivo + botão "Usar esse valor"; mesma conta da Etapa 3, sem IA) e
+  **"🤖 Não sei — me sugere"** (input "O que você faz pra vender?" → IA preenche + EST).
+  `salvarValorHora` agora normaliza vírgula decimal preservando a validação de NaN.
+- `src/api/ia.js`: `sugerirValorHora(atividade)`.
+- Validação: build ✅; smoke Playwright (preview + API mockada, 375px): calculadora
+  2000/160 → R$ 12,50 → preenche campo; IA preenche 22,5 + selo EST; salvar com vírgula ok;
+  atividade vazia mostra dica sem chamar IA. Backend: 61 testes passando (6 novos).
 
 ---
 

@@ -20,3 +20,8 @@ export const estimarPrecos = (nomes) =>
 // Sugere embalagem(ns) provável(is) do produto. Devolve { itens: [...] } (pode ser vazio).
 export const sugerirEmbalagem = (produto) =>
   api.post('/ia/sugerir-embalagem', { produto })
+
+// Sugere um valor-hora de mercado (BR) para quem não sabe quanto cobrar pela própria hora.
+// Devolve { valor_hora, faixa_min, faixa_max, explicacao, fonte:'estimativa' }
+export const sugerirValorHora = (atividade) =>
+  api.post('/ia/sugerir-valor-hora', { atividade })
