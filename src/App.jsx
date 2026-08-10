@@ -29,6 +29,7 @@ import Orcamento from './pages/Orcamento/index'
 import PontoEquilibrio from './pages/PontoEquilibrio/index'
 import ListaCompras from './pages/ListaCompras/index'
 import Configuracoes from './pages/Configuracoes/index'
+import Ajuda from './pages/Ajuda/index'
 import AssistenteFluxo from './pages/Assistente/Fluxo'
 import Assinatura from './pages/Assinatura/index'
 
@@ -95,6 +96,7 @@ export default function App() {
         <Route path="/ponto-equilibrio" element={<PrivateRoute><PontoEquilibrio /></PrivateRoute>} />
         <Route path="/lista-compras" element={<PrivateRoute><ListaCompras /></PrivateRoute>} />
         <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
+        <Route path="/ajuda" element={<PrivateRoute><Ajuda /></PrivateRoute>} />
         <Route path="/assinatura" element={<PrivateRoute><Assinatura /></PrivateRoute>} />
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
