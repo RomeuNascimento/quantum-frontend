@@ -3,10 +3,41 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-07-03 (branch `claude/simplicidade-reset-senha` — **Simplicidade para usuário leigo/semianalfabeto**: linguagem sem jargão, vírgula decimal aceita em todo campo de dinheiro, `/assinatura` com cópia freemium, recuperação de senha (`/esqueci-senha` + `/redefinir-senha`), fixes de bugs no Assistente. ⚠️ DEPLOY pendente — junto do backend)
-**Penúltima:** 2026-06-21 — Assistente (cadastro guiado em 4 etapas) + Freemium
+**Última sessão:** 2026-08-10 (branch `claude/sessao-ajuda-cliente-euf7vf` — **Ajuda / contato de suporte direto**: tela `/ajuda` com WhatsApp + e-mail, ícone "?" no Dashboard e seção em Configurações. ⚠️ DEPLOY do frontend pendente)
+**Penúltima:** 2026-07-03 (branch `claude/simplicidade-reset-senha` — Simplicidade p/ usuário leigo + recuperação de senha)
 **Próxima sessão:** DEPLOY frontend+backend; configurar SMTP no EasyPanel; app Android via TWA; testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
+
+> ⚠️ **Nota de sincronismo (2026-08-10):** o `main` já tinha entrado, entre 07-03 e hoje e
+> **sem estar documentado aqui**, o redesign **"Soft Minimalist"** (nova paleta de tokens
+> `surface`/`on-surface`/`primary` navy/`positive`/`danger`, cantos arredondados, `btn-primary`
+> etc. — a seção "Design System — Quantum v1.0" abaixo está **desatualizada**), a **home única**
+> no Dashboard + botão "Atualizar preços", e a **trava de unidade kg/L** no form de Ingrediente
+> (PRs #7–#10). Ao mexer em UI, siga o código atual (`src/index.css` + `tailwind.config.js`),
+> não a seção v1.0 histórica.
+
+---
+
+## Sessão 2026-08-10 — Ajuda / contato de suporte direto
+
+> Branch `claude/sessao-ajuda-cliente-euf7vf`. Só frontend. Objetivo: dar ao usuário leigo um
+> caminho simples pra **falar com uma pessoa de verdade** quando travar.
+
+- **Tela `/ajuda` (`src/pages/Ajuda/index.jsx`)** — "Precisa de ajuda?". Botão grande verde
+  **"Falar no WhatsApp"** (caminho principal, `wa.me`) + **"Mandar um e-mail"** (`mailto:`). A
+  mensagem já vai **pré-preenchida com nome + e-mail do usuário** (do `authStore`), pra saber de
+  quem é o atendimento. Número do suporte visível no rodapé. Linguagem falada, sem jargão.
+- **Contato configurável (`src/config/suporte.js`)** — `SUPORTE_WHATSAPP` (só dígitos, com DDI)
+  e `SUPORTE_EMAIL`, com **valores padrão embutidos** (`5591982368453` · `suporte@quantumcalc.com.br`),
+  sobrescrevíveis por `VITE_SUPORTE_WHATSAPP` / `VITE_SUPORTE_EMAIL` no EasyPanel **sem mexer no
+  código**. Helper `whatsappFormatado()` exibe `(91) 98236-8453`.
+- **Entradas:** ícone **"?"** no header do Dashboard (ao lado da engrenagem, ambos num
+  `flex gap-2`) + seção **"Ajuda e suporte" → "Falar com o suporte"** em `/configuracoes`
+  (entre Assinatura e Sessões).
+- **Rota** `/ajuda` (PrivateRoute) registrada em `App.jsx`.
+- **Validação:** `npm run build` ✅ (215 módulos). **DEPLOY do frontend pendente** (gatilho manual).
+- ⚠️ Env vars opcionais no EasyPanel (só se quiser trocar o contato): `VITE_SUPORTE_WHATSAPP`,
+  `VITE_SUPORTE_EMAIL`. Sem elas, os padrões acima já funcionam.
 
 ---
 
@@ -458,6 +489,8 @@ VITE_API_URL=https://api.quantumcalc.com.br
 /precificacao → canais + seletor de produto
 /custos-fixos → lista
 /assinatura → status do plano + checkout/portal Stripe (isenta do PaywallGate)
+/ajuda → contato de suporte direto (WhatsApp + e-mail) — config em src/config/suporte.js
+/configuracoes → conta, mão de obra, senha, assinatura, ajuda, sessões
 ```
 
 ---
