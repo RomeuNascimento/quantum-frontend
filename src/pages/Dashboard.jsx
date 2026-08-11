@@ -67,7 +67,8 @@ export default function Dashboard() {
   const listaProdutos = produtos ?? []
 
   const usados = billingQ.data?.produtos_usados ?? 0
-  const limite = billingQ.data?.produtos_limite ?? 3
+  const limite = billingQ.data?.produtos_limite ?? 1
+  const unidadeProd = limite === 1 ? 'produto' : 'produtos'
   const pctUso = Math.min(100, (usados / Math.max(1, limite)) * 100)
 
   return (
@@ -181,7 +182,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm text-on-surface mb-3">
               Você usou <span className="qtm-num font-semibold">{usados}</span> de{' '}
-              <span className="qtm-num font-semibold">{limite}</span> produtos.
+              <span className="qtm-num font-semibold">{limite}</span> {unidadeProd}.
             </p>
             <div className="h-2 bg-surface-2 rounded-full overflow-hidden mb-4">
               <div className="h-full bg-primary rounded-full" style={{ width: `${pctUso}%` }} />
