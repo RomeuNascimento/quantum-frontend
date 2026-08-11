@@ -115,6 +115,7 @@ export default function Assistente() {
         {billingQ.data?.plano === 'gratis' && (() => {
           const usados = billingQ.data.produtos_usados ?? 0
           const limite = billingQ.data.produtos_limite ?? 0
+          const unidade = limite === 1 ? 'produto' : 'produtos'
           const noLimite = usados >= limite
           return (
             <Link to="/assinatura"
@@ -126,7 +127,7 @@ export default function Assistente() {
                 <p className={`font-sans text-sm ${noLimite ? 'text-on-primary' : 'text-on-surface'}`}>
                   {noLimite
                     ? 'Você atingiu o limite — assine para produtos ilimitados'
-                    : <><span className="qtm-num">{usados}</span> de <span className="qtm-num">{limite}</span> produtos usados</>}
+                    : <><span className="qtm-num">{usados}</span> de <span className="qtm-num">{limite}</span> {unidade} usados</>}
                 </p>
               </div>
               <span className={`font-mono text-xs flex-shrink-0 ${noLimite ? 'text-accent-soft' : 'text-secondary'}`}>Assinar →</span>

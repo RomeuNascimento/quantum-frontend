@@ -50,7 +50,8 @@ export default function Assinatura() {
   // Freemium: 'pago' = ilimitado; 'gratis' = até N produtos, sem prazo
   const pago = data?.plano === 'pago'
   const usados = data?.produtos_usados ?? 0
-  const limite = data?.produtos_limite ?? 3
+  const limite = data?.produtos_limite ?? 1
+  const unidade = limite === 1 ? 'produto' : 'produtos'
   const noLimite = !pago && usados >= limite
 
   return (
@@ -83,7 +84,7 @@ export default function Assinatura() {
               <p className="label text-primary">Plano grátis</p>
               <p className="font-sans text-sm text-on-surface">
                 Você usou <strong className="qtm-num">{usados}</strong> de{' '}
-                <strong className="qtm-num">{limite}</strong> produtos grátis.
+                <strong className="qtm-num">{limite}</strong> {unidade} grátis.
               </p>
               {/* Barra de progresso de uso */}
               <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
@@ -98,7 +99,7 @@ export default function Assinatura() {
                 </p>
               ) : (
                 <p className="font-sans text-xs text-on-surface-dim">
-                  Sem prazo pra acabar — o grátis é seu pra sempre, até {limite} produtos.
+                  Sem prazo pra acabar — o grátis é seu pra sempre, até {limite} {unidade}.
                 </p>
               )}
             </>
