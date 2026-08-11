@@ -18,6 +18,25 @@
 
 ---
 
+## Sessão 2026-08-11 — Vender só o plano mensal (R$ 19,90)
+
+> Branch `claude/sessao-ajuda-cliente-euf7vf` (PR #13 front / #8 back). Decisão do dono:
+> na fase de teste, oferecer **apenas o plano mensal de R$ 19,90** (menor compromisso).
+
+- **`/assinatura`** mostra um único botão **"Assinar — R$ X por mês"** (`criarCheckout('mensal')`),
+  fallback de preço `19,90` se `/billing/planos` ainda não respondeu. Removido o botão anual
+  e o texto de economia; adicionado "sem fidelidade — cancele quando quiser".
+- **`src/api/billing.js`** — `criarCheckout` default `'mensal'`.
+- Backend correspondente (PR #8): `CheckoutIn.plano` e fallback do `/checkout` → `'mensal'`.
+  Anual segue disponível se `STRIPE_PRICE_ID` existir, só não aparece na UI.
+- ⚠️ **Depende de config (usuário):** criar o preço mensal no Stripe (painel: adicionar preço
+  R$ 19,90/mês no produto "Quantum — Plano Anual", ou `scripts/setup_stripe.py` que já cria os
+  dois) → setar **`STRIPE_PRICE_ID_MENSAL`** no EasyPanel (serviço backend) → deploy backend+front.
+  Sem essa env var o checkout responde 503. Webhook não muda (eventos já cobrem mensal).
+- Build ✅.
+
+---
+
 ## Sessão 2026-08-10 — Ajuda / contato de suporte direto
 
 > Branch `claude/sessao-ajuda-cliente-euf7vf`. Só frontend. Objetivo: dar ao usuário leigo um
