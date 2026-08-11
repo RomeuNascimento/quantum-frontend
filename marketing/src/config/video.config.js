@@ -151,6 +151,41 @@ export const TIMELINE_SHOWCASE = {
 }
 // Total ≈ 13,6 s
 
+// ═══════════════════════════════════════════════════════════════════
+//  VÍDEO 4 — TUTORIAL: INSTALAR O APP NO ANDROID (atalho na tela inicial)
+// ═══════════════════════════════════════════════════════════════════
+// Ícone REAL que o PWA instala (public/icons/icon-192.png): fundo preto + Q
+// verde-limão. O tutorial mostra exatamente esse — não a versão dourada.
+export const APP_ICON = {
+  bg: '#0B0B0F', // ink
+  fg: '#D6FF3F', // lime
+  label: 'Quantum',
+}
+
+export const COPY_INSTALL = {
+  introTitle: 'Deixa o Quantum\nna tela do celular',
+  introSub: 'Vira atalho em 10 segundos · Android',
+  steps: {
+    abrir: '1 · Abra o site no Chrome',
+    menu: '2 · Toque no menu ⋮',
+    instalar: '3 · Toque em "Instalar aplicativo"',
+    confirmar: '4 · Confirme em "Instalar"',
+  },
+  pronto: 'Pronto! Tá na tela inicial 🎉',
+  outro: 'Agora é só tocar\ne usar quando quiser.',
+  url: 'quantumcalc.com.br',
+}
+
+export const TIMELINE_INSTALL = {
+  intro: 2.4, // título
+  browse: 2.0, // site aberto no Chrome
+  menu: 2.8, // toca no ⋮ → menu abre → toca "Instalar"
+  confirm: 2.0, // diálogo "Instalar?"
+  home: 2.6, // ícone aparece na tela inicial
+  outro: 2.4, // fecho
+}
+// Total ≈ 14,2 s
+
 // ───────────────────────────  helpers  ───────────────────────────
 export const sec = (s) => Math.round(s * FPS)
 export const totalOf = (timeline) => Object.values(timeline).reduce((a, s) => a + sec(s), 0)

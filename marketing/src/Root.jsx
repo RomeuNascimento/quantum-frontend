@@ -2,7 +2,8 @@ import { Composition } from 'remotion'
 import { DemoAd } from './videos/DemoAd.jsx'
 import { ProblemSolutionAd } from './videos/ProblemSolutionAd.jsx'
 import { ProductShowcaseAd } from './videos/ProductShowcaseAd.jsx'
-import { FPS, FORMATS, TIMELINE, TIMELINE_PROBLEMA, TIMELINE_SHOWCASE, totalOf } from './config/video.config.js'
+import { InstallAndroidAd } from './videos/InstallAndroidAd.jsx'
+import { FPS, FORMATS, TIMELINE, TIMELINE_PROBLEMA, TIMELINE_SHOWCASE, TIMELINE_INSTALL, totalOf } from './config/video.config.js'
 import { waitForFonts } from './theme/fonts.js'
 
 /**
@@ -17,6 +18,7 @@ const VIDEOS = [
   { id: 'DemoAd', component: DemoAd, frames: totalOf(TIMELINE) },
   { id: 'ProblemSolutionAd', component: ProblemSolutionAd, frames: totalOf(TIMELINE_PROBLEMA) },
   { id: 'ProductShowcaseAd', component: ProductShowcaseAd, frames: totalOf(TIMELINE_SHOWCASE) },
+  { id: 'InstallAndroidAd', component: InstallAndroidAd, frames: totalOf(TIMELINE_INSTALL) },
 ]
 
 export function RemotionRoot() {
