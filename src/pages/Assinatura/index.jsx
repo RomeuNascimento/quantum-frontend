@@ -22,15 +22,16 @@ export default function Assinatura() {
     refetchInterval: sucesso ? 3000 : false,
   })
 
-  // Planos disponíveis (anual sempre; mensal se configurado no servidor)
+  // Plano vendido hoje: só o mensal (fase de teste). Preço real vem do Stripe;
+  // fallback 19.90 mantém o botão certo mesmo antes de /planos responder.
   const { data: planosData } = useQuery({
     queryKey: ['billing-planos'],
     queryFn: () => listarPlanos().then((r) => r.data),
     staleTime: 60 * 60_000,
   })
   const planos = planosData?.planos ?? []
-  const anual = planos.find((p) => p.plano === 'anual')
   const mensal = planos.find((p) => p.plano === 'mensal')
+  const precoMensal = mensal?.preco ?? 19.9
 
   const redirecionar = async (fn) => {
     setErro('')
@@ -117,26 +118,15 @@ export default function Assinatura() {
             </div>
 
             <button
-              onClick={() => redirecionar(() => criarCheckout('anual'))}
+              onClick={() => redirecionar(() => criarCheckout('mensal'))}
               disabled={carregandoAcao}
               className="btn-primary w-full"
             >
-              {carregandoAcao ? 'Abrindo...' : `Assinar — ${brl(anual?.preco ?? 147)} por ano`}
+              {carregandoAcao ? 'Abrindo...' : `Assinar — ${brl(precoMensal)} por mês`}
             </button>
-            {mensal && (
-              <button
-                onClick={() => redirecionar(() => criarCheckout('mensal'))}
-                disabled={carregandoAcao}
-                className="btn-secondary w-full"
-              >
-                {carregandoAcao ? 'Abrindo...' : `Ou ${brl(mensal.preco)} por mês`}
-              </button>
-            )}
-            {mensal && (
-              <p className="font-sans text-xs text-on-surface-dim text-center">
-                No anual você economiza {brl(mensal.preco * 12 - (anual?.preco ?? 147))} por ano.
-              </p>
-            )}
+            <p className="font-sans text-xs text-on-surface-dim text-center">
+              Sem fidelidade — cancele quando quiser.
+            </p>
           </>
         )}
 
