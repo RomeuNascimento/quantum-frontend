@@ -103,6 +103,55 @@ export const TIMELINE = {
 }
 // Total ≈ 18,6 s  (dentro da faixa 10–20s pedida)
 
+// ═══════════════════════════════════════════════════════════════════
+//  VÍDEO 2 — PROBLEMA → SOLUÇÃO
+// ═══════════════════════════════════════════════════════════════════
+export const COPY_PROBLEMA = {
+  hook: 'Você cobra\nno achismo?', // gancho — a dor como pergunta
+  problema1: 'Preço no chute', // bloco curto 1
+  problema2: 'é lucro que\nsome todo mês.', // bloco curto 2
+  virada: 'Existe um\njeito certo.', // ponte para o app
+  demoManda: 'Manda a receita',
+  demoCalcula: 'A IA calcula o preço',
+  resultTitle: 'Agora você sabe\nquanto cobrar.',
+  resultSub: 'Com a margem certa, em segundos.',
+}
+
+export const TIMELINE_PROBLEMA = {
+  hook: 2.2, // 0.0 – 2.2   "Você cobra no achismo?"
+  problema1: 1.6, // 2.2 – 3.8   "Preço no chute"
+  problema2: 2.0, // 3.8 – 5.8   "é lucro que some todo mês"
+  virada: 1.8, // 5.8 – 7.6   "Existe um jeito certo"
+  demo: 4.4, // 7.6 – 12.0  app resolvendo (receita → preço)
+  result: 2.6, // 12.0 – 14.6 benefício
+  cta: 2.2, // 14.6 – 16.8 CTA
+}
+// Total ≈ 16,8 s
+
+// ═══════════════════════════════════════════════════════════════════
+//  VÍDEO 3 — PRODUCT SHOWCASE
+// ═══════════════════════════════════════════════════════════════════
+export const COPY_SHOWCASE = {
+  introKicker: 'Quantum · gestão de confeitaria',
+  introTitle: 'O preço certo\nde cada receita.',
+  features: [
+    { caption: 'Manda a receita — a IA lê', stat: '1 foto' },
+    { caption: 'Preço e margem na hora', stat: '70%' },
+    { caption: 'Margem real por canal', stat: '3 canais' },
+  ],
+  outroTitle: 'Tudo num\napp só.',
+}
+
+export const TIMELINE_SHOWCASE = {
+  intro: 2.6, // marca + interface flutua para dentro
+  feat1: 2.6, // receita / assistente
+  feat2: 3.0, // preço + slider (o herói)
+  feat3: 2.8, // margem por canal (relatório)
+  outro: 2.6, // fecho + CTA
+}
+// Total ≈ 13,6 s
+
 // ───────────────────────────  helpers  ───────────────────────────
 export const sec = (s) => Math.round(s * FPS)
-export const totalDurationInFrames = () => Object.values(TIMELINE).reduce((a, s) => a + sec(s), 0)
+export const totalOf = (timeline) => Object.values(timeline).reduce((a, s) => a + sec(s), 0)
+export const totalDurationInFrames = () => totalOf(TIMELINE)

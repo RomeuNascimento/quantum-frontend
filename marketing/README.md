@@ -112,9 +112,14 @@ de `../public/brand/logo-mark.svg`. Assim o vídeo parece o produto, não um gen
 
 ## Vídeos
 
-| Composição      | Formato      | Status                          |
-|-----------------|--------------|---------------------------------|
-| `DemoAd`        | 1080×1920    | ✅ Vídeo 1 — Demonstração Rápida |
-| `DemoAdSquare`  | 1080×1080    | ✅ mesma peça, 1:1               |
-| `ProblemSolutionAd` | —        | ⏳ Vídeo 2 (próxima etapa)       |
-| `ProductShowcaseAd` | —        | ⏳ Vídeo 3 (próxima etapa)       |
+Cada vídeo tem duas composições: a vertical (9:16) e a `…Square` (1:1).
+
+| Composição                | Formato      | Vídeo                              |
+|---------------------------|--------------|------------------------------------|
+| `DemoAd`                  | 1080×1920    | ✅ 1 — Demonstração Rápida          |
+| `ProblemSolutionAd`       | 1080×1920    | ✅ 2 — Problema → Solução           |
+| `ProductShowcaseAd`       | 1080×1920    | ✅ 3 — Product Showcase             |
+| `DemoAdSquare` / `…Square`| 1080×1080    | ✅ versões 1:1 de cada um            |
+
+**Comandos de render:** `npm run render:demo` · `render:problema` · `render:showcase`
+(ou `render:all`). Versões 1:1: `render:demo:1x1` · `render:problema:1x1` · `render:showcase:1x1`.

@@ -10,7 +10,7 @@ import { COPY, PRODUCT, precoDe, lucroDe } from '../config/video.config.js'
  * RESULTADO (13,6–16,2s): o benefício. O card de preço "salvo" volta em
  * destaque com a frase de valor. Fecha o arco pergunta→uso→resultado.
  */
-export function ResultScene() {
+export function ResultScene({ title = COPY.result.title, sub = COPY.result.sub }) {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
@@ -23,10 +23,10 @@ export function ResultScene() {
       <Background variant="light" />
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: '0 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <Headline text={COPY.result.title} color={colors.primary} size={92} align="center" lineStagger={7} />
+          <Headline text={title} color={colors.primary} size={92} align="center" lineStagger={7} />
           <div style={{ marginTop: 22 }}>
             <Sub align="center" size={36} delay={14}>
-              {COPY.result.sub}
+              {sub}
             </Sub>
           </div>
         </div>
