@@ -169,6 +169,18 @@ export default function Configuracoes() {
           </Link>
         </section>
 
+        {/* Ajuda e suporte */}
+        <section>
+          <p className="label mb-2">Ajuda e suporte</p>
+          <Link to="/ajuda" className="card flex items-center justify-between active:bg-surface-1">
+            <span className="text-sm text-on-surface">Falar com o suporte</span>
+            <svg className="w-4 h-4 text-on-surface-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </section>
+
         {/* Sessões */}
         <section>
           <p className="label mb-2">Sessões</p>
