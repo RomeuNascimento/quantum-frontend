@@ -54,7 +54,7 @@
            px-2.5 py-1 rounded-full;
   }
   .btn-ghost {
-    @apply w-full border border-primary text-primary bg-transparent font-sans font-semibold py-3 px-6 rounded-xl
+    @apply w-full border border-primary text-primary bg-transparent font-sans font-semibold py-3 px-6 rounded-full
            text-base
            active:bg-primary/5 disabled:opacity-40 disabled:cursor-not-allowed
            transition-colors duration-150;

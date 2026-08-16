@@ -19,8 +19,12 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 402) {
-      window.location.href = '/assinatura'
-      return Promise.reject(new Error('Assinatura necessária'))
+      // Dentro do assistente o 402 é tratado na própria tela (banner + botão
+      // assinar) — redirecionar aqui jogaria fora todo o trabalho do fluxo.
+      if (!window.location.pathname.startsWith('/assistente')) {
+        window.location.href = '/assinatura'
+        return Promise.reject(new Error('Assinatura necessária'))
+      }
     }
     if (error.response?.status === 401) {
       const { token, logout } = useAuthStore.getState()
@@ -44,7 +48,9 @@ api.interceptors.response.use(
     } else if (typeof msg !== 'string') {
       msg = JSON.stringify(msg)
     }
-    return Promise.reject(new Error(msg))
+    const err = new Error(msg)
+    err.status = error.response?.status
+    return Promise.reject(err)
   },
 )
 

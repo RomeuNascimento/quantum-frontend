@@ -235,9 +235,9 @@ export default function Etapa2Precos({ receita, onConcluir }) {
 
         <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline px-4 py-3 z-30">
           <div className="max-w-xl mx-auto flex gap-2">
-            <button onClick={() => setRevisando(false)} className="btn-ghost flex-1">Voltar</button>
-            <button onClick={() => onConcluir({ totalReceita, ingredientesPayload: construirPayload(), embalagens })} className="btn-primary flex-1">
-              Confirmar preços →
+            <button onClick={() => setRevisando(false)} className="btn-ghost flex-1 whitespace-nowrap">Voltar</button>
+            <button onClick={() => onConcluir({ totalReceita, ingredientesPayload: construirPayload(), embalagens })} className="btn-primary flex-[1.4] whitespace-nowrap">
+              Confirmar →
             </button>
           </div>
         </div>
@@ -252,9 +252,15 @@ export default function Etapa2Precos({ receita, onConcluir }) {
         {ingredientesQ.isLoading ? (
           <p className="font-sans text-sm text-on-surface">Conferindo o que você já tem cadastrado…</p>
         ) : faltantes.length === 0 ? (
-          <p className="font-sans text-sm text-on-surface">
-            Boa notícia: <strong>já tenho o preço de todos</strong> os ingredientes! Pode seguir. ✅
-          </p>
+          Object.keys(precos).length > 0 ? (
+            <p className="font-sans text-sm text-on-surface">
+              Pronto, <strong>todos os ingredientes têm preço</strong>! Confere na lista e pode seguir. ✅
+            </p>
+          ) : (
+            <p className="font-sans text-sm text-on-surface">
+              Boa notícia: <strong>já tenho o preço de todos</strong> os ingredientes! Pode seguir. ✅
+            </p>
+          )
         ) : (
           <>
             <p className="font-sans text-sm text-on-surface">
