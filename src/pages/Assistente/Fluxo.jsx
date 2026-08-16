@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { processarReceitas } from '../../api/ia'
 import { salvarAssistente } from '../../api/assistente'
+import { billingStatus } from '../../api/billing'
 import StepBar from './StepBar'
 import Etapa2Precos from './Etapa2Precos'
 import Etapa3Tempo from './Etapa3Tempo'
@@ -25,17 +26,21 @@ function Bolha({ children }) {
   )
 }
 
-// Cabeçalho fixo com voltar + barra de etapas
+// Cabeçalho fixo com voltar + barra de etapas (onBack null → sem seta)
 function Topo({ atual, onBack }) {
   return (
     <header className="sticky top-0 z-10 bg-surface border-b border-outline print:hidden">
       <div className="max-w-xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onClick={onBack} aria-label="Voltar" className="p-1 -ml-1">
-          <svg className="w-5 h-5 text-on-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+        {onBack ? (
+          <button onClick={onBack} aria-label="Voltar" className="p-1 -ml-1">
+            <svg className="w-5 h-5 text-on-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        ) : (
+          <div className="w-5" />
+        )}
         <div className="flex-1">
           <StepBar atual={atual} />
         </div>
@@ -58,7 +63,22 @@ export default function Fluxo() {
   const [preco, setPreco] = useState(null)   // resultado da Etapa 4
   const [produtoId, setProdutoId] = useState(null) // id do produto gravado
   const [erroSalvar, setErroSalvar] = useState('')
+  const [erroAssinatura, setErroAssinatura] = useState(false) // 402 no salvar
   const [erro, setErro] = useState('')
+
+  // Cada etapa começa do topo (as fases trocam sem mudar de rota,
+  // então o ScrollToTop global do App não dispara aqui)
+  useEffect(() => { window.scrollTo(0, 0) }, [fase])
+
+  // Freemium: avisa ANTES do trabalho todo se o produto grátis já foi usado
+  // (o salvar responderia 402 lá no final — frustração à toa)
+  const billingQ = useQuery({
+    queryKey: ['billing-status'],
+    queryFn: () => billingStatus().then((r) => r.data),
+    staleTime: 60_000,
+  })
+  const limiteAtingido = billingQ.data?.plano === 'gratis' &&
+    (billingQ.data.produtos_usados ?? 0) >= (billingQ.data.produtos_limite ?? Infinity)
 
   const totalTempo = (r) =>
     (r?.etapas_mo || []).reduce((s, e) => s + (parseFloat(e.tempo_min) || 0), 0)
@@ -99,7 +119,7 @@ export default function Fluxo() {
 
   // Grava tudo no backend (transacional). Chamado ao Finalizar a Etapa 4.
   const finalizar = async (resultado) => {
-    setErroSalvar(''); setFase('salvando')
+    setErroSalvar(''); setErroAssinatura(false); setFase('salvando')
     try {
       const payload = {
         nome: receita.nome,
@@ -118,15 +138,39 @@ export default function Fluxo() {
       }
       const r = await salvarAssistente(payload)
       setProdutoId(r.data.produto_id)
-      // os novos dados aparecem nas listas/dashboard
-      for (const k of ['produtos', 'ingredientes', 'receitas', 'relatorio-margem', 'canais']) {
+      // os novos dados aparecem nas listas/dashboard (billing-status: contador do plano grátis)
+      for (const k of ['produtos', 'ingredientes', 'receitas', 'relatorio-margem', 'canais', 'billing-status']) {
         queryClient.invalidateQueries({ queryKey: [k] })
       }
       setFase('confirmado')
     } catch (e) {
       setErroSalvar(e.message)
+      setErroAssinatura(e.status === 402)
       setFase('preco')
     }
+  }
+
+  // ── INTRO · limite grátis já usado ───────────────────────────────────────
+  if (fase === 'intro' && limiteAtingido) {
+    const limite = billingQ.data?.produtos_limite ?? 1
+    return (
+      <div className="min-h-screen bg-surface">
+        <Topo atual={1} onBack={voltarHome} />
+        <main className="max-w-xl mx-auto px-4 pt-5 pb-8 space-y-4">
+          <Bolha>
+            <p className="font-sans text-sm text-on-surface">
+              Você já usou {limite === 1 ? 'o seu produto grátis' : `os seus ${limite} produtos grátis`}. 😊
+            </p>
+            <p className="font-sans text-sm text-on-surface mt-2">
+              Pra calcular uma receita nova, é só <strong>assinar</strong> — aí você cria
+              quantos produtos quiser. O que você já salvou continua seu.
+            </p>
+          </Bolha>
+          <button onClick={() => navigate('/assinatura')} className="btn-primary">Ver plano →</button>
+          <button onClick={voltarHome} className="btn-ghost">Voltar ao início</button>
+        </main>
+      </div>
+    )
   }
 
   // ── INTRO ────────────────────────────────────────────────────────────────
@@ -321,6 +365,9 @@ export default function Fluxo() {
           custoTotal={(precos?.totalReceita || 0) + (mo?.custoMO || 0)}
           embalagens={precos?.embalagens || []}
           erro={erroSalvar}
+          erroAssinatura={erroAssinatura}
+          inicial={preco}
+          onAssinar={() => navigate('/assinatura')}
           onConcluir={(resultado) => { setPreco(resultado); finalizar(resultado) }}
         />
       </div>
@@ -331,7 +378,7 @@ export default function Fluxo() {
   if (fase === 'salvando') {
     return (
       <div className="min-h-screen bg-surface">
-        <Topo atual={4} onBack={() => {}} />
+        <Topo atual={4} onBack={null} />
         <main className="max-w-xl mx-auto px-4 pt-5">
           <Bolha>
             <div className="flex items-center gap-3">
@@ -348,7 +395,7 @@ export default function Fluxo() {
   const custoMP = precos?.totalReceita || 0
   const custoMO = mo?.custoMO || 0
   const custoTotal = custoMP + custoMO
-  const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null); setProdutoId(null); setErroSalvar('') }
+  const limpar = () => { setFase('intro'); setArquivo(null); setTexto(''); setReceita(null); setPrecos(null); setMo(null); setPreco(null); setProdutoId(null); setErroSalvar(''); setErroAssinatura(false) }
   return (
     <div className="min-h-screen bg-surface">
       {/* voltar leva pro início — voltar à Etapa 4 permitiria salvar duplicado */}
@@ -389,8 +436,8 @@ export default function Fluxo() {
             Ver produto no app →
           </button>
         )}
-        <button onClick={limpar} className="btn-ghost">Montar outro produto</button>
-        <button onClick={voltarHome} className="btn-secondary">Voltar ao início</button>
+        <button onClick={limpar} className="btn-secondary">Montar outro produto</button>
+        <button onClick={voltarHome} className="btn-ghost">Voltar ao início</button>
       </main>
     </div>
   )

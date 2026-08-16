@@ -3,8 +3,8 @@
 ## Estado do Projeto
 
 **Criado em:** 2026-05-20
-**Última sessão:** 2026-08-10 (branch `claude/sessao-ajuda-cliente-euf7vf` — **Ajuda / contato de suporte direto**: tela `/ajuda` com WhatsApp + e-mail, ícone "?" no Dashboard e seção em Configurações. ⚠️ DEPLOY do frontend pendente)
-**Penúltima:** 2026-07-03 (branch `claude/simplicidade-reset-senha` — Simplicidade p/ usuário leigo + recuperação de senha)
+**Última sessão:** 2026-08-16 (branch `claude/ingredientes-preco-fluxo-62ur67` — Assistente: fix do 402 que jogava pra /assinatura no fim do fluxo, Etapa 3 guiada por toques, errinhos de layout. Só frontend.)
+**Penúltima:** 2026-08-10 (branch `claude/sessao-ajuda-cliente-euf7vf` — **Ajuda / contato de suporte direto**: tela `/ajuda` com WhatsApp + e-mail, ícone "?" no Dashboard e seção em Configurações. ⚠️ DEPLOY do frontend pendente)
 **Próxima sessão:** DEPLOY frontend+backend; configurar SMTP no EasyPanel; app Android via TWA; testes Playwright
 **Status:** PRODUÇÃO — app em https://quantumcalc.com.br · landing em https://lp.quantumcalc.com.br
 
@@ -15,6 +15,92 @@
 > no Dashboard + botão "Atualizar preços", e a **trava de unidade kg/L** no form de Ingrediente
 > (PRs #7–#10). Ao mexer em UI, siga o código atual (`src/index.css` + `tailwind.config.js`),
 > não a seção v1.0 histórica.
+
+---
+
+## Sessão 2026-08-16 — Assistente: fim do fluxo caía em /assinatura + Etapa 3 guiada
+
+> Branch `claude/ingredientes-preco-fluxo-62ur67`. Só frontend, sem backend.
+> Queixas do dono: (1) ao terminar a receita "volta pra página errada"; (2) errinhos de
+> layout; (3) o cálculo da hora de trabalho "ainda não tá simples o suficiente".
+
+### (1) "Volta pra página errada" = redirect duro no 402
+Com o limite grátis em **1 produto** (PR #14), o `/assistente/salvar` responde 402 pra quem
+já usou o produto grátis — e o interceptor do `client.js` fazia `window.location.href =
+'/assinatura'` **no meio do fluxo, perdendo todo o trabalho** (reproduzido em Chromium).
+- `client.js`: 402 **não** redireciona mais quando `pathname` começa com `/assistente`
+  (o resto do app mantém o comportamento); o `Error` rejeitado agora carrega `err.status`.
+- `Fluxo.jsx`: **trava na entrada** — query `['billing-status']`; se `plano === 'gratis'`
+  e `produtos_usados >= produtos_limite`, a intro vira aviso amigável ("você já usou o seu
+  produto grátis") com "Ver plano →" e "Voltar ao início", ANTES de a pessoa fazer o
+  trabalho todo. No `finalizar`, 402 → volta pra Etapa 4 com banner + botão "Ver plano →"
+  (`erroAssinatura`/`onAssinar` novos em `Etapa4Preco`). Salvar com sucesso também
+  invalida `['billing-status']` (contador do banner freemium).
+- `Etapa4Preco` ganhou prop `inicial` — porções/margem preservadas quando o salvar falha
+  e a etapa remonta.
+
+### (2) Etapa 3 — "anti gente burra" (reescrita de `Etapa3Tempo.jsx`)
+Antes: 3 cards ("Por hora / Por salário / Não contar") + campos com jargão ("horas/mês").
+Agora, **zero digitação no caminho feliz**:
+- Quem **já tem valor-hora salvo** (`/auth/configuracao`) não responde nada: card "Seu
+  trabalho: 50min × R$ 15,00 por hora" + link "Usar outro valor". 1 toque (Continuar).
+- Quem não tem responde **2 perguntas de toque**: "Quanto você quer ganhar por mês?"
+  (chips R$ 1.500 / 2.000 / 3.000 / Outro) e "Quantas horas por dia você trabalha nisso?"
+  (chips 2h/4h/6h/8h) → mostra "1 hora sua vale R$ X" com a conta em linguagem falada
+  (salário ÷ h/dia × **22 dias úteis**, constante `DIAS_MES`).
+- "Já sei quanto vale minha hora — quero digitar" e "Não quero contar meu trabalho agora"
+  viraram **links discretos** (não cards do mesmo peso). Contrato `onConcluir` inalterado
+  ({tempoMin, valorHora, custoMO, contar}); valor-hora continua sendo persistido.
+
+### (3) Errinhos de layout
+- **Scroll não voltava pro topo ao trocar de etapa** (fases trocam sem mudar rota; o
+  `ScrollToTop` global não dispara) → `useEffect` no `fase` em `Fluxo.jsx`.
+- `.btn-ghost` era `rounded-xl` no meio de tudo `rounded-full` → padronizado (global).
+- Etapa 2 revisão: "Confirmar preços →" quebrava em 2 linhas ao lado do "Voltar" →
+  "Confirmar →" + `whitespace-nowrap` (Voltar `flex-1`, primário `flex-[1.4]`).
+- Etapa 4: toggle de canais em mono-uppercase quebrado em 2 linhas → sans normal
+  ("Vende no iFood ou outro app? Veja o preço lá").
+- Tela "Salvando": seta de voltar morta (`onBack={() => {}}`) → `Topo` aceita `onBack`
+  null e esconde a seta.
+- Tela final: "Montar outro produto" (secondary) / "Voltar ao início" (ghost) — hierarquia
+  consistente com "Ver produto no app" (primary).
+- Etapa 2: bolha dizia "**já tenho** o preço de todos" logo após a pessoa estimar/digitar
+  → mensagem separada ("Pronto, todos os ingredientes têm preço").
+
+**Validação:** `npm run build` ✅ · fluxo completo percorrido em Chromium headless 375px
+com API mockada (Playwright): 4 etapas + estimativa + embalagem + salvar OK; salvar com
+402 mantém na Etapa 4 com aviso; conta no limite vê a trava na intro; screenshots
+conferidos. ⚠️ DEPLOY do frontend pendente (gatilho manual, junto do backlog de deploy).
+
+### Parte 2 (mesma sessão) — "Meu dinheiro" (assistente financeiro · fase 1)
+
+> Decisão do dono: evoluir pro assistente financeiro (retenção diária). Backend
+> correspondente na mesma branch (ver CLAUDE.md do quantum-backend — **migration 009
+> pendente em produção**; sem ela a tela e o card do Dashboard falham silenciosamente).
+
+- **Tela `/financeiro` (`src/pages/Financeiro/index.jsx`) — "Meu dinheiro".** Navegação por
+  mês (‹ Agosto de 2026 ›), card navy Sobrou/Entrou/Saiu, e o registro "anti gente burra":
+  a pessoa ESCREVE do jeito dela ("vendi 20 brigadeiros por 100", "mercado 80 e gás 110")
+  → `POST /ia/interpretar-lancamento` → cards de confirmação (nada salva sem confirmar) →
+  `POST /financeiro/lancamentos`. Botão **"📄 Print do Pix"** → `POST /ia/comprovante` →
+  mesmo fluxo de confirmação. Fallback manual (botões ＋Entrou/－Saiu com `parseDecimal`)
+  sempre visível — e é o caminho indicado no banner quando a IA responde 503/502.
+  Lista agrupada por dia (Hoje/Ontem/data) com apagar (ConfirmDialog) + card "Pra onde foi
+  o dinheiro" (categorias de saída). QueryKeys: `['financeiro-resumo', mes]`,
+  `['financeiro-lancamentos', mes]`.
+- **`src/api/financeiro.js`** — listar/criar/deletar/resumo + interpretarLancamento +
+  lerComprovante.
+- **Dashboard:** card **"Meu dinheiro"** ("Este mês sobrou R$ X", query
+  `['financeiro-resumo-mes-atual']`) → `/financeiro`. Rota registrada no App.jsx.
+- **Nota fiscal → gasto automático:** `ImportarNota.jsx` guarda `gasto_total` (total pago
+  por linha, do payload original da IA) e, ao concluir o salvar, cria UM lançamento
+  `saida/insumos/origem:'nota'` com a soma dos itens salvos (best-effort em try/catch —
+  backend sem /financeiro não quebra a importação). Tela de conclusão mostra
+  "💸 Anotei a compra no Meu dinheiro: saiu R$ X".
+- **Validação:** build ✅ (217 módulos) · Chromium 375px mockado: resumo, texto→IA→confirmar
+  →lista atualizada, form manual, dashboard com card. Screenshots conferidos.
+- **Fase 2 (WhatsApp) planejada no CLAUDE.md do backend** — o canal vai usar estes mesmos
+  endpoints; nada a fazer no front até lá.
 
 ---
 

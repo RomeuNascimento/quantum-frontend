@@ -25,11 +25,12 @@ const precoCom = (custo, margem, taxasPct = 0) => {
   return div > 0 ? custo / div : 0
 }
 
-export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro, onConcluir }) {
+export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro, erroAssinatura, onAssinar, onConcluir, inicial }) {
   const canaisQ = useQuery({ queryKey: ['canais'], queryFn: () => listarCanais().then((r) => r.data) })
 
-  const [porcoes, setPorcoes] = useState(1)
-  const [margem, setMargem] = useState(MARGEM_PADRAO)
+  // `inicial`: preserva porções/margem quando o salvar falha e a etapa remonta
+  const [porcoes, setPorcoes] = useState(inicial?.porcoes ?? 1)
+  const [margem, setMargem] = useState(inicial?.margem ?? MARGEM_PADRAO)
   const [verCanais, setVerCanais] = useState(false)
 
   const n = Math.max(parseFloat(porcoes) || 1, 1)
@@ -97,8 +98,8 @@ export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro
       <div className="border border-outline rounded-xl bg-card overflow-hidden">
         <button onClick={() => setVerCanais((v) => !v)}
           className="w-full flex items-center justify-between px-4 py-3 active:bg-surface-1">
-          <span className="font-mono text-xs uppercase tracking-widest text-on-surface">
-            Vende em iFood, etc.? Ver preço por canal
+          <span className="font-sans text-sm font-medium text-on-surface text-left flex-1 pr-2">
+            Vende no iFood ou outro app? Veja o preço lá
           </span>
           <svg className={`w-4 h-4 text-on-surface-dim transition-transform ${verCanais ? 'rotate-180' : ''}`}
             fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -132,8 +133,11 @@ export default function Etapa4Preco({ custoTotal, receita, embalagens = [], erro
       </div>
 
       {erro && (
-        <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-2">
-          <p className="font-sans text-sm">Não consegui salvar: {erro}</p>
+        <div className="bg-danger-bg text-on-danger-bg rounded-xl px-3 py-3 space-y-2">
+          <p className="font-sans text-sm">{erroAssinatura ? erro : `Não consegui salvar: ${erro}`}</p>
+          {erroAssinatura && (
+            <button onClick={onAssinar} className="btn-primary py-2 text-sm">Ver plano →</button>
+          )}
         </div>
       )}
 
