@@ -5,6 +5,7 @@ import Layout from '../components/Layout'
 import { getMe } from '../api/auth'
 import { listarProdutos } from '../api/produtos'
 import { resumoCustosFixos } from '../api/custosFixos'
+import { resumoFinanceiro } from '../api/financeiro'
 import { relatorioMargem } from '../api/precificacao'
 import { billingStatus } from '../api/billing'
 import useAuthStore from '../store/authStore'
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const resumoQ = useQuery({ queryKey: ['custos-fixos-resumo'], queryFn: () => resumoCustosFixos().then((r) => r.data) })
   const margemQ = useQuery({ queryKey: ['relatorio-margem'], queryFn: () => relatorioMargem().then((r) => r.data.produtos) })
   const billingQ = useQuery({ queryKey: ['billing-status'], queryFn: () => billingStatus().then((r) => r.data) })
+  const finQ = useQuery({ queryKey: ['financeiro-resumo-mes-atual'], queryFn: () => resumoFinanceiro().then((r) => r.data) })
 
   useEffect(() => {
     if (meQ.data) setUser(meQ.data)
@@ -117,6 +119,24 @@ export default function Dashboard() {
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold text-on-surface">Atualizar preços</p>
             <p className="text-sm text-on-surface-dim">Mande a notinha · a IA atualiza os preços</p>
+          </div>
+          <svg className="w-4 h-4 text-on-surface-dim flex-shrink-0" {...stroke}><path d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        {/* Meu dinheiro — resumo do mês */}
+        <Link to="/financeiro" className="card flex items-center gap-4 active:bg-surface-1">
+          <span className="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-full bg-surface-2 text-primary">
+            <svg className="w-5 h-5" {...stroke}>
+              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-semibold text-on-surface">Meu dinheiro</p>
+            <p className="text-sm text-on-surface-dim">
+              {finQ.data
+                ? <>Este mês sobrou <span className={`qtm-num font-semibold ${finQ.data.sobra < 0 ? 'text-danger' : 'text-positive'}`}>{brl(finQ.data.sobra)}</span></>
+                : 'Anote o que entra e o que sai'}
+            </p>
           </div>
           <svg className="w-4 h-4 text-on-surface-dim flex-shrink-0" {...stroke}><path d="M9 5l7 7-7 7" /></svg>
         </Link>

@@ -30,6 +30,7 @@ import PontoEquilibrio from './pages/PontoEquilibrio/index'
 import ListaCompras from './pages/ListaCompras/index'
 import Configuracoes from './pages/Configuracoes/index'
 import Ajuda from './pages/Ajuda/index'
+import Financeiro from './pages/Financeiro/index'
 import AssistenteFluxo from './pages/Assistente/Fluxo'
 import Assinatura from './pages/Assinatura/index'
 
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="/lista-compras" element={<PrivateRoute><ListaCompras /></PrivateRoute>} />
         <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
         <Route path="/ajuda" element={<PrivateRoute><Ajuda /></PrivateRoute>} />
+        <Route path="/financeiro" element={<PrivateRoute><Financeiro /></PrivateRoute>} />
         <Route path="/assinatura" element={<PrivateRoute><Assinatura /></PrivateRoute>} />
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

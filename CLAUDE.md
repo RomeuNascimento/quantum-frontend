@@ -72,6 +72,36 @@ com API mockada (Playwright): 4 etapas + estimativa + embalagem + salvar OK; sal
 402 mantém na Etapa 4 com aviso; conta no limite vê a trava na intro; screenshots
 conferidos. ⚠️ DEPLOY do frontend pendente (gatilho manual, junto do backlog de deploy).
 
+### Parte 2 (mesma sessão) — "Meu dinheiro" (assistente financeiro · fase 1)
+
+> Decisão do dono: evoluir pro assistente financeiro (retenção diária). Backend
+> correspondente na mesma branch (ver CLAUDE.md do quantum-backend — **migration 009
+> pendente em produção**; sem ela a tela e o card do Dashboard falham silenciosamente).
+
+- **Tela `/financeiro` (`src/pages/Financeiro/index.jsx`) — "Meu dinheiro".** Navegação por
+  mês (‹ Agosto de 2026 ›), card navy Sobrou/Entrou/Saiu, e o registro "anti gente burra":
+  a pessoa ESCREVE do jeito dela ("vendi 20 brigadeiros por 100", "mercado 80 e gás 110")
+  → `POST /ia/interpretar-lancamento` → cards de confirmação (nada salva sem confirmar) →
+  `POST /financeiro/lancamentos`. Botão **"📄 Print do Pix"** → `POST /ia/comprovante` →
+  mesmo fluxo de confirmação. Fallback manual (botões ＋Entrou/－Saiu com `parseDecimal`)
+  sempre visível — e é o caminho indicado no banner quando a IA responde 503/502.
+  Lista agrupada por dia (Hoje/Ontem/data) com apagar (ConfirmDialog) + card "Pra onde foi
+  o dinheiro" (categorias de saída). QueryKeys: `['financeiro-resumo', mes]`,
+  `['financeiro-lancamentos', mes]`.
+- **`src/api/financeiro.js`** — listar/criar/deletar/resumo + interpretarLancamento +
+  lerComprovante.
+- **Dashboard:** card **"Meu dinheiro"** ("Este mês sobrou R$ X", query
+  `['financeiro-resumo-mes-atual']`) → `/financeiro`. Rota registrada no App.jsx.
+- **Nota fiscal → gasto automático:** `ImportarNota.jsx` guarda `gasto_total` (total pago
+  por linha, do payload original da IA) e, ao concluir o salvar, cria UM lançamento
+  `saida/insumos/origem:'nota'` com a soma dos itens salvos (best-effort em try/catch —
+  backend sem /financeiro não quebra a importação). Tela de conclusão mostra
+  "💸 Anotei a compra no Meu dinheiro: saiu R$ X".
+- **Validação:** build ✅ (217 módulos) · Chromium 375px mockado: resumo, texto→IA→confirmar
+  →lista atualizada, form manual, dashboard com card. Screenshots conferidos.
+- **Fase 2 (WhatsApp) planejada no CLAUDE.md do backend** — o canal vai usar estes mesmos
+  endpoints; nada a fazer no front até lá.
+
 ---
 
 ## Sessão 2026-08-11 — Vender só o plano mensal (R$ 19,90)

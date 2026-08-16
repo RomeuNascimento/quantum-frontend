@@ -5,6 +5,7 @@ import Layout from '../../components/Layout'
 import { processarNotaFiscal } from '../../api/ia'
 import { listarIngredientes, criarIngrediente, adicionarPrecoIngrediente } from '../../api/ingredientes'
 import { listarEmbalagens, criarEmbalagem, adicionarPrecoEmbalagem } from '../../api/embalagens'
+import { criarLancamento } from '../../api/financeiro'
 
 const UNIDADES = ['g', 'kg', 'ml', 'L', 'unid']
 const hoje = () => new Date().toISOString().split('T')[0]
@@ -26,6 +27,7 @@ export default function ImportarNota() {
   const [existentesEmb, setExistentesEmb] = useState([])
   const [erro, setErro] = useState('')
   const [resultados, setResultados] = useState([])
+  const [gastoRegistrado, setGastoRegistrado] = useState(null) // valor lançado no financeiro
 
   useEffect(() => {
     listarIngredientes().then((r) => setExistentes(r.data))
@@ -75,6 +77,8 @@ export default function ImportarNota() {
             quantidade: temPeso ? item.peso_embalagem_g : (item.quantidade ?? 1),
             unidade: temPeso ? 'g' : (item.unidade ?? 'unid'),
             preco_total: item.preco_unitario ?? item.preco_total ?? 0,
+            // total realmente pago na linha da nota (p/ registrar o gasto no financeiro)
+            gasto_total: item.preco_total ?? ((item.preco_unitario ?? 0) * (item.quantidade ?? 1)),
             vinculoId: match ? match.id : '', // '' = criar novo
             sugeridoPelaIA: Boolean(sugerido),
           }
@@ -180,6 +184,29 @@ export default function ImportarNota() {
         res.push({ nome: item.nome, ok: true })
       } catch (e) {
         res.push({ nome: item.nome, ok: false, msg: e.message })
+      }
+    }
+    // A compra vira UM gasto no "Meu dinheiro" (best-effort — não trava a importação)
+    const totalGasto = selecionados.reduce((soma, item, i) => {
+      const g = parseFloat(item.gasto_total)
+      return res[i]?.ok && g > 0 ? soma + g : soma
+    }, 0)
+    if (totalGasto > 0) {
+      try {
+        await criarLancamento({
+          tipo: 'saida',
+          valor: Math.round(totalGasto * 100) / 100,
+          descricao: 'Compras da nota fiscal',
+          categoria: 'insumos',
+          data: dataCompra,
+          origem: 'nota',
+        })
+        setGastoRegistrado(Math.round(totalGasto * 100) / 100)
+        queryClient.invalidateQueries({ queryKey: ['financeiro-resumo'] })
+        queryClient.invalidateQueries({ queryKey: ['financeiro-lancamentos'] })
+        queryClient.invalidateQueries({ queryKey: ['financeiro-resumo-mes-atual'] })
+      } catch {
+        // backend antigo sem /financeiro ou erro pontual — importação segue válida
       }
     }
     // Ingredientes/embalagens e preços novos — invalida caches do TanStack Query
@@ -411,6 +438,14 @@ export default function ImportarNota() {
             {resultados.filter((r) => r.ok).length} ingrediente(s) cadastrado(s) com sucesso.
           </p>
         </div>
+        {gastoRegistrado != null && (
+          <div className="border border-outline bg-card rounded-xl px-4 py-3">
+            <p className="font-sans text-sm text-on-surface">
+              💸 Anotei a compra no <strong>Meu dinheiro</strong>: saiu{' '}
+              <span className="qtm-num font-semibold">R$ {gastoRegistrado.toFixed(2).replace('.', ',')}</span>.
+            </p>
+          </div>
+        )}
         {erros.length > 0 && (
           <div className="bg-danger-bg text-on-danger-bg rounded-xl px-4 py-3 space-y-1">
             <p className="font-mono text-xs uppercase tracking-widest mb-1">Erros</p>
@@ -422,7 +457,7 @@ export default function ImportarNota() {
         <button onClick={() => navigate('/ingredientes')} className="btn-primary w-full max-w-xl mx-auto block">
           Ver ingredientes
         </button>
-        <button onClick={() => { setFase('upload'); setArquivo(null); setItens([]); setResultados([]) }}
+        <button onClick={() => { setFase('upload'); setArquivo(null); setItens([]); setResultados([]); setGastoRegistrado(null) }}
           className="btn-ghost w-full">
           Importar outra nota
         </button>
